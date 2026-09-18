@@ -222,6 +222,27 @@ export class VoiceCall {
   @Property({ type: 'text', nullable: true })
   summary?: string | null
 
+  /**
+   * Rekord w CRM klienta, do którego trafił wynik rozmowy, w postaci
+   * "LEAD:123" albo "CONTACT:456".
+   *
+   * Trzymamy to u siebie z dwóch powodów: handlowiec widzi w panelu, że
+   * rozmowa gdzieś poszła, a przy ponownym webhooku nie zakładamy drugiego
+   * rekordu na to samo.
+   */
+  @Property({ name: 'crm_record_ref', type: 'text', nullable: true })
+  crmRecordRef?: string | null
+
+  /**
+   * Powód, dla którego zapis do CRM się nie udał.
+   *
+   * Błąd po stronie CRM nie może wywrócić webhooka, bo wynik rozmowy jest
+   * cenniejszy niż zapis w cudzym systemie i nie da się go powtórzyć.
+   * Dlatego zapisujemy powód i idziemy dalej, a nie rzucamy błędem.
+   */
+  @Property({ name: 'crm_error', type: 'text', nullable: true })
+  crmError?: string | null
+
   @Property({ name: 'tenant_id', type: 'uuid', nullable: true })
   tenantId?: string | null
 

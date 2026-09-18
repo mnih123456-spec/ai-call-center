@@ -58,6 +58,8 @@ export async function GET(request: Request) {
       conversationId: r.conversationId ?? null,
       durationSecs: r.durationSecs ?? null,
       costUsd: r.costUsd ?? null,
+      crmRecordRef: r.crmRecordRef ?? null,
+      crmError: r.crmError ?? null,
       identityConfirmed: r.identityConfirmed ?? null,
       consentGiven: r.consentGiven ?? null,
       productCode: r.productCode ?? null,

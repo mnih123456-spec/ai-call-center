@@ -23,6 +23,8 @@ type CallRow = {
   requestsContact: boolean | null
   durationSecs: number | null
   costUsd: string | null
+  crmRecordRef: string | null
+  crmError: string | null
   summary: string | null
   createdAt: string
 }
@@ -104,6 +106,16 @@ export default function VoicebotCallsPage() {
     { accessorKey: 'bank', header: t('voicebot.calls.column.bank', 'Bank') },
     { id: 'czas', header: t('voicebot.calls.column.duration', 'Czas'), cell: ({ row }) => czas(row.original.durationSecs) },
     { id: 'koszt', header: t('voicebot.calls.column.cost', 'Koszt'), cell: ({ row }) => kosztWierszaPln(row.original.costUsd) },
+    {
+      id: 'crm',
+      header: t('voicebot.calls.column.crm', 'CRM'),
+      cell: ({ row }) => {
+        const { crmRecordRef, crmError } = row.original
+        if (crmRecordRef) return crmRecordRef.replace(':', ' ')
+        if (crmError) return <span className="text-muted-foreground">{crmError}</span>
+        return ''
+      },
+    },
   ], [t])
 
   const zebrane = rows.filter((r) => r.productCode && r.productCode !== 'NIEUSTALONY').length

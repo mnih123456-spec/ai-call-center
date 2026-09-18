@@ -2,9 +2,11 @@ import crypto from 'node:crypto'
 import type { EntityManager } from '@mikro-orm/postgresql'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import { createLogger } from '@open-mercato/shared/lib/logger'
-import { VoiceCall, VoiceCampaign } from '../../data/entities'
+import { VoiceCall, VoiceCampaign, VoiceCrmConnection } from '../../data/entities'
 import { postCallWebhookSchema } from '../../data/validators'
 import { toE164 } from '../../lib/phone'
+import { type DanePolaczenia, czyWartoZakladac } from '../../lib/crm'
+import { BitrixCrm } from '../../lib/crm-bitrix'
 
 const logger = createLogger('voicebot')
 
@@ -119,6 +121,70 @@ async function poprzedniaProba(em: EntityManager, tenantId: string | null, phone
     },
     { orderBy: { createdAt: 'desc' } },
   )
+}
+
+/**
+ * Przepisuje wynik rozmowy na kształt, którego oczekuje złącze CRM.
+ */
+function daneDoCrm(call: VoiceCall): DanePolaczenia {
+  return {
+    phone: call.phone,
+    firstName: call.firstName,
+    lastName: call.lastName,
+    direction: call.direction,
+    durationSecs: call.durationSecs,
+    productCode: call.productCode,
+    productDescription: call.productDescription,
+    amount: call.amount,
+    currency: call.currency,
+    contractYear: call.contractYear,
+    bank: call.bank,
+    identityConfirmed: call.identityConfirmed,
+    consentGiven: call.consentGiven,
+    requestsContact: call.requestsContact,
+    preferredContactTime: call.preferredContactTime,
+    summary: call.summary,
+  }
+}
+
+/**
+ * Wysyła wynik rozmowy do CRM klienta.
+ *
+ * Uruchamiane dopiero po zapisaniu rozmowy u nas, bo wynik rozmowy jest
+ * cenniejszy niż zapis w cudzym systemie i nie da się go powtórzyć. Żaden
+ * błąd po stronie CRM nie może wywrócić webhooka: gdyby wywrócił, dostawca
+ * ponowiłby zdarzenie, a my mielibyśmy podwójne rekordy.
+ *
+ * Zwraca opis do zapisania przy rozmowie, żeby w panelu było widać, co się
+ * stało, zamiast szukać po logach.
+ */
+async function wyslijDoCrm(
+  em: EntityManager,
+  call: VoiceCall,
+): Promise<{ ref: string | null; blad: string | null }> {
+  const polaczenie = await em.findOne(VoiceCrmConnection, {
+    tenantId: call.tenantId,
+    active: true,
+    deletedAt: null,
+  })
+  if (!polaczenie) return { ref: null, blad: null }
+
+  const dane = daneDoCrm(call)
+  if (!czyWartoZakladac(dane)) {
+    return { ref: null, blad: 'Rozmowa bez treści, pominięta świadomie' }
+  }
+
+  try {
+    const zlacze = new BitrixCrm(polaczenie.webhookUrl)
+    const istniejacy = await zlacze.znajdzPoNumerze(call.phone)
+    const rekord = istniejacy ?? (await zlacze.utworzLead(dane))
+    await zlacze.zapiszRozmowe(rekord, dane)
+    return { ref: `${rekord.typ}:${rekord.id}`, blad: null }
+  } catch (e) {
+    const powod = e instanceof Error ? e.message : 'Nieznany błąd CRM'
+    logger.warn('crm push failed', { callId: call.id })
+    return { ref: null, blad: powod.slice(0, 300) }
+  }
 }
 
 export async function POST(request: Request) {
@@ -255,11 +321,21 @@ export async function POST(request: Request) {
   await em.flush()
   logger.info('call result stored', { id: call.id, direction: call.direction, product: call.productCode })
 
+  // Dopiero teraz, gdy wynik rozmowy jest już bezpiecznie u nas.
+  const crm = await wyslijDoCrm(em, call)
+  if (crm.ref || crm.blad) {
+    call.crmRecordRef = crm.ref
+    call.crmError = crm.blad
+    em.persist(call)
+    await em.flush()
+  }
+
   return json({
     accepted: true,
     status: call.status,
     id: call.id,
     direction: call.direction,
     relatedCallId: call.relatedCallId ?? null,
+    crm: crm.ref ?? null,
   })
 }
