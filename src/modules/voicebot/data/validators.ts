@@ -37,6 +37,18 @@ export const callStartSchema = z.object({
   lastName: z.string().max(100).nullable().optional(),
 })
 
+/**
+ * Wklejona lista kontaktów.
+ *
+ * Górne ograniczenie jest po to, żeby jedno wklejenie nie zablokowało
+ * bazy na minutę. Przy większych listach lepszy jest import pliku,
+ * i to będzie osobna sprawa.
+ */
+export const listImportSchema = z.object({
+  campaignId: z.string().uuid(),
+  tekst: z.string().min(1).max(200000),
+})
+
 export const callListSchema = z.object({
   campaignId: z.string().uuid().optional(),
   status: callStatusSchema.optional(),
