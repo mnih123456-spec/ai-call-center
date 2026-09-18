@@ -57,6 +57,7 @@ export async function GET(request: Request) {
       relatedCallId: r.relatedCallId ?? null,
       conversationId: r.conversationId ?? null,
       durationSecs: r.durationSecs ?? null,
+      costUsd: r.costUsd ?? null,
       identityConfirmed: r.identityConfirmed ?? null,
       consentGiven: r.consentGiven ?? null,
       productCode: r.productCode ?? null,

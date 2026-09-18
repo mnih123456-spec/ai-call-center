@@ -21,17 +21,51 @@ function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
 }
 
+/** Zdarzenie starsze niż pół godziny odrzucamy jako odtworzone. */
+const MAX_WIEK_PODPISU_S = 30 * 60
+
+function porownajStale(oczekiwany: string, otrzymany: string): boolean {
+  const a = Buffer.from(oczekiwany, 'utf8')
+  const b = Buffer.from(otrzymany, 'utf8')
+  if (a.length !== b.length) return false
+  return crypto.timingSafeEqual(a, b)
+}
+
+/**
+ * Sprawdzenie podpisu webhooka.
+ *
+ * Dostawca przysyła nagłówek w postaci "t=<znacznik czasu>,v0=<skrót>",
+ * a podpisuje wartość "<znacznik>.<treść>", nie samą treść. Liczenie skrótu
+ * z samej treści dawało nagłówek o innej długości, więc po włączeniu sekretu
+ * każdy webhook dostawałby 401 i wyniki rozmów przestałyby wchodzić, bez
+ * żadnego widocznego błędu po stronie dostawcy.
+ *
+ * Prostszą postać bez znacznika czasu obsługujemy dalej, bo tym samym wejściem
+ * potrafi się posłużyć scenariusz w Make.
+ */
 function signatureMatches(rawBody: string, header: string | null): boolean {
   const secret = process.env.VOICEBOT_WEBHOOK_SECRET
   if (!secret) return true
   if (!header) return false
 
-  const expected = crypto.createHmac('sha256', secret).update(rawBody).digest('hex')
-  const provided = header.replace(/^sha256=/, '').trim()
-  const a = Buffer.from(expected, 'utf8')
-  const b = Buffer.from(provided, 'utf8')
-  if (a.length !== b.length) return false
-  return crypto.timingSafeEqual(a, b)
+  const pola = new Map<string, string>()
+  for (const kawalek of header.split(',')) {
+    const i = kawalek.indexOf('=')
+    if (i > 0) pola.set(kawalek.slice(0, i).trim(), kawalek.slice(i + 1).trim())
+  }
+
+  const znacznik = pola.get('t')
+  const podpis = pola.get('v0')
+
+  if (znacznik && podpis) {
+    const wiek = Math.abs(Date.now() / 1000 - Number(znacznik))
+    if (!Number.isFinite(wiek) || wiek > MAX_WIEK_PODPISU_S) return false
+    const oczekiwany = crypto.createHmac('sha256', secret).update(`${znacznik}.${rawBody}`).digest('hex')
+    return porownajStale(oczekiwany, podpis)
+  }
+
+  const oczekiwany = crypto.createHmac('sha256', secret).update(rawBody).digest('hex')
+  return porownajStale(oczekiwany, header.replace(/^sha256=/, '').trim())
 }
 
 function firstString(value: unknown): string | null {
@@ -182,6 +216,13 @@ export async function POST(request: Request) {
 
   call.conversationId = data.conversation_id
   call.finishedAt = new Date()
+
+  // Koszt zapisujemy przy każdym zakończeniu, także nieudanym, bo sama próba
+  // zestawienia połączenia potrafi kosztować.
+  const kosztUsd = data.metadata?.cost_fiat
+  if (kosztUsd != null) call.costUsd = kosztUsd.toFixed(6)
+  const kosztKredyty = data.metadata?.cost
+  if (kosztKredyty != null) call.costCredits = Math.round(kosztKredyty)
 
   if (type === 'call_initiation_failure') {
     call.status = 'failed'

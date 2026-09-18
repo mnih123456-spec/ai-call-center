@@ -114,6 +114,20 @@ export class VoiceCall {
   @Property({ name: 'failure_reason', type: 'text', nullable: true })
   failureReason?: string | null
 
+  /**
+   * Koszt rozmowy u dostawcy, w dolarach.
+   *
+   * Liczba stałoprzecinkowa, nie zmiennoprzecinkowa: pojedyncza rozmowa
+   * kosztuje ułamki centa, a sumujemy ich tysiące, więc błędy zaokrągleń
+   * zmiennoprzecinkowych kumulowałyby się na rachunku tenanta.
+   */
+  @Property({ name: 'cost_usd', type: 'decimal', precision: 12, scale: 6, nullable: true })
+  costUsd?: string | null
+
+  /** Koszt w kredytach dostawcy. Po tym pilnuje się zużycia pakietu. */
+  @Property({ name: 'cost_credits', type: 'integer', nullable: true })
+  costCredits?: number | null
+
   // --- wynik rozmowy ---
 
   @Property({ name: 'identity_confirmed', type: 'boolean', nullable: true })

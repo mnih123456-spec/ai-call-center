@@ -5,6 +5,7 @@ import { DataTable } from '@open-mercato/ui/backend/DataTable'
 import { Button } from '@open-mercato/ui/primitives/button'
 import type { LegacyColumnDef as ColumnDef } from '@tanstack/react-table/legacy'
 import { useT } from '@open-mercato/shared/lib/i18n/context'
+import { kosztWierszaPln, naZlote, sumaUsd } from '../../lib/koszty'
 
 type CallRow = {
   id: string
@@ -21,6 +22,7 @@ type CallRow = {
   bank: string | null
   requestsContact: boolean | null
   durationSecs: number | null
+  costUsd: string | null
   summary: string | null
   createdAt: string
 }
@@ -101,6 +103,7 @@ export default function VoicebotCallsPage() {
     { accessorKey: 'contractYear', header: t('voicebot.calls.column.year', 'Rok umowy') },
     { accessorKey: 'bank', header: t('voicebot.calls.column.bank', 'Bank') },
     { id: 'czas', header: t('voicebot.calls.column.duration', 'Czas'), cell: ({ row }) => czas(row.original.durationSecs) },
+    { id: 'koszt', header: t('voicebot.calls.column.cost', 'Koszt'), cell: ({ row }) => kosztWierszaPln(row.original.costUsd) },
   ], [t])
 
   const zebrane = rows.filter((r) => r.productCode && r.productCode !== 'NIEUSTALONY').length
@@ -131,6 +134,10 @@ export default function VoicebotCallsPage() {
           <div>
             <div className="text-muted-foreground">{t('voicebot.calls.stat.returned', 'Oddzwonili')}</div>
             <div className="text-2xl font-semibold">{oddzwonienia}</div>
+          </div>
+          <div>
+            <div className="text-muted-foreground">{t('voicebot.calls.stat.cost', 'Koszt rozmów')}</div>
+            <div className="text-2xl font-semibold">{naZlote(sumaUsd(rows))} zł</div>
           </div>
         </div>
         {error ? <div className="mb-3 text-sm text-destructive">{error}</div> : null}

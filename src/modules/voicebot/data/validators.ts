@@ -70,6 +70,9 @@ export const postCallWebhookSchema = z.object({
     metadata: z.object({
       call_duration_secs: z.coerce.number().optional(),
       termination_reason: z.string().optional(),
+      /** Koszt rozmowy: w kredytach dostawcy i w dolarach. */
+      cost: z.coerce.number().optional(),
+      cost_fiat: z.coerce.number().optional(),
       /**
        * Obecne tylko przy rozmowie telefonicznej. Stąd bierzemy kierunek,
        * numer dzwoniącego i numer, na który zadzwoniono. Ten ostatni jest
