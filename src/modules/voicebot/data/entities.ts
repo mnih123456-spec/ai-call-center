@@ -49,6 +49,58 @@ export class VoiceCampaign {
 }
 
 /**
+ * Połączenie tenanta z jego własnym systemem CRM.
+ *
+ * Każda firma-klient ma swój CRM i swoje dane dostępowe, dlatego to jest
+ * wiersz w bazie, a nie ustawienie w środowisku. Jeden tenant, jedno aktywne
+ * połączenie z danym dostawcą.
+ *
+ * UWAGA: `webhookUrl` zawiera w sobie żeton dostępowy, czyli jest hasłem.
+ * Zanim trafią tu dane prawdziwego klienta, kolumna musi zostać objęta mapą
+ * szyfrowania modułu. Na czas hackatonu pole jest jawne i wpisujemy do niego
+ * wyłącznie adres testowy.
+ */
+@Entity({ tableName: 'voicebot_crm_connections' })
+@Unique({ name: 'voicebot_crm_conn_tenant_provider', properties: ['tenantId', 'provider'] })
+export class VoiceCrmConnection {
+  @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
+  id!: string
+
+  /** bitrix24, w przyszłości kolejne systemy. */
+  @Property({ type: 'text', default: 'bitrix24' })
+  provider: string = 'bitrix24'
+
+  @Property({ name: 'webhook_url', type: 'text' })
+  webhookUrl!: string
+
+  /** Wyłączenie bez kasowania danych dostępowych. */
+  @Property({ type: 'boolean', default: true })
+  active: boolean = true
+
+  /** Kiedy ostatnio sprawdziliśmy, że adres działa. */
+  @Property({ name: 'checked_at', type: Date, nullable: true })
+  checkedAt?: Date | null
+
+  @Property({ name: 'check_result', type: 'text', nullable: true })
+  checkResult?: string | null
+
+  @Property({ name: 'tenant_id', type: 'uuid', nullable: true })
+  tenantId?: string | null
+
+  @Property({ name: 'organization_id', type: 'uuid', nullable: true })
+  organizationId?: string | null
+
+  @Property({ name: 'created_at', type: Date, onCreate: () => new Date() })
+  createdAt: Date = new Date()
+
+  @Property({ name: 'updated_at', type: Date, onUpdate: () => new Date() })
+  updatedAt: Date = new Date()
+
+  @Property({ name: 'deleted_at', type: Date, nullable: true })
+  deletedAt?: Date | null
+}
+
+/**
  * Pojedyncze połączenie do leada wraz z wynikiem rozmowy.
  *
  * Wynik przychodzi webhookiem po zakończeniu rozmowy, dlatego wszystkie pola
