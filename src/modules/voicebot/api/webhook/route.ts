@@ -176,9 +176,7 @@ async function wyslijDoCrm(
 
   try {
     const zlacze = new BitrixCrm(polaczenie.webhookUrl)
-    const istniejacy = await zlacze.znajdzPoNumerze(call.phone)
-    const rekord = istniejacy ?? (await zlacze.utworzLead(dane))
-    await zlacze.zapiszRozmowe(rekord, dane)
+    const rekord = await zlacze.zapiszWynikRozmowy(dane)
     return { ref: `${rekord.typ}:${rekord.id}`, blad: null }
   } catch (e) {
     const powod = e instanceof Error ? e.message : 'Nieznany błąd CRM'

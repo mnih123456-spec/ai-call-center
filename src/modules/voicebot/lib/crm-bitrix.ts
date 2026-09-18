@@ -68,67 +68,97 @@ export class BitrixCrm implements ZlaczeCrm {
   }
 
   /**
-   * Szukanie po numerze telefonu.
+   * Szukanie kontaktu po numerze telefonu.
    *
    * Bitrix dopasowuje numery po swojemu i bywa wrażliwy na format, dlatego
-   * pytamy dwa razy: postacią z plusem i samymi cyframi. Kontakt ma
-   * pierwszeństwo przed leadem, bo kontakt oznacza kogoś, kto jest już
-   * klientem, a lead dopiero kandydata.
+   * pytamy dwa razy: postacią z plusem i samymi cyframi.
    */
-  async znajdzPoNumerze(phone: string): Promise<ZnalezionyRekord | null> {
+  private async znajdzKontakt(phone: string): Promise<string | null> {
     const warianty = Array.from(new Set([phone, phone.replace(/^\+/, '')]))
-
-    for (const typ of ['CONTACT', 'LEAD'] as const) {
-      for (const numer of warianty) {
-        const wynik = await this.wywolaj<Record<string, string[] | undefined>>(
-          'crm.duplicate.findbycomm',
-          { entity_type: typ, type: 'PHONE', values: [numer] },
-        )
-        const znalezione = wynik?.[typ]
-        if (Array.isArray(znalezione) && znalezione.length > 0) {
-          return { typ, id: String(znalezione[0]) }
-        }
-      }
+    for (const numer of warianty) {
+      const wynik = await this.wywolaj<Record<string, string[] | undefined>>(
+        'crm.duplicate.findbycomm',
+        { entity_type: 'CONTACT', type: 'PHONE', values: [numer] },
+      )
+      const znalezione = wynik?.CONTACT
+      if (Array.isArray(znalezione) && znalezione.length > 0) return String(znalezione[0])
     }
     return null
   }
 
-  async utworzLead(dane: DanePolaczenia): Promise<ZnalezionyRekord> {
-    const tytul = `Rozmowa z botem: ${pelneImie(dane)}`
-    const pola: Record<string, unknown> = {
-      TITLE: tytul,
-      NAME: dane.firstName ?? undefined,
-      LAST_NAME: dane.lastName ?? undefined,
-      PHONE: [{ VALUE: dane.phone, VALUE_TYPE: 'WORK' }],
-      COMMENTS: notatkaZRozmowy(dane),
-      OPENED: 'Y',
-    }
+  /**
+   * Otwarty deal tego kontaktu, jeśli istnieje.
+   *
+   * Szukamy, żeby nie zakładać drugiego deala na tę samą sprawę. Klient,
+   * który oddzwania trzy razy, ma mieć jedną szansę sprzedaży z trzema
+   * wpisami, a nie trzy szanse.
+   */
+  private async znajdzOtwartyDeal(contactId: string): Promise<string | null> {
+    const wynik = await this.wywolaj<Array<{ ID?: string }>>('crm.deal.list', {
+      filter: { CONTACT_ID: Number(contactId), CLOSED: 'N' },
+      select: ['ID'],
+      order: { ID: 'DESC' },
+    })
+    const pierwszy = Array.isArray(wynik) ? wynik[0] : null
+    return pierwszy?.ID ? String(pierwszy.ID) : null
+  }
 
-    const id = await this.wywolaj<number>('crm.lead.add', {
-      fields: pola,
+  private async utworzKontakt(dane: DanePolaczenia): Promise<string> {
+    const id = await this.wywolaj<number>('crm.contact.add', {
+      fields: {
+        // Przy rozmowie przychodzącej od nieznanego numeru nie mamy imienia.
+        // Wpisujemy wtedy numer, bo na liście kontaktów "Nieznany" nic nie
+        // mówi, a numer pozwala rozpoznać, z kim była rozmowa.
+        NAME: dane.firstName ?? dane.phone,
+        LAST_NAME: dane.lastName ?? undefined,
+        PHONE: [{ VALUE: dane.phone, VALUE_TYPE: 'WORK' }],
+        OPENED: 'Y',
+        SOURCE_DESCRIPTION: 'Rozmowa z botem telefonicznym',
+      },
       params: { REGISTER_SONET_EVENT: 'Y' },
     })
+    logger.info('bitrix contact created', { id })
+    return String(id)
+  }
 
-    logger.info('bitrix lead created', { id })
-    return { typ: 'LEAD', id: String(id) }
+  private async utworzDeal(contactId: string, dane: DanePolaczenia): Promise<string> {
+    const id = await this.wywolaj<number>('crm.deal.add', {
+      fields: {
+        TITLE: `${pelneImie(dane)}${dane.productCode && dane.productCode !== 'NIEUSTALONY' ? ` - ${dane.productCode}` : ''}`,
+        CONTACT_ID: Number(contactId),
+        COMMENTS: notatkaZRozmowy(dane),
+        OPENED: 'Y',
+      },
+      params: { REGISTER_SONET_EVENT: 'Y' },
+    })
+    logger.info('bitrix deal created', { id })
+    return String(id)
   }
 
   /**
-   * Dopisanie rozmowy do istniejącego rekordu.
+   * Zapis wyniku rozmowy: kontakt, deal i wpis na osi czasu.
    *
-   * Używamy komentarza na osi czasu, a nie własnego pola, bo komentarz widzi
-   * każdy handlowiec bez zmiany konfiguracji jego Bitrixa. Docelowo warto
-   * przejść na API telefoniczne, które pokaże rozmowę razem z nagraniem
-   * w tym samym miejscu, co rozmowy z centrali.
+   * Kolejność odpowiada temu, jak pracuje zespół: najpierw ustalamy, czy
+   * znamy tego człowieka, potem czy jest z nim otwarta sprawa, i dopiero
+   * do niej dopisujemy rozmowę. Nowy deal powstaje tylko wtedy, gdy żadnej
+   * otwartej nie ma.
+   *
+   * Wpis idzie komentarzem na oś czasu, bo widzi go każdy handlowiec bez
+   * zmiany konfiguracji swojego Bitriksa.
    */
-  async zapiszRozmowe(rekord: ZnalezionyRekord, dane: DanePolaczenia): Promise<void> {
+  async zapiszWynikRozmowy(dane: DanePolaczenia): Promise<ZnalezionyRekord> {
+    const contactId = (await this.znajdzKontakt(dane.phone)) ?? (await this.utworzKontakt(dane))
+    const dealId = (await this.znajdzOtwartyDeal(contactId)) ?? (await this.utworzDeal(contactId, dane))
+
     await this.wywolaj<number>('crm.timeline.comment.add', {
       fields: {
-        ENTITY_ID: Number(rekord.id),
-        ENTITY_TYPE: rekord.typ.toLowerCase(),
+        ENTITY_ID: Number(dealId),
+        ENTITY_TYPE: 'deal',
         COMMENT: notatkaZRozmowy(dane),
       },
     })
-    logger.info('bitrix comment added', { typ: rekord.typ, id: rekord.id })
+
+    logger.info('bitrix call stored', { dealId })
+    return { typ: 'DEAL', id: dealId }
   }
 }

@@ -39,12 +39,15 @@ export type WynikCrm =
 export interface ZlaczeCrm {
   /** Sprawdza, czy adres i uprawnienia działają. Nic nie zmienia. */
   sprawdzPolaczenie(): Promise<{ ok: boolean; opis: string }>
-  /** Szuka rekordu po numerze telefonu. */
-  znajdzPoNumerze(phone: string): Promise<ZnalezionyRekord | null>
-  /** Zakłada nowy rekord na podstawie rozmowy. */
-  utworzLead(dane: DanePolaczenia): Promise<ZnalezionyRekord>
-  /** Dopisuje przebieg rozmowy do istniejącego rekordu. */
-  zapiszRozmowe(rekord: ZnalezionyRekord, dane: DanePolaczenia): Promise<void>
+
+  /**
+   * Zapisuje wynik rozmowy w CRM i zwraca rekord, do którego trafił.
+   *
+   * Całe znajdowanie i zakładanie siedzi po stronie dostawcy, bo każdy CRM
+   * ma inny model: jeden pracuje na leadach, inny na kontaktach i szansach,
+   * a jeszcze inny na zgłoszeniach. Reszta modułu nie musi o tym wiedzieć.
+   */
+  zapiszWynikRozmowy(dane: DanePolaczenia): Promise<ZnalezionyRekord>
 }
 
 /**
