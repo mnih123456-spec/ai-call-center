@@ -21,9 +21,11 @@ nie pisały po tych samych plikach.
 
 ## Stan na start
 
-Sześć commitów na `main`. Działa: kampanie, połączenia wychodzące, rozmowy
-przychodzące ze sklejaniem oddzwonień, licznik kosztów, podpis webhooka,
-dwa ekrany panelu, dane demo.
+Czternaście commitów na `main`. Działa i jest sprawdzone: kampanie,
+połączenia wychodzące, rozmowy przychodzące ze sklejaniem oddzwonień,
+licznik kosztów, podpis webhooka przez tunel, trzy ekrany panelu, dane demo,
+złącze Bitrix na kontaktach i dealach z wyborem lejka i etapu, oraz API
+dostępne dla systemów klienta przez klucz.
 
 ---
 
@@ -111,6 +113,22 @@ połączenie idzie z nowego numeru.
 
 Zostają u mnie, bo dotykają rzeczy, które już mam w głowie.
 
+## K1. ZROBIONE: złącze Bitrix
+
+Działa w całości, sprawdzone na żywo na koncie Michała: kontakt, deal
+na wskazanym etapie i komentarz z wynikiem rozmowy na osi czasu.
+
+## K2. Powiązanie rozmów z kartami klientów z modułu `customers`
+
+To jest punktowane w kryterium "wykorzystanie Open Mercato", warte 20 procent
+w ścieżce 03. Wymaga przeczytania faktów modułu `customers` i użycia
+identyfikatorów, nie relacji ORM między modułami.
+
+## K3. Szyfrowanie adresu webhooka Bitriksa
+
+Pole `webhook_url` zawiera żeton, czyli hasło. Przed wpisaniem tam czegokolwiek
+prawdziwego trzeba objąć kolumnę mapą szyfrowania modułu.
+
 ## K4. Profil agenta per tenant i widok dla admina
 
 Klient nie pisze promptu, tylko **dodaje pytania** do scenariusza rozmowy
@@ -123,24 +141,6 @@ ma ktorego agenta i ktory numer. Bez tego nie da sie niczego zdiagnozowac,
 gdy klient zadzwoni z pretensja.
 
 Dzis identyfikator agenta siedzi przy kampanii, czyli o poziom za nisko.
-
-## K1. Podpięcie złącza Bitrix do webhooka
-
-Interfejs `lib/crm.ts`, realizacja `lib/crm-bitrix.ts` i encja
-`VoiceCrmConnection` są gotowe. Zostało: ekran do wpisania adresu, trasa API
-do zapisu i sprawdzenia połączenia, oraz wywołanie złącza po zapisaniu wyniku
-rozmowy, za bramką `czyWartoZakladac`.
-
-## K2. Powiązanie rozmów z kartami klientów z modułu `customers`
-
-To jest punktowane w kryterium "wykorzystanie Open Mercato", warte 20 procent
-w ścieżce 03. Wymaga przeczytania faktów modułu `customers` i użycia
-identyfikatorów, nie relacji ORM między modułami.
-
-## K3. Szyfrowanie adresu webhooka Bitriksa
-
-Pole `webhook_url` zawiera żeton, czyli hasło. Przed wpisaniem tam czegokolwiek
-prawdziwego trzeba objąć kolumnę mapą szyfrowania modułu.
 
 ---
 
