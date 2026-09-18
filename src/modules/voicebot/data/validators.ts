@@ -47,6 +47,26 @@ export const callListSchema = z.object({
 })
 
 /**
+ * Dane dostępowe do CRM klienta.
+ *
+ * Adres musi być pełnym adresem webhooka przychodzącego Bitriksa, czyli
+ * zawierać w ścieżce `/rest/`. Sprawdzamy to od razu, bo najczęstszą pomyłką
+ * jest wklejenie adresu samego portalu, a wtedy błąd wyszedłby dopiero przy
+ * pierwszej rozmowie, czyli w najgorszym możliwym momencie.
+ */
+export const crmConnectionSchema = z.object({
+  provider: z.enum(['bitrix24']).default('bitrix24'),
+  webhookUrl: z.string()
+    .url('To nie jest poprawny adres')
+    .max(500)
+    .refine((v) => v.startsWith('https://'), 'Adres musi zaczynać się od https://')
+    .refine((v) => v.includes('/rest/'), 'To nie wygląda na adres webhooka. Powinien zawierać /rest/'),
+  active: z.boolean().default(true),
+})
+
+export type CrmConnectionInput = z.infer<typeof crmConnectionSchema>
+
+/**
  * Kształt webhooka po zakończeniu rozmowy.
  *
  * Celowo luźny: dostawca dokłada pola bez zapowiedzi, a odrzucenie całego
