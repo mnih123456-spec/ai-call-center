@@ -70,7 +70,17 @@ tunel raz, rano, i już go nie ruszać.
 
 Adres z 18.09 wieczorem: `https://bronze-joins-rather-treaty.trycloudflare.com`
 
-## 9. Kolejność prac
+## 9. Prawdziwy numer Michała w bazie demo
+
+W tabeli połączeń zostały dwa wiersze "Michal Test" z numerem `+48503956401`,
+pamiątka po teście prawdziwym telefonem z 16.09.
+
+Na scenie i na relacji wyświetliłby się prawdziwy numer.
+
+**Do decyzji:** skasować je przy uruchamianiu danych demo. Dowód z tamtego
+testu jest opisany w dzienniku, więc nic nie ginie.
+
+## 10. Kolejność prac
 
 Zaproponowana: licznik kosztów, potem złącze CRM z Bitrixem,
 potem powiązanie z kartami klientów z modułu `customers`.
