@@ -19,6 +19,9 @@ export const campaignCreateSchema = z.object({
 
 export const campaignUpdateSchema = campaignCreateSchema.partial().extend({
   id: z.string().uuid(),
+  updatedAt: z.string().datetime(),
+  // Częściowa edycja nie może przywracać domyślnego odstępu z tworzenia.
+  minIntervalSecs: z.coerce.number().int().min(0).max(3600).optional(),
   status: z.enum(['draft', 'running', 'paused', 'finished']).optional(),
 })
 
