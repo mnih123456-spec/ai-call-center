@@ -2,6 +2,10 @@
 import * as React from 'react'
 import { Page, PageHeader, PageBody } from '@open-mercato/ui/backend/Page'
 import { DataTable } from '@open-mercato/ui/backend/DataTable'
+import { CrudForm, type CrudField } from '@open-mercato/ui/backend/CrudForm'
+import { apiCall } from '@open-mercato/ui/backend/utils/apiCall'
+import { createCrud, updateCrud } from '@open-mercato/ui/backend/utils/crud'
+import { campaignCreateSchema, campaignUpdateSchema } from '../data/validators'
 import { Button } from '@open-mercato/ui/primitives/button'
 import type { LegacyColumnDef as ColumnDef } from '@tanstack/react-table/legacy'
 import { useT } from '@open-mercato/shared/lib/i18n/context'
@@ -14,6 +18,7 @@ type CampaignRow = {
   phoneNumberId: string | null
   status: string
   minIntervalSecs: number
+  updatedAt: string
   createdAt: string
 }
 
@@ -34,22 +39,21 @@ export default function VoicebotCampaignsPage() {
   const [error, setError] = React.useState<string | null>(null)
   const [formOpen, setFormOpen] = React.useState(false)
   const [saving, setSaving] = React.useState(false)
-  const [name, setName] = React.useState('')
-  const [agentId, setAgentId] = React.useState('')
-  const [phoneNumberId, setPhoneNumberId] = React.useState('')
+  const [editing, setEditing] = React.useState<CampaignRow | null>(null)
+  const [success, setSuccess] = React.useState(false)
 
   const load = React.useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
       const [cRes, kRes] = await Promise.all([
-        fetch('/api/voicebot/campaigns?pageSize=100', { credentials: 'same-origin' }),
-        fetch('/api/voicebot/provider', { credentials: 'same-origin' }),
+        apiCall<{ items?: CampaignRow[] }>('/api/voicebot/campaigns?pageSize=100'),
+        apiCall<Catalog>('/api/voicebot/provider'),
       ])
       if (!cRes.ok) throw new Error(String(cRes.status))
-      const body = (await cRes.json()) as { items?: CampaignRow[] }
+      const body = cRes.result ?? {}
       setRows(Array.isArray(body.items) ? body.items : [])
-      if (kRes.ok) setCatalog(((await kRes.json()) as Catalog) ?? PUSTY_KATALOG)
+      setCatalog(kRes.ok ? kRes.result ?? PUSTY_KATALOG : { ...PUSTY_KATALOG, error: 'unavailable' })
     } catch {
       setError(t('voicebot.campaigns.loadError', 'Nie udało się pobrać listy kampanii.'))
     } finally {
@@ -58,11 +62,6 @@ export default function VoicebotCampaignsPage() {
   }, [t])
 
   React.useEffect(() => { void load() }, [load])
-
-  React.useEffect(() => {
-    if (!agentId && catalog.agents.length) setAgentId(catalog.agents[0].agentId)
-    if (!phoneNumberId && catalog.numbers.length) setPhoneNumberId(catalog.numbers[0].phoneNumberId)
-  }, [catalog, agentId, phoneNumberId])
 
   const opisNumeru = React.useCallback((id: string | null): string => {
     if (!id) return ''
@@ -75,34 +74,77 @@ export default function VoicebotCampaignsPage() {
     return catalog.agents.find((a) => a.agentId === id)?.name ?? id
   }, [catalog])
 
-  const zapisz = React.useCallback(async () => {
-    if (!name.trim() || !agentId) return
+  const statuses = React.useMemo(() => [
+    { value: 'draft', label: t('voicebot.campaigns.status.draft', 'Szkic') },
+    { value: 'running', label: t('voicebot.campaigns.status.running', 'W toku') },
+    { value: 'paused', label: t('voicebot.campaigns.status.paused', 'Wstrzymana') },
+    { value: 'finished', label: t('voicebot.campaigns.status.finished', 'Zakończona') },
+  ], [t])
+
+  const fields = React.useMemo<CrudField[]>(() => {
+    const agents = catalog.agents.map((a) => ({ value: a.agentId, label: a.name }))
+    const numbers = catalog.numbers.map((n) => ({ value: n.phoneNumberId, label: opisNumeru(n.phoneNumberId) }))
+    // Brak pozycji w katalogu nie może po cichu podmienić zapisanego wyboru.
+    if (editing?.agentId && !agents.some((a) => a.value === editing.agentId)) {
+      agents.unshift({ value: editing.agentId, label: t('voicebot.campaigns.savedAgent', 'Zapisany agent (poza katalogiem)') })
+    }
+    if (editing?.phoneNumberId && !numbers.some((n) => n.value === editing.phoneNumberId)) {
+      numbers.unshift({ value: editing.phoneNumberId, label: t('voicebot.campaigns.savedNumber', 'Zapisany numer (poza katalogiem)') })
+    }
+    const result: CrudField[] = [
+      { id: 'name', type: 'text', required: true, label: t('voicebot.campaigns.field.name', 'Nazwa kampanii') },
+      { id: 'agentId', type: 'select', required: true, label: t('voicebot.campaigns.field.agent', 'Agent'), options: agents },
+      { id: 'phoneNumberId', type: 'select', label: t('voicebot.campaigns.field.number', 'Numer wychodzący'), options: [
+        { value: '', label: t('voicebot.campaigns.field.none', 'Brak') }, ...numbers,
+      ] },
+    ]
+    if (editing) result.push({ id: 'status', type: 'select', required: true, label: t('voicebot.campaigns.column.status', 'Status'), options: statuses })
+    return result
+  }, [catalog, editing, opisNumeru, statuses, t])
+
+  const initialValues = React.useMemo(() => editing ? {
+    ...editing, phoneNumberId: editing.phoneNumberId ?? '',
+  } : {
+    name: '', agentId: catalog.agents[0]?.agentId ?? '', phoneNumberId: catalog.numbers[0]?.phoneNumberId ?? '',
+  }, [editing, catalog])
+
+  const zapisz = async (values: Record<string, unknown>) => {
     setSaving(true)
-    setError(null)
+    setSuccess(false)
     try {
-      const res = await fetch('/api/voicebot/campaigns', {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), agentId, phoneNumberId: phoneNumberId || null, minIntervalSecs: 180 }),
-      })
-      if (!res.ok) throw new Error(String(res.status))
-      setName('')
+      const payload = {
+        name: String(values.name ?? '').trim(), agentId: String(values.agentId ?? ''),
+        phoneNumberId: values.phoneNumberId || null,
+      }
+      const options = { errorMessage: t('voicebot.campaigns.saveError', 'Nie udało się zapisać kampanii.') }
+      if (editing) {
+        await updateCrud('voicebot/campaigns', campaignUpdateSchema.parse({
+          ...payload, id: editing.id, updatedAt: editing.updatedAt, status: values.status,
+        }), options)
+      } else {
+        await createCrud('voicebot/campaigns', campaignCreateSchema.parse({ ...payload, minIntervalSecs: 180 }), options)
+      }
       setFormOpen(false)
+      setEditing(null)
+      setSuccess(true)
       await load()
-    } catch {
-      setError(t('voicebot.campaigns.saveError', 'Nie udało się zapisać kampanii.'))
     } finally {
+      // CrudForm zachowuje wartości i pokazuje błąd, również konflikt wersji 409.
       setSaving(false)
     }
-  }, [name, agentId, phoneNumberId, load, t])
+  }
 
   const columns: ColumnDef<CampaignRow>[] = React.useMemo(() => [
     { accessorKey: 'name', header: t('voicebot.campaigns.column.name', 'Nazwa') },
-    { accessorKey: 'status', header: t('voicebot.campaigns.column.status', 'Status') },
+    { accessorKey: 'status', header: t('voicebot.campaigns.column.status', 'Status'), cell: ({ row }) => statuses.find((s) => s.value === row.original.status)?.label ?? row.original.status },
     { id: 'agent', header: t('voicebot.campaigns.column.agent', 'Agent'), cell: ({ row }) => opisAgenta(row.original.agentId) },
     { id: 'numer', header: t('voicebot.campaigns.column.number', 'Numer'), cell: ({ row }) => opisNumeru(row.original.phoneNumberId) },
-  ], [t, opisAgenta, opisNumeru])
+    { id: 'edit', header: t('voicebot.campaigns.actions', 'Działania'), cell: ({ row }) => (
+      <Button variant="outline" disabled={saving || formOpen} onClick={() => { setEditing(row.original); setFormOpen(true); setSuccess(false) }}>
+        {t('voicebot.campaigns.edit', 'Edytuj')}
+      </Button>
+    ) },
+  ], [t, opisAgenta, opisNumeru, statuses, saving, formOpen])
 
   return (
     <Page>
@@ -111,56 +153,34 @@ export default function VoicebotCampaignsPage() {
         description={t('voicebot.campaigns.subtitle', 'Listy leadów obsługiwane przez bota telefonicznego.')}
         actions={
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => void load()}>{t('voicebot.campaigns.refresh', 'Odśwież')}</Button>
-            <Button onClick={() => setFormOpen((v) => !v)}>{t('voicebot.campaigns.new', 'Nowa kampania')}</Button>
+            <Button variant="outline" disabled={loading || saving || formOpen} onClick={() => void load()}>{t('voicebot.campaigns.refresh', 'Odśwież')}</Button>
+            <Button disabled={loading || saving || formOpen} onClick={() => { setEditing(null); setFormOpen(true); setSuccess(false) }}>{t('voicebot.campaigns.new', 'Nowa kampania')}</Button>
           </div>
         }
       />
       <PageBody>
-        {!catalog.configured ? (
+        {!catalog.configured && !loading ? (
           <div className="mb-4 rounded border border-dashed p-3 text-sm text-muted-foreground">
-            {t('voicebot.campaigns.noKey', 'Brak klucza dostawcy głosu. Agentów i numerów trzeba wpisać ręcznie, a połączenia będą symulowane.')}
+            {t('voicebot.campaigns.noCatalog', 'Brak konfiguracji dostawcy głosu. Lista agentów i numerów jest niedostępna.')}
           </div>
         ) : null}
-        {catalog.error ? <div className="mb-4 text-sm text-destructive">{catalog.error}</div> : null}
+        {catalog.error ? <div role="alert" className="mb-4 text-sm text-destructive">{t('voicebot.campaigns.catalogError', 'Nie udało się pobrać agentów i numerów. Odśwież listę, aby spróbować ponownie.')}</div> : null}
 
         {formOpen ? (
-          <div className="mb-4 grid gap-3 rounded border p-4 md:grid-cols-3">
-            <label className="flex flex-col gap-1 text-sm">
-              <span>{t('voicebot.campaigns.field.name', 'Nazwa kampanii')}</span>
-              <input
-                className="rounded border px-2 py-1"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder={t('voicebot.campaigns.field.namePlaceholder', 'np. Leady z formularza, wrzesien')}
-              />
-            </label>
-            <label className="flex flex-col gap-1 text-sm">
-              <span>{t('voicebot.campaigns.field.agent', 'Agent')}</span>
-              <select className="rounded border px-2 py-1" value={agentId} onChange={(e) => setAgentId(e.target.value)}>
-                {catalog.agents.length === 0 ? <option value="">{t('voicebot.campaigns.field.none', 'brak')}</option> : null}
-                {catalog.agents.map((a) => <option key={a.agentId} value={a.agentId}>{a.name}</option>)}
-              </select>
-            </label>
-            <label className="flex flex-col gap-1 text-sm">
-              <span>{t('voicebot.campaigns.field.number', 'Numer wychodzący')}</span>
-              <select className="rounded border px-2 py-1" value={phoneNumberId} onChange={(e) => setPhoneNumberId(e.target.value)}>
-                {catalog.numbers.length === 0 ? <option value="">{t('voicebot.campaigns.field.none', 'brak')}</option> : null}
-                {catalog.numbers.map((n) => (
-                  <option key={n.phoneNumberId} value={n.phoneNumberId}>{opisNumeru(n.phoneNumberId)}</option>
-                ))}
-              </select>
-            </label>
-            <div className="md:col-span-3">
-              <Button onClick={() => void zapisz()} disabled={saving || !name.trim() || !agentId}>
-                {saving ? t('voicebot.campaigns.saving', 'Zapisuje...') : t('voicebot.campaigns.save', 'Zapisz kampanie')}
-              </Button>
-            </div>
-          </div>
+          <CrudForm
+            key={editing?.id ?? 'new'}
+            title={editing ? t('voicebot.campaigns.editTitle', 'Edycja kampanii') : t('voicebot.campaigns.new', 'Nowa kampania')}
+            fields={fields}
+            initialValues={initialValues}
+            submitLabel={t('voicebot.campaigns.save', 'Zapisz kampanię')}
+            onSubmit={zapisz}
+            extraActions={<Button type="button" variant="outline" disabled={saving} onClick={() => { setFormOpen(false); setEditing(null) }}>{t('voicebot.campaigns.cancel', 'Anuluj')}</Button>}
+          />
         ) : null}
+        {success ? <div role="status" className="mb-3 text-sm">{t('voicebot.campaigns.saved', 'Kampania została zapisana.')}</div> : null}
 
-        {error ? <div className="mb-3 text-sm text-destructive">{error}</div> : null}
-        <DataTable columns={columns} data={rows} isLoading={loading} />
+        {error ? <div role="alert" className="mb-3 text-sm text-destructive">{error}</div> : null}
+        <DataTable columns={columns} data={rows} isLoading={loading} emptyState={t('voicebot.campaigns.empty', 'Brak kampanii. Utwórz pierwszą kampanię.')} />
       </PageBody>
     </Page>
   )
