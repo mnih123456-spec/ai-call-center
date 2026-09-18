@@ -1,6 +1,9 @@
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import {
   type DanePolaczenia,
+  type Etap,
+  type Lejek,
+  type UstawieniaZapisu,
   type ZlaczeCrm,
   type ZnalezionyRekord,
   notatkaZRozmowy,
@@ -22,9 +25,11 @@ const logger = createLogger('voicebot')
  */
 export class BitrixCrm implements ZlaczeCrm {
   private readonly bazowy: string
+  private readonly ustawienia: UstawieniaZapisu
 
-  constructor(adresWebhooka: string) {
+  constructor(adresWebhooka: string, ustawienia: UstawieniaZapisu = {}) {
     this.bazowy = adresWebhooka.replace(/\/+$/, '')
+    this.ustawienia = ustawienia
   }
 
   /**
@@ -68,6 +73,34 @@ export class BitrixCrm implements ZlaczeCrm {
   }
 
   /**
+   * Lejki szans sprzedaży.
+   *
+   * `crm.category.list` dla typu 2 (szansa sprzedaży) zwraca także lejek
+   * domyślny o identyfikatorze 0, którego starsza metoda `crm.dealcategory.list`
+   * nie pokazuje. Dlatego używamy tej, inaczej klient nie mógłby wybrać
+   * lejka, w którym najczęściej pracuje.
+   */
+  async pobierzLejki(): Promise<Lejek[]> {
+    const wynik = await this.wywolaj<{ categories?: Array<{ id?: number | string; name?: string }> }>(
+      'crm.category.list',
+      { entityTypeId: 2 },
+    )
+    return (wynik?.categories ?? [])
+      .filter((c) => c?.id !== undefined && c?.id !== null)
+      .map((c) => ({ id: String(c.id), nazwa: c.name?.trim() || `Lejek ${c.id}` }))
+  }
+
+  async pobierzEtapy(pipelineId: string): Promise<Etap[]> {
+    const wynik = await this.wywolaj<Array<{ STATUS_ID?: string; NAME?: string }>>(
+      'crm.dealcategory.stage.list',
+      { id: Number(pipelineId) },
+    )
+    return (Array.isArray(wynik) ? wynik : [])
+      .filter((s): s is { STATUS_ID: string; NAME?: string } => typeof s?.STATUS_ID === 'string')
+      .map((s) => ({ id: s.STATUS_ID, nazwa: s.NAME?.trim() || s.STATUS_ID }))
+  }
+
+  /**
    * Szukanie kontaktu po numerze telefonu.
    *
    * Bitrix dopasowuje numery po swojemu i bywa wrażliwy na format, dlatego
@@ -94,8 +127,15 @@ export class BitrixCrm implements ZlaczeCrm {
    * wpisami, a nie trzy szanse.
    */
   private async znajdzOtwartyDeal(contactId: string): Promise<string | null> {
+    const filtr: Record<string, unknown> = { CONTACT_ID: Number(contactId), CLOSED: 'N' }
+
+    // Szukamy w tym samym lejku, w którym byśmy zakładali. Inaczej rozmowa
+    // wpadłaby do otwartej sprawy z zupełnie innego procesu, na przykład
+    // do windykacji, tylko dlatego że dotyczy tego samego człowieka.
+    if (this.ustawienia.pipelineId) filtr.CATEGORY_ID = Number(this.ustawienia.pipelineId)
+
     const wynik = await this.wywolaj<Array<{ ID?: string }>>('crm.deal.list', {
-      filter: { CONTACT_ID: Number(contactId), CLOSED: 'N' },
+      filter: filtr,
       select: ['ID'],
       order: { ID: 'DESC' },
     })
@@ -122,13 +162,21 @@ export class BitrixCrm implements ZlaczeCrm {
   }
 
   private async utworzDeal(contactId: string, dane: DanePolaczenia): Promise<string> {
+    const pola: Record<string, unknown> = {
+      TITLE: `${pelneImie(dane)}${dane.productCode && dane.productCode !== 'NIEUSTALONY' ? ` - ${dane.productCode}` : ''}`,
+      CONTACT_ID: Number(contactId),
+      COMMENTS: notatkaZRozmowy(dane),
+      OPENED: 'Y',
+    }
+
+    // Pola ustawiamy tylko wtedy, gdy klient je wskazał. Puste CATEGORY_ID
+    // wysłane do Bitriksa nie znaczy "domyślny lejek", tylko lejek zerowy,
+    // więc lepiej pominąć klucz niż wysłać pustą wartość.
+    if (this.ustawienia.pipelineId) pola.CATEGORY_ID = Number(this.ustawienia.pipelineId)
+    if (this.ustawienia.stageId) pola.STAGE_ID = this.ustawienia.stageId
+
     const id = await this.wywolaj<number>('crm.deal.add', {
-      fields: {
-        TITLE: `${pelneImie(dane)}${dane.productCode && dane.productCode !== 'NIEUSTALONY' ? ` - ${dane.productCode}` : ''}`,
-        CONTACT_ID: Number(contactId),
-        COMMENTS: notatkaZRozmowy(dane),
-        OPENED: 'Y',
-      },
+      fields: pola,
       params: { REGISTER_SONET_EVENT: 'Y' },
     })
     logger.info('bitrix deal created', { id })

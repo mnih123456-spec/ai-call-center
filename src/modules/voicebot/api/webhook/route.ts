@@ -175,7 +175,10 @@ async function wyslijDoCrm(
   }
 
   try {
-    const zlacze = new BitrixCrm(polaczenie.webhookUrl)
+    const zlacze = new BitrixCrm(polaczenie.webhookUrl, {
+      pipelineId: polaczenie.pipelineId,
+      stageId: polaczenie.stageId,
+    })
     const rekord = await zlacze.zapiszWynikRozmowy(dane)
     return { ref: `${rekord.typ}:${rekord.id}`, blad: null }
   } catch (e) {

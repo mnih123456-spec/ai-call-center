@@ -56,11 +56,20 @@ export const callListSchema = z.object({
  */
 export const crmConnectionSchema = z.object({
   provider: z.enum(['bitrix24']).default('bitrix24'),
+  /**
+   * Pomijany przy zmianie samego lejka albo etapu: adres jest już zapisany,
+   * a wymaganie ponownego wklejania hasła przy każdej drobnej zmianie
+   * kończy się tym, że ludzie trzymają je w notatniku.
+   */
   webhookUrl: z.string()
     .url('To nie jest poprawny adres')
     .max(500)
     .refine((v) => v.startsWith('https://'), 'Adres musi zaczynać się od https://')
-    .refine((v) => v.includes('/rest/'), 'To nie wygląda na adres webhooka. Powinien zawierać /rest/'),
+    .refine((v) => v.includes('/rest/'), 'To nie wygląda na adres webhooka. Powinien zawierać /rest/')
+    .optional(),
+  /** Puste znaczy: zostaw dostawcy jego domyślny lejek. */
+  pipelineId: z.string().max(50).nullable().optional(),
+  stageId: z.string().max(100).nullable().optional(),
   active: z.boolean().default(true),
 })
 

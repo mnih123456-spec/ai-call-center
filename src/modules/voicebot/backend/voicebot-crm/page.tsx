@@ -4,21 +4,33 @@ import { Page, PageHeader, PageBody } from '@open-mercato/ui/backend/Page'
 import { Button } from '@open-mercato/ui/primitives/button'
 import { useT } from '@open-mercato/shared/lib/i18n/context'
 
+type Pozycja = { id: string; nazwa: string }
+
 type Stan = {
   configured: boolean
+  dostawcy?: Pozycja[]
   provider?: string
   active?: boolean
   adresSkrocony?: string
+  pipelineId?: string | null
+  stageId?: string | null
+  lejki?: Pozycja[]
+  etapy?: Pozycja[]
+  bladDostawcy?: string | null
   checkedAt?: string | null
   checkResult?: string | null
 }
 
-const PUSTY: Stan = { configured: false }
+const PUSTY: Stan = { configured: false, dostawcy: [{ id: 'bitrix24', nazwa: 'Bitrix24' }] }
 
 export default function VoicebotCrmPage() {
   const t = useT()
   const [stan, setStan] = React.useState<Stan>(PUSTY)
+  const [dostawca, setDostawca] = React.useState('bitrix24')
   const [adres, setAdres] = React.useState('')
+  const [lejek, setLejek] = React.useState('')
+  const [etap, setEtap] = React.useState('')
+  const [etapy, setEtapy] = React.useState<Pozycja[]>([])
   const [ladowanie, setLadowanie] = React.useState(true)
   const [zapis, setZapis] = React.useState(false)
   const [blad, setBlad] = React.useState<string | null>(null)
@@ -30,7 +42,12 @@ export default function VoicebotCrmPage() {
     try {
       const res = await fetch('/api/voicebot/crm', { credentials: 'same-origin' })
       if (!res.ok) throw new Error(String(res.status))
-      setStan(((await res.json()) as Stan) ?? PUSTY)
+      const body = ((await res.json()) as Stan) ?? PUSTY
+      setStan(body)
+      if (body.provider) setDostawca(body.provider)
+      setLejek(body.pipelineId ?? '')
+      setEtap(body.stageId ?? '')
+      setEtapy(body.etapy ?? [])
     } catch {
       setBlad(t('voicebot.crm.loadError', 'Nie udało się pobrać stanu połączenia.'))
     } finally {
@@ -40,8 +57,7 @@ export default function VoicebotCrmPage() {
 
   React.useEffect(() => { void wczytaj() }, [wczytaj])
 
-  const zapisz = React.useCallback(async () => {
-    if (!adres.trim()) return
+  const zapisz = React.useCallback(async (nowyLejek?: string, nowyEtap?: string) => {
     setZapis(true)
     setBlad(null)
     setSukces(null)
@@ -50,7 +66,13 @@ export default function VoicebotCrmPage() {
         method: 'POST',
         credentials: 'same-origin',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ provider: 'bitrix24', webhookUrl: adres.trim(), active: true }),
+        body: JSON.stringify({
+          provider: dostawca,
+          ...(adres.trim() ? { webhookUrl: adres.trim() } : {}),
+          pipelineId: (nowyLejek ?? lejek) || null,
+          stageId: (nowyEtap ?? etap) || null,
+          active: true,
+        }),
       })
       const tresc = (await res.json().catch(() => null)) as
         | { error?: string; szczegoly?: string; checkResult?: string }
@@ -68,7 +90,18 @@ export default function VoicebotCrmPage() {
     } finally {
       setZapis(false)
     }
-  }, [adres, wczytaj, t])
+  }, [dostawca, adres, lejek, etap, wczytaj, t])
+
+  // Etapy należą do lejka, więc po zmianie lejka trzeba je pobrać na nowo.
+  // Robimy to przez zapis, bo listę zna serwer, który ma dane dostępowe.
+  const zmienLejek = React.useCallback((wartosc: string) => {
+    setLejek(wartosc)
+    setEtap('')
+    void zapisz(wartosc, '')
+  }, [zapisz])
+
+  const dostawcy = stan.dostawcy ?? PUSTY.dostawcy ?? []
+  const lejki = stan.lejki ?? []
 
   return (
     <Page>
@@ -85,13 +118,11 @@ export default function VoicebotCrmPage() {
             <div className="mb-6 rounded border p-4 text-sm">
               {stan.configured ? (
                 <>
-                  <div className="font-medium">{t('voicebot.crm.connected', 'Połączono z Bitrix24')}</div>
+                  <div className="font-medium">{t('voicebot.crm.connected', 'Połączono')}</div>
                   <div className="mt-1 text-muted-foreground">
                     {t('voicebot.crm.address', 'Adres')}: {stan.adresSkrocony}
                   </div>
-                  {stan.checkResult ? (
-                    <div className="mt-1 text-muted-foreground">{stan.checkResult}</div>
-                  ) : null}
+                  {stan.checkResult ? <div className="mt-1 text-muted-foreground">{stan.checkResult}</div> : null}
                   {stan.checkedAt ? (
                     <div className="mt-1 text-muted-foreground">
                       {t('voicebot.crm.checkedAt', 'Sprawdzono')}: {new Date(stan.checkedAt).toLocaleString('pl-PL')}
@@ -108,27 +139,78 @@ export default function VoicebotCrmPage() {
               )}
             </div>
 
-            <label className="flex flex-col gap-1 text-sm">
-              <span>{t('voicebot.crm.field.url', 'Adres webhooka przychodzącego Bitrix24')}</span>
-              <input
-                className="rounded border px-2 py-1 font-mono text-xs"
-                value={adres}
-                onChange={(e) => setAdres(e.target.value)}
-                placeholder="https://firma.bitrix24.pl/rest/1/xxxxxxxxxxxx"
-                autoComplete="off"
-                spellCheck={false}
-              />
-            </label>
+            <div className="grid gap-4">
+              <label className="flex flex-col gap-1 text-sm">
+                <span>{t('voicebot.crm.field.provider', 'System CRM')}</span>
+                <select
+                  className="rounded border px-2 py-1"
+                  value={dostawca}
+                  onChange={(e) => setDostawca(e.target.value)}
+                >
+                  {dostawcy.map((d) => <option key={d.id} value={d.id}>{d.nazwa}</option>)}
+                </select>
+              </label>
 
-            <p className="mt-2 text-xs text-muted-foreground">
+              <label className="flex flex-col gap-1 text-sm">
+                <span>
+                  {stan.configured
+                    ? t('voicebot.crm.field.urlChange', 'Nowy adres webhooka (zostaw puste, żeby nie zmieniać)')
+                    : t('voicebot.crm.field.url', 'Adres webhooka przychodzącego')}
+                </span>
+                <input
+                  className="rounded border px-2 py-1 font-mono text-xs"
+                  value={adres}
+                  onChange={(e) => setAdres(e.target.value)}
+                  placeholder="https://firma.bitrix24.pl/rest/1/xxxxxxxxxxxx"
+                  autoComplete="off"
+                  spellCheck={false}
+                />
+              </label>
+
+              {stan.configured ? (
+                <>
+                  <label className="flex flex-col gap-1 text-sm">
+                    <span>{t('voicebot.crm.field.pipeline', 'Lejek')}</span>
+                    <select
+                      className="rounded border px-2 py-1"
+                      value={lejek}
+                      onChange={(e) => zmienLejek(e.target.value)}
+                      disabled={zapis || lejki.length === 0}
+                    >
+                      <option value="">{t('voicebot.crm.field.default', 'Domyślny')}</option>
+                      {lejki.map((l) => <option key={l.id} value={l.id}>{l.nazwa}</option>)}
+                    </select>
+                  </label>
+
+                  <label className="flex flex-col gap-1 text-sm">
+                    <span>{t('voicebot.crm.field.stage', 'Etap, na którym ląduje nowa szansa')}</span>
+                    <select
+                      className="rounded border px-2 py-1"
+                      value={etap}
+                      onChange={(e) => setEtap(e.target.value)}
+                      disabled={zapis || etapy.length === 0}
+                    >
+                      <option value="">{t('voicebot.crm.field.default', 'Domyślny')}</option>
+                      {etapy.map((s) => <option key={s.id} value={s.id}>{s.nazwa}</option>)}
+                    </select>
+                  </label>
+                </>
+              ) : null}
+            </div>
+
+            {stan.bladDostawcy ? (
+              <div className="mt-3 text-sm text-destructive">{stan.bladDostawcy}</div>
+            ) : null}
+
+            <p className="mt-3 text-xs text-muted-foreground">
               {t(
                 'voicebot.crm.hint',
-                'Adres znajdziesz w Bitriksie: Aplikacje, Webhooki, Webhook przychodzący. Potrzebne uprawnienia do modułu CRM. Adres zawiera token, więc traktuj go jak hasło.',
+                'Adres znajdziesz w Bitriksie: Aplikacje, Webhooki, Webhook przychodzący. Potrzebne uprawnienie do modułu CRM. Adres zawiera token, więc traktuj go jak hasło.',
               )}
             </p>
 
             <div className="mt-4 flex items-center gap-3">
-              <Button onClick={() => void zapisz()} disabled={zapis || !adres.trim()}>
+              <Button onClick={() => void zapisz()} disabled={zapis || (!stan.configured && !adres.trim())}>
                 {zapis
                   ? t('voicebot.crm.checking', 'Sprawdzam połączenie...')
                   : t('voicebot.crm.save', 'Sprawdź i zapisz')}

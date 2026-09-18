@@ -36,9 +36,37 @@ export type WynikCrm =
   | { ok: true; utworzono: boolean; rekord: ZnalezionyRekord | null }
   | { ok: false; blad: string }
 
+/** Lejek sprzedaży u dostawcy. */
+export type Lejek = { id: string; nazwa: string }
+
+/** Etap w lejku. */
+export type Etap = { id: string; nazwa: string }
+
+/**
+ * Gdzie ma lądować nowa szansa sprzedaży.
+ *
+ * Puste pola znaczą "zostaw dostawcy jego domyślne ustawienie".
+ */
+export type UstawieniaZapisu = {
+  pipelineId?: string | null
+  stageId?: string | null
+}
+
 export interface ZlaczeCrm {
   /** Sprawdza, czy adres i uprawnienia działają. Nic nie zmienia. */
   sprawdzPolaczenie(): Promise<{ ok: boolean; opis: string }>
+
+  /**
+   * Lejki dostępne u klienta, do wyboru w panelu.
+   *
+   * Pobieramy je zamiast kazać przepisywać identyfikatory z cudzej konsoli.
+   * Ta sama zasada co przy agentach i numerach u dostawcy głosu: raz już
+   * kosztowała nas telefon wykonany z nieaktualnego numeru wziętego z pliku.
+   */
+  pobierzLejki(): Promise<Lejek[]>
+
+  /** Etapy w danym lejku. */
+  pobierzEtapy(pipelineId: string): Promise<Etap[]>
 
   /**
    * Zapisuje wynik rozmowy w CRM i zwraca rekord, do którego trafił.

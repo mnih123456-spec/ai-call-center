@@ -13,6 +13,14 @@ export const metadata = {
   POST: { requireAuth: true, requireFeatures: ['voicebot.campaigns.manage'] },
 }
 
+/**
+ * Systemy, z którymi umiemy się połączyć.
+ *
+ * Lista jest po stronie serwera, a nie wpisana w ekran, bo dołożenie
+ * kolejnego systemu ma być zmianą w jednym miejscu.
+ */
+const DOSTAWCY = [{ id: 'bitrix24', nazwa: 'Bitrix24' }]
+
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
 }
@@ -47,13 +55,35 @@ export async function GET() {
     deletedAt: null,
   })
 
-  if (!polaczenie) return json({ configured: false })
+  if (!polaczenie) return json({ configured: false, dostawcy: DOSTAWCY })
+
+  // Listy pobieramy z systemu klienta, żeby nie kazać mu przepisywać
+  // identyfikatorów. Gdy dostawca akurat nie odpowiada, oddajemy to, co
+  // zapisane, zamiast wywracać cały ekran.
+  let lejki: Array<{ id: string; nazwa: string }> = []
+  let etapy: Array<{ id: string; nazwa: string }> = []
+  let bladDostawcy: string | null = null
+
+  try {
+    const zlacze = new BitrixCrm(polaczenie.webhookUrl)
+    lejki = await zlacze.pobierzLejki()
+    const wybrany = polaczenie.pipelineId ?? lejki[0]?.id
+    if (wybrany) etapy = await zlacze.pobierzEtapy(wybrany)
+  } catch (e) {
+    bladDostawcy = e instanceof Error ? e.message : 'Nie udało się pobrać list z CRM.'
+  }
 
   return json({
     configured: true,
+    dostawcy: DOSTAWCY,
     provider: polaczenie.provider,
     active: polaczenie.active,
     adresSkrocony: skrocAdres(polaczenie.webhookUrl),
+    pipelineId: polaczenie.pipelineId ?? null,
+    stageId: polaczenie.stageId ?? null,
+    lejki,
+    etapy,
+    bladDostawcy,
     checkedAt: polaczenie.checkedAt?.toISOString() ?? null,
     checkResult: polaczenie.checkResult ?? null,
   })
@@ -75,15 +105,6 @@ export async function POST(request: Request) {
     return json({ error: 'Nieprawidłowe dane połączenia', details: parsed.error.flatten() }, 400)
   }
 
-  // Adres sprawdzamy, zanim go zapiszemy. Zapisany, ale niedziałający adres
-  // byłby gorszy od jego braku: system wyglądałby na skonfigurowany, a wyniki
-  // rozmów po cichu nie trafiałyby do CRM klienta.
-  const zlacze = new BitrixCrm(parsed.data.webhookUrl)
-  const sprawdzenie = await zlacze.sprawdzPolaczenie()
-  if (!sprawdzenie.ok) {
-    return json({ error: 'Nie udało się połączyć z CRM', szczegoly: sprawdzenie.opis }, 400)
-  }
-
   const { resolve } = await createRequestContainer()
   const em = resolve<EntityManager>('em')
 
@@ -95,8 +116,24 @@ export async function POST(request: Request) {
     deletedAt: null,
   })
 
+  const adres = parsed.data.webhookUrl ?? polaczenie?.webhookUrl
+  if (!adres) {
+    return json({ error: 'Podaj adres webhooka, bo żaden nie jest jeszcze zapisany' }, 400)
+  }
+
+  // Adres sprawdzamy, zanim go zapiszemy. Zapisany, ale niedziałający adres
+  // byłby gorszy od jego braku: system wyglądałby na skonfigurowany, a wyniki
+  // rozmów po cichu nie trafiałyby do CRM klienta.
+  const zlacze = new BitrixCrm(adres)
+  const sprawdzenie = await zlacze.sprawdzPolaczenie()
+  if (!sprawdzenie.ok) {
+    return json({ error: 'Nie udało się połączyć z CRM', szczegoly: sprawdzenie.opis }, 400)
+  }
+
   if (polaczenie) {
-    polaczenie.webhookUrl = parsed.data.webhookUrl
+    polaczenie.webhookUrl = adres
+    polaczenie.pipelineId = parsed.data.pipelineId ?? null
+    polaczenie.stageId = parsed.data.stageId ?? null
     polaczenie.active = parsed.data.active
     polaczenie.checkedAt = teraz
     polaczenie.checkResult = sprawdzenie.opis
@@ -104,7 +141,9 @@ export async function POST(request: Request) {
   } else {
     polaczenie = em.create(VoiceCrmConnection, {
       provider: parsed.data.provider,
-      webhookUrl: parsed.data.webhookUrl,
+      webhookUrl: adres,
+      pipelineId: parsed.data.pipelineId ?? null,
+      stageId: parsed.data.stageId ?? null,
       active: parsed.data.active,
       checkedAt: teraz,
       checkResult: sprawdzenie.opis,

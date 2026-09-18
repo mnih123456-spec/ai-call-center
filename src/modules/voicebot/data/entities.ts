@@ -73,6 +73,18 @@ export class VoiceCrmConnection {
   @Property({ name: 'webhook_url', type: 'text' })
   webhookUrl!: string
 
+  /**
+   * Lejek i etap, w których ma lądować nowa szansa sprzedaży.
+   *
+   * Puste znaczy "domyślny lejek dostawcy". Trzymamy identyfikatory jako
+   * tekst, bo każdy system nazywa je inaczej i nie wszystkie są liczbami.
+   */
+  @Property({ name: 'pipeline_id', type: 'text', nullable: true })
+  pipelineId?: string | null
+
+  @Property({ name: 'stage_id', type: 'text', nullable: true })
+  stageId?: string | null
+
   /** Wyłączenie bez kasowania danych dostępowych. */
   @Property({ type: 'boolean', default: true })
   active: boolean = true
