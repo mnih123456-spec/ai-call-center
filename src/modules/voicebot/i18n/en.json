@@ -1,0 +1,5 @@
+{
+  "voicebot.queue.scope_required": "Select an organization.",
+  "voicebot.queue.invalid_campaign": "Invalid campaign.",
+  "voicebot.queue.campaign_missing": "Campaign not found."
+}

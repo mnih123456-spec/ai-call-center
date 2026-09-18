@@ -1,0 +1,5 @@
+{
+  "voicebot.queue.scope_required": "Wybierz organizację.",
+  "voicebot.queue.invalid_campaign": "Nieprawidłowa kampania.",
+  "voicebot.queue.campaign_missing": "Kampania nie istnieje."
+}

@@ -5,6 +5,8 @@ import { createLogger } from '@open-mercato/shared/lib/logger'
 import { VoiceCall, VoiceCampaign } from '../../../data/entities'
 import { listImportSchema } from '../../../data/validators'
 import { parsujListe } from '../../../lib/import-listy'
+import { publishPendingCalls } from '../../../lib/call-queue'
+import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 
 const logger = createLogger('voicebot')
 
@@ -27,7 +29,7 @@ function json(body: unknown, status = 200) {
  */
 export async function POST(request: Request) {
   const auth = await getAuthFromRequest(request)
-  if (!auth?.orgId) return json({ error: 'Brak kontekstu organizacji' }, 403)
+  if (!auth?.orgId || !auth.tenantId) return json({ error: 'Brak kontekstu organizacji' }, 403)
 
   let raw: unknown
   try {
@@ -71,6 +73,7 @@ export async function POST(request: Request) {
     {
       campaignId: campaign.id,
       tenantId: auth.tenantId,
+      organizationId: auth.orgId,
       status: 'pending',
       deletedAt: null,
     },
@@ -95,7 +98,7 @@ export async function POST(request: Request) {
       leadRef: pozycja.leadRef,
       status: 'pending',
       direction: 'outbound',
-      tenantId: auth.tenantId ?? null,
+      tenantId: auth.tenantId,
       organizationId: auth.orgId,
       createdAt: teraz,
       updatedAt: teraz,
@@ -105,6 +108,9 @@ export async function POST(request: Request) {
   }
 
   await em.flush()
+  const publication = await publishPendingCalls(em, {
+    tenantId: auth.tenantId, organizationId: auth.orgId,
+  }, campaign.id)
   logger.info('list imported', { campaignId: campaign.id, dodane })
 
   return json({
@@ -112,5 +118,16 @@ export async function POST(request: Request) {
     bledy: wynik.bledy,
     pominieteDuplikaty: wynik.pominieteDuplikaty,
     pominieteBoCzekaja,
+    queuePending: publication.queuePending,
   }, 201)
+}
+
+export const openApi: OpenApiRouteDoc = {
+  methods: {
+    POST: {
+      summary: 'Import and queue campaign calls',
+      requestBody: { schema: listImportSchema },
+      responses: [{ status: 201, description: 'Calls saved; queuePending indicates publication needs recovery.' }],
+    },
+  },
 }

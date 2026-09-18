@@ -37,6 +37,16 @@ export const callStartSchema = z.object({
   lastName: z.string().max(100).nullable().optional(),
 })
 
+// Zakres zadania ustala API z sesji; nie jest czescia publicznego formularza.
+export const callJobSchema = z.object({
+  type: z.literal('voicebot.call.dispatch'),
+  tenantId: z.string().uuid(),
+  organizationId: z.string().uuid(),
+  campaignId: z.string().uuid(),
+  callId: z.string().uuid(),
+})
+export const callDispatchSchema = z.object({ campaignId: z.string().uuid() })
+
 /**
  * Wklejona lista kontaktów.
  *
