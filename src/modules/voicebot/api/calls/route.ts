@@ -1,5 +1,5 @@
 import type { EntityManager } from '@mikro-orm/postgresql'
-import { getAuthFromCookies } from '@open-mercato/shared/lib/auth/server'
+import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import { VoiceCall, VoiceCampaign } from '../../data/entities'
@@ -18,7 +18,7 @@ function json(body: unknown, status = 200) {
 }
 
 export async function GET(request: Request) {
-  const auth = await getAuthFromCookies()
+  const auth = await getAuthFromRequest(request)
   if (!auth?.orgId) return json({ items: [], total: 0 })
 
   const url = new URL(request.url)
@@ -80,7 +80,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const auth = await getAuthFromCookies()
+  const auth = await getAuthFromRequest(request)
   if (!auth?.orgId) return json({ error: 'Brak kontekstu organizacji' }, 403)
 
   let raw: unknown
