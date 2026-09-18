@@ -70,6 +70,18 @@ export const postCallWebhookSchema = z.object({
     metadata: z.object({
       call_duration_secs: z.coerce.number().optional(),
       termination_reason: z.string().optional(),
+      /**
+       * Obecne tylko przy rozmowie telefonicznej. Stąd bierzemy kierunek,
+       * numer dzwoniącego i numer, na który zadzwoniono. Ten ostatni jest
+       * naszym kluczem tenanta: webhook nie ma sesji, więc nie może ufać
+       * temu, co przyszło w treści.
+       */
+      phone_call: z.object({
+        direction: z.string().optional(),
+        external_number: z.string().optional(),
+        agent_number: z.string().optional(),
+        phone_number_id: z.string().optional(),
+      }).passthrough().optional(),
     }).passthrough().optional(),
   }).passthrough(),
 }).passthrough()

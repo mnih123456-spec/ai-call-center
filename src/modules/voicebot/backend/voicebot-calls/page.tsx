@@ -12,6 +12,8 @@ type CallRow = {
   firstName: string | null
   lastName: string | null
   status: string
+  direction: string
+  relatedCallId: string | null
   productCode: string | null
   amount: string | null
   currency: string | null
@@ -47,6 +49,10 @@ function czas(secs: number | null): string {
   return m ? `${m} min ${s} s` : `${s} s`
 }
 
+function jestOddzwonieniem(row: CallRow): boolean {
+  return row.direction === 'inbound' && row.relatedCallId != null
+}
+
 export default function VoicebotCallsPage() {
   const t = useT()
   const [rows, setRows] = React.useState<CallRow[]>([])
@@ -73,6 +79,18 @@ export default function VoicebotCallsPage() {
   const columns: ColumnDef<CallRow>[] = React.useMemo(() => [
     { id: 'osoba', header: t('voicebot.calls.column.person', 'Rozmówca'), cell: ({ row }) => osoba(row.original) },
     { accessorKey: 'phone', header: t('voicebot.calls.column.phone', 'Numer') },
+    {
+      id: 'kierunek',
+      header: t('voicebot.calls.column.direction', 'Kierunek'),
+      cell: ({ row }) => {
+        if (row.original.direction !== 'inbound') {
+          return t('voicebot.calls.direction.outbound', 'Wychodzące')
+        }
+        return jestOddzwonieniem(row.original)
+          ? t('voicebot.calls.direction.callback', 'Oddzwonienie')
+          : t('voicebot.calls.direction.inbound', 'Przychodzące')
+      },
+    },
     { accessorKey: 'status', header: t('voicebot.calls.column.status', 'Status') },
     {
       id: 'produkt',
@@ -87,6 +105,7 @@ export default function VoicebotCallsPage() {
 
   const zebrane = rows.filter((r) => r.productCode && r.productCode !== 'NIEUSTALONY').length
   const prosiOKontakt = rows.filter((r) => r.requestsContact).length
+  const oddzwonienia = rows.filter(jestOddzwonieniem).length
 
   return (
     <Page>
@@ -108,6 +127,10 @@ export default function VoicebotCallsPage() {
           <div>
             <div className="text-muted-foreground">{t('voicebot.calls.stat.callback', 'Prosi o kontakt')}</div>
             <div className="text-2xl font-semibold">{prosiOKontakt}</div>
+          </div>
+          <div>
+            <div className="text-muted-foreground">{t('voicebot.calls.stat.returned', 'Oddzwonili')}</div>
+            <div className="text-2xl font-semibold">{oddzwonienia}</div>
           </div>
         </div>
         {error ? <div className="mb-3 text-sm text-destructive">{error}</div> : null}

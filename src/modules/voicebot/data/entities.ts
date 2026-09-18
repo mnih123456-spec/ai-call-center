@@ -5,6 +5,7 @@ import { Entity, Index, PrimaryKey, Property, Unique } from '@mikro-orm/decorato
  * i numerem telefonu u dostawcy.
  */
 @Entity({ tableName: 'voicebot_campaigns' })
+@Index({ properties: ['phoneNumberId'] })
 export class VoiceCampaign {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string
@@ -59,13 +60,27 @@ export class VoiceCampaign {
  */
 @Entity({ tableName: 'voicebot_calls' })
 @Index({ properties: ['tenantId', 'status'] })
+@Index({ properties: ['tenantId', 'phone'] })
 @Unique({ properties: ['tenantId', 'conversationId'] })
 export class VoiceCall {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string
 
-  @Property({ name: 'campaign_id', type: 'uuid' })
-  campaignId!: string
+  /** Puste dla rozmowy przychodzącej od kogoś, kto nie jest w żadnej kampanii. */
+  @Property({ name: 'campaign_id', type: 'uuid', nullable: true })
+  campaignId?: string | null
+
+  /** outbound: bot dzwoni do leada. inbound: ktoś dzwoni na nasz numer. */
+  @Property({ type: 'text', default: 'outbound' })
+  direction: string = 'outbound'
+
+  /**
+   * Wcześniejsze połączenie, na które to jest oddzwonieniem.
+   * Oddzwonienie zakłada nowy wiersz i nigdy nie nadpisuje tamtego,
+   * bo informacja o tym, że ktoś nie odebrał, sama w sobie ma wartość.
+   */
+  @Property({ name: 'related_call_id', type: 'uuid', nullable: true })
+  relatedCallId?: string | null
 
   /** Identyfikator rekordu w systemie źródłowym, np. deal w CRM. */
   @Property({ name: 'lead_ref', type: 'text', nullable: true })

@@ -1,4 +1,5 @@
 import { createLogger } from '@open-mercato/shared/lib/logger'
+import { toE164 } from './phone'
 
 const logger = createLogger('voicebot')
 
@@ -103,11 +104,11 @@ export async function fetchProviderCatalog(): Promise<ProviderCatalog> {
 
     const numbers: ProviderNumber[] = (Array.isArray(numbersRaw) ? numbersRaw : [])
       .filter((n): n is { phone_number_id: string; phone_number?: string; provider?: string } => typeof n?.phone_number_id === 'string')
-      .map((n) => {
-        const digits = (n.phone_number ?? '').replace(/[^\d+]/g, '')
-        const e164 = digits.startsWith('+') ? digits : digits ? `+${digits}` : ''
-        return { phoneNumberId: n.phone_number_id, phoneNumber: e164, provider: n.provider ?? '' }
-      })
+      .map((n) => ({
+        phoneNumberId: n.phone_number_id,
+        phoneNumber: toE164(n.phone_number) ?? '',
+        provider: n.provider ?? '',
+      }))
 
     return { configured: true, agents, numbers }
   } catch {
