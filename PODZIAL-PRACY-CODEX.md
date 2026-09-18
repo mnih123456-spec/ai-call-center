@@ -51,7 +51,26 @@ faktycznie zacząć używać statusu `pending`, dziś nieużywanego.
 **Pliki:** nowy katalog `src/modules/voicebot/jobs/` albo `subscribers/`,
 plus `api/calls/route.ts` w miejscu nadawania statusu.
 
-## C2. Ekran przeglądu
+## C2. Wklejanie listy numerów do kampanii
+
+**Problem:** nie każdy klient ma CRM. Dziś połączenie da się zlecić tylko
+pojedynczo i tylko przez API. Klient bez CRM-u nie ma jak ruszyć kampanii.
+
+**Do zrobienia:** w kampanii pole, do którego wkleja się listę, po jednym
+kontakcie w wierszu, w postaci `numer, imię, nazwisko`. Po zatwierdzeniu
+powstają połączenia w stanie `pending`, które podejmuje kolejka z zadania C1.
+
+**Gotowe, gdy:** wklejenie dwudziestu wierszy tworzy dwadzieścia połączeń,
+błędne numery są pokazane z powodem i **nie blokują** reszty listy.
+
+**Pułapka:** numery trzeba przepuścić przez `lib/phone.ts`, bo ludzie wklejają
+je w każdej możliwej postaci: ze spacjami, z myślnikami, bez prefiksu.
+Walidator wymaga E.164 z plusem.
+
+**Pliki:** `api/calls/route.ts` (nowa trasa zbiorcza albo tryb wsadowy),
+`backend/page.tsx`.
+
+## C3. Ekran przeglądu
 
 **Problem:** panel ma listy, nie ma widoku zbiorczego. Konkurencja ma "Przegląd"
 jako pierwszą pozycję menu, a w ścieżce Showcase wygląd waży 30 procent.
@@ -69,7 +88,7 @@ koliduje z innymi modułami. To samo wyszło wcześniej przy `voicebot-calls`.
 
 **Pliki:** nowy katalog w `backend/`, ewentualnie nowa trasa w `api/`.
 
-## C3. Wybór agenta i numeru przy edycji kampanii
+## C4. Wybór agenta i numeru przy edycji kampanii
 
 **Problem:** kampanię da się założyć, ale nie da się jej zmienić. Przy pomyłce
 w numerze trzeba zakładać nową. Tak właśnie 16.09 telefon poszedł ze starego
@@ -91,6 +110,19 @@ połączenie idzie z nowego numeru.
 # ZADANIA DLA CLAUDE
 
 Zostają u mnie, bo dotykają rzeczy, które już mam w głowie.
+
+## K4. Profil agenta per tenant i widok dla admina
+
+Klient nie pisze promptu, tylko **dodaje pytania** do scenariusza rozmowy
+i podaje adres swojej strony. Prompt jest nasz i sprawdzony. Z tego wynika,
+ze kazdy tenant ma wlasnego agenta w ElevenLabs, utworzonego z szablonu.
+
+Potrzebne: encja profilu agenta per tenant (identyfikator agenta, lista pytan
+klienta, zrodlo wiedzy, stan) oraz ekran dla admina pokazujacy, ktory tenant
+ma ktorego agenta i ktory numer. Bez tego nie da sie niczego zdiagnozowac,
+gdy klient zadzwoni z pretensja.
+
+Dzis identyfikator agenta siedzi przy kampanii, czyli o poziom za nisko.
 
 ## K1. Podpięcie złącza Bitrix do webhooka
 
