@@ -16,7 +16,10 @@ nie pisały po tych samych plikach.
    o `yarn db:migrate`.
 5. **Sprawdzenie przed commitem:** `yarn typecheck`. Błędy w `agent_examples`
    są zastane i nie są nasze.
-6. **Commit po polsku, bez polskich znaków**, opisujący DLACZEGO, nie tylko CO.
+6. **NIE commituj.** Piaskownica celowo nie pozwala pisać do katalogu `.git`,
+   żeby agent nie przepisał historii. Zakończ podsumowaniem, co zmieniłeś
+   i dlaczego. Commit robi człowiek po przejrzeniu kodu, i to jest zamierzone:
+   dzięki temu nic nie ląduje w historii bez sprawdzenia.
 7. Jeden agent, jedno zadanie naraz. Po skończeniu dopisać wynik do dziennika.
 
 ## Stan na start
