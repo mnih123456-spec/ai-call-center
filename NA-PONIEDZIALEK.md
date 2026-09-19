@@ -21,6 +21,21 @@ przerywać dla tego pracy. Na poniedziałek warte obejrzenia:
 Czego tam nie szukać: skilli do generowania wideo. Film z demo ma pokazywać
 twój panel, a nie wygenerowaną animację.
 
+## 1b. cezar-cli, kokpit do agentów programistycznych
+
+, alias na . Od zespołu Open Mercato,
+czyli od autorów frameworka, na licencji MIT. Lokalny kokpit do uruchamiania
+i śledzenia zadań agentów AI w repozytorium, otwiera się w przeglądarce.
+
+Dotyczy agentów programistycznych, nie naszych głosowych. Zastąpiłby ręczne
+zlecanie zadań Codexowi, które dziś robimy poleceniem w konsoli.
+
+**Sprawdzone 19.09:** wersja 0.11.0, 562 wydania od lipca 2026, ostatnie
+cztery dni temu. Rozwija się bardzo szybko, więc spodziewaj się ostrych
+krawędzi. Dlatego nie wprowadzaliśmy go dzień przed zamknięciem kodu.
+
+Warto obejrzeć w poniedziałek: autorzy znają ten framework od środka.
+
 ## 2. Analiza wąskiego gardła w obdzwanianiu
 
 Osobny plik: `ANALIZA-WASKIE-GARDLO.md`. Samodzielny, można go wkleić
