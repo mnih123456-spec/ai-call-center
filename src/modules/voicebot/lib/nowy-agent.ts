@@ -2,6 +2,7 @@ import { createLogger } from '@open-mercato/shared/lib/logger'
 import { opisOdpowiedzi, powitanieBranzy, pytaniaBranzy, scenariuszBranzy, slowaKluczoweBranzy, wiedzaBranzowa } from './branze'
 import { dataCollectionDlaDostawcy, polaZPytan } from './pola-z-pytan'
 import { oczyscWiedze } from './scenariusz'
+import { nazwaWDopelniaczu } from './odmiana'
 
 const logger = createLogger('voicebot')
 
@@ -84,11 +85,14 @@ export async function zalozAgentaDlaFirmy(
     // Branza z gotowym scenariuszem zastepuje tresc szablonu, a nie dokleja
     // sie do niej. Bot serwisu samochodowego nie moze dalej pytac o umowe
     // kredytowa tylko dlatego, ze szablon powstal dla kancelarii.
-    const wlasny = scenariuszBranzy(branza, nazwa)
-    const prompt = wlasny || `${podmienNazwe(cc?.prompt?.prompt, nazwa)}
+    // W powitaniu i scenariuszu nazwa stoi po "asystentka" i "specjalista",
+    // wiec musi byc w dopelniaczu: "asystentka Kancelarii Bankowej".
+    const nazwaD = await nazwaWDopelniaczu(nazwa)
+    const wlasny = scenariuszBranzy(branza, nazwaD)
+    const prompt = wlasny || `${podmienNazwe(cc?.prompt?.prompt, nazwaD)}
 
 ${oczyscWiedze(wiedzaBranzowa(branza, wiedzaWlasna))}`.trim()
-    const powitanie = powitanieBranzy(branza, nazwa) || podmienNazwe(cc?.first_message, nazwa)
+    const powitanie = powitanieBranzy(branza, nazwaD) || podmienNazwe(cc?.first_message, nazwaD)
 
     // Pola do zebrania tez trzeba podmienic, nie tylko tresc scenariusza.
     //

@@ -6,10 +6,11 @@ import { VoiceAgentProfile } from '../../data/entities'
 import { agentProfileSchema } from '../../data/validators'
 import { fetchProviderCatalog } from '../../lib/provider'
 import { wyslijScenariuszDoAgenta } from '../../lib/scenariusz'
-import { BRANZA_WLASNA, BRANZE, opisOdpowiedzi, scenariuszBranzy, slowaKluczoweBranzy, wiedzaBranzowa, znanaBranza } from '../../lib/branze'
+import { BRANZA_WLASNA, BRANZE, opisOdpowiedzi, powitanieBranzy, scenariuszBranzy, slowaKluczoweBranzy, wiedzaBranzowa, znanaBranza } from '../../lib/branze'
 import { MODELE, pobierzUstawienia, sprawdzUstawienia, wyslijPolaDoAgenta, zapiszUstawienia } from '../../lib/ustawienia-agenta'
 import { dataCollectionDlaDostawcy, polaZPytan } from '../../lib/pola-z-pytan'
 import { pobierzWiedze } from '../../lib/wiedza'
+import { nazwaWDopelniaczu } from '../../lib/odmiana'
 
 const logger = createLogger('voicebot')
 
@@ -193,12 +194,14 @@ export async function POST(request: Request) {
   // Dopiero po zapisie u nas wysylamy scenariusz do dostawcy. Gdyby wysylka
   // szla pierwsza i sie udala, a zapis padl, klient mialby bota mowiacego
   // rzeczy, ktorych nie widzi w panelu.
+  const nazwaD = await nazwaWDopelniaczu(profil.name)
   const wysylka = await wyslijScenariuszDoAgenta(
     profil.agentId,
     profil.questions,
     profil.knowledgeText,
     wiedzaBranzowa(profil.industry, profil.industryKnowledge),
-    scenariuszBranzy(profil.industry, profil.name) || null,
+    scenariuszBranzy(profil.industry, nazwaD) || null,
+    powitanieBranzy(profil.industry, nazwaD) || null,
   )
 
   // Model i czas ciszy ida osobnym zadaniem, bo dotycza sposobu prowadzenia

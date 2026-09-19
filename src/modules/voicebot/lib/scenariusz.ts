@@ -119,6 +119,7 @@ export async function wyslijScenariuszDoAgenta(
   wiedza?: string | null,
   branza?: string | null,
   stalyZastepczy?: string | null,
+  powitanie?: string | null,
 ): Promise<WynikSynchronizacji> {
   const apiKey = process.env.ELEVENLABS_API_KEY
   if (!apiKey) return { ok: false, blad: 'Brak klucza dostawcy głosu.' }
@@ -145,7 +146,14 @@ export async function wyslijScenariuszDoAgenta(
     const zapis = await fetch(`${API}/agents/${agentId}`, {
       method: 'PATCH',
       headers: { 'xi-api-key': apiKey, 'content-type': 'application/json' },
-      body: JSON.stringify({ conversation_config: { agent: { prompt: { prompt: nowy } } } }),
+      // Powitanie idzie razem ze scenariuszem, bo oba wynikaja z branzy
+      // i nazwy firmy. Bez tego poprawka powitania dzialalaby tylko dla
+      // botow zakladanych od nowa.
+      body: JSON.stringify({
+        conversation_config: {
+          agent: { prompt: { prompt: nowy }, ...(powitanie ? { first_message: powitanie } : {}) },
+        },
+      }),
       signal: AbortSignal.timeout(20000),
     })
     if (!zapis.ok) {
