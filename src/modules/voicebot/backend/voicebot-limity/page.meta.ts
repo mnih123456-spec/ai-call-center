@@ -5,6 +5,6 @@ export const metadata = {
   pageTitleKey: 'voicebot.limits.title',
   pageGroup: 'Voicebot',
   pageGroupKey: 'voicebot.nav.group',
-  pageOrder: 130,
+  pageOrder: 150,
   icon: 'gauge',
 }

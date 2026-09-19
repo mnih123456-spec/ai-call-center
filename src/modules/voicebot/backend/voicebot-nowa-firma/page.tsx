@@ -3,6 +3,7 @@ import * as React from 'react'
 import { Page, PageHeader, PageBody } from '@open-mercato/ui/backend/Page'
 import { Button } from '@open-mercato/ui/primitives/button'
 import { useT } from '@open-mercato/shared/lib/i18n/context'
+import { clearAllOperations } from '@open-mercato/ui/backend/operations/store'
 
 type Branza = { id: string; nazwa: string }
 
@@ -120,6 +121,10 @@ export default function VoicebotNowaFirmaPage() {
       setBranza('')
       setStrona('')
       setEtap('gotowe')
+      // Pasek "Ostatnia operacja: Utworz organizacje" nazywa klientowi nasza
+      // kuchnie. On zalozyl konto firmy, a nie organizacje, i nie ma powodu
+      // tego cofac jednym kliknieciem zaraz po zalozeniu.
+      try { clearAllOperations() } catch { /* pasek jest ozdoba, nie warunkiem */ }
       setWynik({
         nazwa: bot?.nazwa ?? czysta,
         kampania: bot?.kampaniaNazwa ?? '',
@@ -224,24 +229,22 @@ export default function VoicebotNowaFirmaPage() {
                 {t('voicebot.newCompany.doneBody', 'Ma przygotowane pytania i wie, o czym rozmawiać.')}
                 {wynik.numer
                   ? t('voicebot.newCompany.doneNumber', ' Będzie dzwonił z numeru ') + wynik.numer + '.'
-                  : t('voicebot.newCompany.doneNoNumber', ' Zostało przypisać mu numer telefonu.')}
+                  : t('voicebot.newCompany.doneNoNumber', ' Rozmowę próbną wykona z naszego numeru, własny numer firmy podepniemy później.')}
               </div>
               {wynik.uwaga ? <div className="mt-1 text-muted-foreground">{wynik.uwaga}</div> : null}
 
-              <div className="mt-3 flex flex-wrap gap-4">
-                <a className="underline" href="/backend/voicebot">
-                  {t('voicebot.newCompany.ctaCall', 'Posłuchaj, jak brzmi')}
-                </a>
-                <a className="underline" href="/backend/voicebot-agenci">
-                  {t('voicebot.newCompany.ctaBot', 'Zmień pytania')}
-                </a>
-                <button
-                  type="button"
-                  className="underline text-muted-foreground"
-                  onClick={() => { setWynik(null); setEtap(null) }}
+              {/* Jeden nastepny krok, nie trzy rownolegle. Po zalozeniu konta
+                  jedyna sensowna czynnosc to ustawienie pytan: bez nich bot
+                  zadzwoni z gotowcem branzowym, ktorego nikt nie przeczytal.
+                  Propozycja zalozenia kolejnego klienta w tym miejscu odpowiada
+                  na pytanie, ktorego nikt nie zadal. */}
+              <div className="mt-3">
+                <a
+                  className="inline-block rounded bg-primary px-3 py-2 text-primary-foreground"
+                  href="/backend/voicebot-agenci"
                 >
-                  {t('voicebot.newCompany.ctaNext', 'Załóż kolejnego klienta')}
-                </button>
+                  {t('voicebot.newCompany.ctaBot', 'Dalej: ustaw pytania dla bota')}
+                </a>
               </div>
             </div>
           ) : null}

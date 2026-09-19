@@ -143,8 +143,11 @@ const MOTORYZACJA: Branza = {
   id: 'motoryzacja',
   nazwa: 'Serwis samochodowy',
   pola: [{"klucz":"marka_model","etykieta":"Marka i model"},{"klucz":"rocznik","etykieta":"Rocznik"},{"klucz":"przebieg","etykieta":"Przebieg"},{"klucz":"objaw","etykieta":"Co się dzieje z autem"},{"klucz":"termin_podstawienia","etykieta":"Kiedy podstawi auto"},{"klucz":"auto_zastepcze","etykieta":"Auto zastępcze"}],
-  pytania: ["Jaka marka i model samochodu?","Z którego rocznika i jaki przebieg?","Co dokładnie dzieje się z autem?","Czy zapala się kontrolka na desce?","Kiedy może Pan podstawić samochód?","Czy potrzebuje Pan auta zastępczego?"],
-  przyklady: ["Jaka marka i rocznik?","Jaki przebieg?","Kiedy może Pan podstawić auto?"],
+  // Pytania sa cale zdania, a nie hasla z formularza. "Jaka marka i model?"
+  // czyta sie jak rubryke w ankiecie; czlowiek po drugiej stronie slyszy
+  // wtedy automat wypelniajacy tabelke, a nie kogos, kto chce mu pomoc.
+  pytania: ["Jakim samochodem Pan jeździ? Marka i model wystarczą.","Który to rocznik i ile mniej więcej ma przebiegu?","Proszę powiedzieć własnymi słowami, co się z autem dzieje.","Czy zapaliła się jakaś kontrolka na desce rozdzielczej?","Kiedy najwygodniej byłoby Panu podjechać do nas?","Czy na czas naprawy będzie Panu potrzebne auto zastępcze?"],
+  przyklady: ["Jakim samochodem Pan jeździ?","Co się z nim dzieje?","Kiedy mógłby Pan podjechać?"],
   powitanie: "Dzien dobry, z tej strony wirtualna asystentka {FIRMA}. Dzwonie w sprawie wizyty w serwisie. Czy rozmawiam z wlascicielem samochodu?",
   cel: "Dzwonisz, zeby umowic wizyte w serwisie samochodowym albo potwierdzic juz umowiona.\n\nUstalasz po kolei: marke i model, rocznik, przebieg, co dokladnie dzieje sie z autem i kiedy moze je podstawic. Nie stawiasz diagnozy i nie podajesz ceny naprawy, bo to zalezy od ogledzin.",
   slownik: `Pojecia, ktorymi posluguja sie rozmowcy. Rozpoznajesz je i rozumiesz, ale sam nie stawiasz diagnozy.

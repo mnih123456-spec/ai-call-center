@@ -96,9 +96,18 @@ export async function POST(request: Request) {
   em.persist(call)
   await em.flush()
 
+  // Numer platformy na rozmowe probna.
+  //
+  // Firma kupuje wlasny numer u operatora i to potrafi potrwac dni. Rozmowa
+  // probna ma sie odbyc w minute po zalozeniu konta, inaczej firma nigdy nie
+  // uslyszy, co kupila. Dlatego proba wychodzi z naszego numeru, gdy firma
+  // nie ma jeszcze swojego. Kampanie tego nie dotyczy: tam numer musi byc
+  // wlasny, bo to juz ruch na rachunek klienta.
+  const numerProby = campaign.phoneNumberId ?? process.env.VOICEBOT_NUMER_PLATFORMY ?? null
+
   const wynik = await startOutboundCall({
     agentId: campaign.agentId,
-    phoneNumberId: campaign.phoneNumberId ?? null,
+    phoneNumberId: numerProby,
     toNumber: parsed.data.phone,
     variables: {
       lead_id: call.id,

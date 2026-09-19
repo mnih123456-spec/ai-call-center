@@ -5,6 +5,6 @@ export const metadata = {
   pageTitleKey: 'voicebot.import.title',
   pageGroup: 'Voicebot',
   pageGroupKey: 'voicebot.nav.group',
-  pageOrder: 105,
+  pageOrder: 120,
   icon: 'upload',
 }

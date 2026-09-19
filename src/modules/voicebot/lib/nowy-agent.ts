@@ -1,5 +1,6 @@
 import { createLogger } from '@open-mercato/shared/lib/logger'
-import { powitanieBranzy, scenariuszBranzy, slownikBranzy } from './branze'
+import { powitanieBranzy, pytaniaBranzy, scenariuszBranzy, slownikBranzy } from './branze'
+import { dataCollectionDlaDostawcy, polaZPytan } from './pola-z-pytan'
 
 const logger = createLogger('voicebot')
 
@@ -87,6 +88,28 @@ export async function zalozAgentaDlaFirmy(
 ${slownikBranzy(branza)}`.trim()
     const powitanie = powitanieBranzy(branza, nazwa) || podmienNazwe(cc?.first_message, nazwa)
 
+    // Pola do zebrania tez trzeba podmienic, nie tylko tresc scenariusza.
+    //
+    // Kopia szablonu przynosi ze soba jego liste pol, a szablon powstal dla
+    // kancelarii kredytowej. Bez tej podmiany warsztat samochodowy dostawal
+    // bota, ktory owszem, pytal o samochod, ale do tabeli wynikow zwracal
+    // kwote kredytu, bank i rok umowy. Zrodlem pol sa pytania, nie szablon.
+    const pola = polaZPytan(pytaniaBranzy(branza))
+    const dataCollection = pola.length > 0 ? dataCollectionDlaDostawcy(pola) : null
+
+    const platformSettings: Record<string, unknown> = {}
+    if (webhook) {
+      platformSettings.workspace_overrides = {
+        webhooks: {
+          post_call_webhook_id: webhook,
+          events: ['transcript'],
+          transcript_format: 'json',
+          send_audio: false,
+        },
+      }
+    }
+    if (dataCollection) platformSettings.data_collection = dataCollection
+
     const zapis = await fetch(`${API}/agents/${agentId}`, {
       method: 'PATCH',
       headers: { 'xi-api-key': apiKey, 'content-type': 'application/json' },
@@ -98,20 +121,7 @@ ${slownikBranzy(branza)}`.trim()
           },
           turn: { turn_timeout: 1.5 },
         },
-        ...(webhook
-          ? {
-              platform_settings: {
-                workspace_overrides: {
-                  webhooks: {
-                    post_call_webhook_id: webhook,
-                    events: ['transcript'],
-                    transcript_format: 'json',
-                    send_audio: false,
-                  },
-                },
-              },
-            }
-          : {}),
+        ...(Object.keys(platformSettings).length > 0 ? { platform_settings: platformSettings } : {}),
       }),
       signal: AbortSignal.timeout(30000),
     })

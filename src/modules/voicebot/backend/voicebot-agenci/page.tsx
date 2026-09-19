@@ -23,13 +23,6 @@ type Profil = {
 type Branza = { id: string; nazwa: string; przyklady?: string[]; pytania?: string[] }
 type Model = { id: string; nazwa: string }
 
-/**
- * Stan jednej edytowanej karty.
- *
- * Otwarta jest zawsze najwyżej jedna. Kilka rozwiniętych kart naraz robi
- * z tego ekranu ścianę pól, a to był właśnie zarzut: nie wiadomo, co do
- * czego należy.
- */
 type Edycja = {
   id: string
   questions: string
@@ -40,8 +33,14 @@ type Edycja = {
   cisza: string
 }
 
-const PUSTA_FIRMA = { nazwaFirmy: '', industry: '', knowledgeUrl: '' }
-
+/**
+ * Konfiguracja bota firmy.
+ *
+ * Ten ekran nie zaklada firm ani botow. Firma, ktora tu wchodzi, ma juz
+ * jednego bota i przyszla zmienic mu pytania. Propozycja zalozenia kolejnej
+ * firmy w tym miejscu odpowiada na pytanie, ktorego nikt nie zadal, wiec
+ * zakladanie zyje wylacznie na ekranie "Nowy klient".
+ */
 export default function VoicebotAgenciPage() {
   const t = useT()
   const [profile, setProfile] = React.useState<Profil[]>([])
@@ -50,21 +49,20 @@ export default function VoicebotAgenciPage() {
   const [katalogDziala, setKatalogDziala] = React.useState(true)
 
   const [edycja, setEdycja] = React.useState<Edycja | null>(null)
-  const [nowa, setNowa] = React.useState(PUSTA_FIRMA)
-  const [gotowe, setGotowe] = React.useState<
-    { nazwa: string; kampania: string; numer: string | null; uwaga: string | null } | null
-  >(null)
 
   const [ladowanie, setLadowanie] = React.useState(true)
   const [zapis, setZapis] = React.useState(false)
-  const [zakladanie, setZakladanie] = React.useState(false)
   const [kasowany, setKasowany] = React.useState<string | null>(null)
   const [blad, setBlad] = React.useState<string | null>(null)
   const [komunikat, setKomunikat] = React.useState<string | null>(null)
 
-  // Model i czas ciszy to sprawa operatora platformy. Klient ma dostać bota,
-  // który działa, a nie listę modeli do eksperymentów na własnych rozmowach.
+  // Model i czas ciszy to sprawa operatora platformy. Klient ma dostac bota,
+  // ktory dziala, a nie liste modeli do eksperymentow na wlasnych rozmowach.
   const [operator, setOperator] = React.useState(false)
+
+  // Rozwiniecie karty robimy raz, zaraz po wczytaniu. Bez tego "Zwin"
+  // zamykaloby karte, ktora natychmiast otwieralaby sie z powrotem.
+  const rozwinieto = React.useRef(false)
 
   const wczytaj = React.useCallback(async () => {
     setLadowanie(true)
@@ -78,10 +76,27 @@ export default function VoicebotAgenciPage() {
         modele?: Model[]
         katalogDziala?: boolean
       }
-      setProfile(Array.isArray(body.profile) ? body.profile : [])
+      const lista = Array.isArray(body.profile) ? body.profile : []
+      setProfile(lista)
       setBranze(Array.isArray(body.branze) ? body.branze : [])
       setModele(Array.isArray(body.modele) ? body.modele : [])
       setKatalogDziala(body.katalogDziala !== false)
+
+      // Firma z jednym botem przyszla tu edytowac wlasnie jego. Kazanie jej
+      // najpierw kliknac "Konfiguruj" to klikniecie bez decyzji.
+      if (!rozwinieto.current && lista.length === 1) {
+        rozwinieto.current = true
+        const p = lista[0]
+        setEdycja({
+          id: p.id,
+          questions: p.questions,
+          industry: p.industry,
+          knowledgeUrl: p.knowledgeUrl,
+          odswiez: false,
+          llm: p.llm ?? '',
+          cisza: p.cisza === null ? '' : String(p.cisza),
+        })
+      }
     } catch {
       setBlad(t('voicebot.agents.loadError', 'Nie udało się pobrać botów.'))
     } finally {
@@ -148,9 +163,8 @@ export default function VoicebotAgenciPage() {
         setBlad(body?.error ?? t('voicebot.agents.saveError', 'Nie udało się zapisać.'))
         return
       }
-      setEdycja(null)
-      // Zapis u nas i przekazanie zmian botowi to dwie różne rzeczy. Gdy druga
-      // zawiedzie, klient musi to wiedzieć, bo bot dalej mówi po staremu,
+      // Zapis u nas i przekazanie zmian botowi to dwie rozne rzeczy. Gdy druga
+      // zawiedzie, klient musi to wiedziec, bo bot dalej mowi po staremu,
       // a panel pokazuje nowe pytania.
       setKomunikat(body?.syncResult ?? t('voicebot.agents.saved', 'Zapisane i przekazane botowi.'))
       await wczytaj()
@@ -160,40 +174,6 @@ export default function VoicebotAgenciPage() {
       setZapis(false)
     }
   }, [edycja, operator, wczytaj, t])
-
-  const zalozBota = React.useCallback(async () => {
-    setZakladanie(true)
-    setBlad(null)
-    setKomunikat(null)
-    setGotowe(null)
-    try {
-      const res = await fetch('/api/voicebot/agents/create', {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(nowa),
-      })
-      const body = (await res.json().catch(() => null)) as
-        | { error?: string; nazwa?: string; uwaga?: string; kampaniaNazwa?: string; numerPrzypisany?: string | null }
-        | null
-      if (!res.ok) {
-        setBlad(body?.error ?? t('voicebot.agents.new.error', 'Nie udało się założyć bota.'))
-        return
-      }
-      setNowa(PUSTA_FIRMA)
-      setGotowe({
-        nazwa: body?.nazwa ?? '',
-        kampania: body?.kampaniaNazwa ?? '',
-        numer: body?.numerPrzypisany ?? null,
-        uwaga: body?.uwaga ?? null,
-      })
-      await wczytaj()
-    } catch {
-      setBlad(t('voicebot.agents.new.error', 'Nie udało się założyć bota.'))
-    } finally {
-      setZakladanie(false)
-    }
-  }, [nowa, wczytaj, t])
 
   const usunBota = React.useCallback(async (p: Profil) => {
     // Potwierdzenie jest tu konieczne: bot znika razem ze swoim scenariuszem
@@ -236,7 +216,7 @@ export default function VoicebotAgenciPage() {
   return (
     <Page>
       <PageHeader
-        title={t('voicebot.agents.title', 'Boty telefoniczne')}
+        title={t('voicebot.agents.title', 'Pytania, które zadaje bot')}
         actions={<Button variant="outline" onClick={() => void wczytaj()}>{t('voicebot.agents.refresh', 'Odśwież')}</Button>}
       />
       <PageBody>
@@ -246,37 +226,19 @@ export default function VoicebotAgenciPage() {
           <div className="grid max-w-3xl gap-6">
             {!katalogDziala ? (
               <div className="rounded border border-dashed p-3 text-sm text-muted-foreground">
-                {t('voicebot.agents.noCatalog', 'Brak połączenia z dostawcą głosu. Zakładanie botów jest chwilowo niedostępne.')}
+                {t('voicebot.agents.noCatalog', 'Brak połączenia z dostawcą głosu. Zmiany nie dotrą teraz do bota.')}
               </div>
             ) : null}
 
-            {komunikat ? <div className="text-sm text-muted-foreground">{komunikat}</div> : null}
+            {komunikat ? <div className="rounded border bg-muted p-3 text-sm">{komunikat}</div> : null}
             {blad ? <div className="text-sm text-destructive">{blad}</div> : null}
 
-            {/* Potwierdzenie stoi nad listą, a nie w sekcji zakładania.
-                Tamta znika po założeniu pierwszego bota, więc zabierała ze sobą
-                potwierdzenie i odnośnik do rozmowy testowej dokładnie temu,
-                kto ich najbardziej potrzebował. */}
-            {gotowe ? (
-              <div className="rounded border p-4 text-sm">
-                <div className="font-medium">
-                  {t('voicebot.agents.new.readyTitle', 'Gotowe: ')}{gotowe.nazwa}
-                </div>
-                <div className="mt-1 text-muted-foreground">
-                  {t('voicebot.agents.new.readyBody', 'Bot ma przygotowane pytania i wie, o czym rozmawiać.')}
-                  {gotowe.numer
-                    ? t('voicebot.agents.new.readyNumber', ' Będzie dzwonił z numeru ') + gotowe.numer + '.'
-                    : t('voicebot.agents.new.readyNoNumber', ' Zostało przypisać mu numer telefonu.')}
-                </div>
-                {gotowe.uwaga ? <div className="mt-1 text-muted-foreground">{gotowe.uwaga}</div> : null}
-                <a className="mt-2 inline-block underline" href="/backend/voicebot">
-                  {t('voicebot.agents.new.readyCta', 'Posłuchaj, jak brzmi')}
-                </a>
+            {profile.length === 0 ? (
+              <div className="rounded border border-dashed p-4 text-sm text-muted-foreground">
+                {t('voicebot.agents.empty', 'Ta firma nie ma jeszcze bota.')}
               </div>
             ) : null}
 
-            {/* Boty firmy. Konfiguracja siedzi w karcie bota, którego dotyczy,
-                a nie w osobnym formularzu pod spodem. */}
             {profile.map((p) => {
               const otwarta = edycja?.id === p.id
               const branzaWybrana = otwarta ? edycja.industry : p.industry
@@ -296,38 +258,28 @@ export default function VoicebotAgenciPage() {
                           : ''}
                       </div>
                     </div>
-                    <Button variant="outline" onClick={() => otworz(p)}>
-                      {otwarta ? t('voicebot.agents.close', 'Zwiń') : t('voicebot.agents.configure', 'Konfiguruj')}
-                    </Button>
+                    {profile.length > 1 ? (
+                      <Button variant="outline" onClick={() => otworz(p)}>
+                        {otwarta ? t('voicebot.agents.close', 'Zwiń') : t('voicebot.agents.configure', 'Konfiguruj')}
+                      </Button>
+                    ) : null}
                   </header>
 
                   {otwarta ? (
                     <div className="grid gap-4 border-t p-4">
                       <label className="flex flex-col gap-1 text-sm">
-                        <span>{t('voicebot.agents.field.industry', 'Branża firmy')}</span>
-                        <select
-                          className="rounded border px-2 py-1"
-                          value={edycja.industry}
-                          onChange={(e) => setEdycja((x) => x && { ...x, industry: e.target.value })}
-                        >
-                          {branze.map((b) => <option key={b.id} value={b.id}>{b.nazwa}</option>)}
-                        </select>
-                        <span className="text-xs text-muted-foreground">
-                          {t('voicebot.agents.field.industryHint', 'Branża decyduje, po co bot dzwoni i jakimi pojęciami się posługuje.')}
+                        <span className="font-medium">
+                          {t('voicebot.agents.field.questions', 'O co bot ma zapytać? Jedno pytanie w każdym wierszu.')}
                         </span>
-                      </label>
-
-                      <label className="flex flex-col gap-1 text-sm">
-                        <span>{t('voicebot.agents.field.questions', 'Pytania, które bot ma zadać, po jednym w wierszu')}</span>
                         <textarea
-                          className="min-h-32 rounded border px-2 py-1"
+                          className="min-h-40 rounded border px-2 py-1"
                           value={edycja.questions}
                           onChange={(e) => setEdycja((x) => x && { ...x, questions: e.target.value })}
                           placeholder={podpowiedz}
                         />
-                        {/* Gotowiec jest punktem wyjścia, nie obowiązkiem: każda
-                            firma pyta o co innego. Nadpisujemy wyłącznie na
-                            wyraźne kliknięcie. */}
+                        <span className="text-xs text-muted-foreground">
+                          {t('voicebot.agents.field.questionsHint', 'Każde pytanie to jedna kolumna w wynikach rozmów.')}
+                        </span>
                         {gotowePytania ? (
                           <button
                             type="button"
@@ -339,6 +291,20 @@ export default function VoicebotAgenciPage() {
                               : t('voicebot.agents.field.questionsFill', 'Wstaw gotowy zestaw pytań dla tej branży')}
                           </button>
                         ) : null}
+                      </label>
+
+                      <label className="flex flex-col gap-1 text-sm">
+                        <span>{t('voicebot.agents.field.industry', 'Czym zajmuje się firma')}</span>
+                        <select
+                          className="rounded border px-2 py-1"
+                          value={edycja.industry}
+                          onChange={(e) => setEdycja((x) => x && { ...x, industry: e.target.value })}
+                        >
+                          {branze.map((b) => <option key={b.id} value={b.id}>{b.nazwa}</option>)}
+                        </select>
+                        <span className="text-xs text-muted-foreground">
+                          {t('voicebot.agents.field.industryHint', 'Decyduje, jakimi słowami bot się posługuje.')}
+                        </span>
                       </label>
 
                       <label className="flex flex-col gap-1 text-sm">
@@ -417,11 +383,8 @@ export default function VoicebotAgenciPage() {
                             ? t('voicebot.agents.saving', 'Zapisuję...')
                             : t('voicebot.agents.save', 'Zapisz i przekaż botowi')}
                         </Button>
-                        <Button variant="outline" onClick={() => setEdycja(null)} disabled={zapis}>
-                          {t('voicebot.agents.cancel', 'Anuluj')}
-                        </Button>
                         <a className="text-sm underline" href="/backend/voicebot">
-                          {t('voicebot.agents.toCampaigns', 'Rozmowa testowa')}
+                          {t('voicebot.agents.toCampaigns', 'Zadzwoń do mnie na próbę')}
                         </a>
                         <button
                           type="button"
@@ -446,65 +409,6 @@ export default function VoicebotAgenciPage() {
                 </section>
               )
             })}
-
-            {/* Zakładanie bota widzi operator platformy oraz firma, która nie
-                ma jeszcze żadnego. Klientowi z gotowym botem propozycja
-                "załóż kolejną firmę" nie mówi nic: ma jedną firmę i jednego
-                bota, a nie listę do rozbudowy. */}
-            {operator || profile.length === 0 ? (
-            <section className="grid gap-3 rounded border border-dashed p-4">
-              <div className="text-sm font-medium">
-                {profile.length === 0
-                  ? t('voicebot.agents.new.first', 'Załóż swojego bota')
-                  : t('voicebot.agents.new.title', 'Załóż bota dla kolejnej firmy')}
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-3">
-                <label className="flex flex-col gap-1 text-sm">
-                  <span>{t('voicebot.agents.new.company', 'Nazwa firmy')}</span>
-                  <input
-                    className="rounded border px-2 py-1"
-                    value={nowa.nazwaFirmy}
-                    onChange={(e) => setNowa((n) => ({ ...n, nazwaFirmy: e.target.value }))}
-                    placeholder={t('voicebot.agents.new.companyPlaceholder', 'np. Kancelaria Nowak')}
-                  />
-                </label>
-                <label className="flex flex-col gap-1 text-sm">
-                  <span>{t('voicebot.agents.field.industry', 'Branża firmy')}</span>
-                  <select
-                    className="rounded border px-2 py-1"
-                    value={nowa.industry}
-                    onChange={(e) => setNowa((n) => ({ ...n, industry: e.target.value }))}
-                  >
-                    {branze.map((b) => <option key={b.id} value={b.id}>{b.nazwa}</option>)}
-                  </select>
-                </label>
-                <label className="flex flex-col gap-1 text-sm">
-                  <span>{t('voicebot.agents.new.site', 'Adres strony, opcjonalnie')}</span>
-                  <input
-                    className="rounded border px-2 py-1"
-                    value={nowa.knowledgeUrl}
-                    onChange={(e) => setNowa((n) => ({ ...n, knowledgeUrl: e.target.value }))}
-                    placeholder="https://twojafirma.pl"
-                  />
-                </label>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <Button onClick={() => void zalozBota()} disabled={zakladanie || nowa.nazwaFirmy.trim().length < 2}>
-                  {zakladanie
-                    ? t('voicebot.agents.new.working', 'Zakładam bota...')
-                    : t('voicebot.agents.new.submit', 'Załóż bota')}
-                </Button>
-                {nowa.knowledgeUrl ? (
-                  <span className="text-xs text-muted-foreground">
-                    {t('voicebot.agents.new.slow', 'Z odczytem strony potrwa to kilkanaście sekund.')}
-                  </span>
-                ) : null}
-              </div>
-
-            </section>
-            ) : null}
           </div>
         )}
       </PageBody>

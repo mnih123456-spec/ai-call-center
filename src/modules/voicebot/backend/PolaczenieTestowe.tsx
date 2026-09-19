@@ -22,21 +22,37 @@ export function PolaczenieTestowe({ kampanie, domyslnyNumer }: {
   // Scenariusz demo obiecuje, ze pracownik oglada wyniki, ale nie uruchamia
   // platnych polaczen. Bez tego sprawdzenia przycisk widzial kazdy, kto ma
   // wglad w kampanie, i obietnice dalo sie obalic na scenie w pol minuty.
+  //
+  // Sprawdzamy dwie rzeczy, bo sama odpowiedz o uprawnienie klamie zaraz po
+  // zalozeniu firmy: sesja jest juz przelaczona na nowe konto, a uprawnienia
+  // dla niego nie zdazyly sie policzyc, wiec przycisk znikal wlasnie temu,
+  // kto przed chwila zalozyl bota i chcial go uslyszec.
   const [wolno, setWolno] = React.useState<boolean | null>(null)
   React.useEffect(() => {
     let zywe = true
     void (async () => {
-      try {
-        const res = await fetch('/api/auth/feature-check', {
+      const [uprawnienie, operator] = await Promise.all([
+        fetch('/api/auth/feature-check', {
           method: 'POST',
           credentials: 'same-origin',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ features: ['voicebot.calls.start'] }),
         })
-        if (!res.ok) { if (zywe) setWolno(false); return }
-        const body = (await res.json()) as { granted?: Record<string, boolean> }
-        if (zywe) setWolno(body?.granted?.['voicebot.calls.start'] === true)
-      } catch { if (zywe) setWolno(false) }
+          .then(async (res) => {
+            if (!res.ok) return false
+            const body = (await res.json()) as { granted?: Record<string, boolean> }
+            return body?.granted?.['voicebot.calls.start'] === true
+          })
+          .catch(() => false),
+        fetch('/api/directory/organization-switcher', { credentials: 'same-origin' })
+          .then(async (res) => {
+            if (!res.ok) return false
+            const body = (await res.json()) as { isSuperAdmin?: boolean }
+            return body?.isSuperAdmin === true
+          })
+          .catch(() => false),
+      ])
+      if (zywe) setWolno(uprawnienie || operator)
     })()
     return () => { zywe = false }
   }, [])
