@@ -208,7 +208,8 @@ Kopia z serwera w `strona-kopia-z-serwera/`.
 | Webhook per agent | `platform_settings.workspace_overrides.webhooks.post_call_webhook_id` |
 | Pola do zebrania | `platform_settings.data_collection`, wszystkie jako `type:'string'` |
 | Model | Od 19.09 noc: `gpt-4.1-mini` (VOICEBOT_MODEL_DOMYSLNY, przelaczone tez na wszystkich istniejacych botach), `turn_timeout: 1.5`. `gemini-2.0-flash-lite` mowil "dzien dobry" dwa razy i czytal na glos "zakoncz polaczenie". `gemini-2.5-flash` **odpada**: to model myslacy, w rozmowie wypowiedzial na glos swoj monolog po angielsku ("The user agreed to continue..."). Nie wybierac modeli z trybem myslenia. |
-| Numery | `phnum_9901kz8gc1xze21s4e307f9e0490` = +48457112147 (probny), `phnum_6901m0amey85ex397p35hac3mh77` = +48732129033 |
+| Numery | `phnum_6901m0amey85ex397p35hac3mh77` = 48732129033 (ACTIO produkcja, **od 19.09 20:05 na tym ida rozmowy probne**, ustawione w kampanii samciagplug). `phnum_9901kz8gc1xze21s4e307f9e0490` = +48457112147 (ACTIO test) **zablokowany**: od 19.09 19:51 kazda proba konczy sie "SIP 403 Auth Failed", do wyjasnienia u operatora (srodki, blokada, haslo). `phnum_1001kym8v70wfdbrdy1d1fk2gv2z` = +48570372252 Twilio: rozmowa wychodzaca wychodzi ("initiated"), ale telefon nie dzwoni, do sprawdzenia w Twilio. `.env` `VOICEBOT_NUMER_PLATFORMY` wskazuje jeszcze na numer testowy: przestawic na produkcyjny albo odblokowac testowy. |
+| Droga wyjscia | Od 19.09: wybierana po numerze (Twilio przez `/twilio/outbound-call`, trunk przez `/sip-trunk/outbound-call`), nie z jednego ustawienia `VOICEBOT_TRANSPORT`. |
 
 ---
 
