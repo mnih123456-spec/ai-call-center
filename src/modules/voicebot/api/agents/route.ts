@@ -7,6 +7,7 @@ import { agentProfileSchema } from '../../data/validators'
 import { fetchProviderCatalog } from '../../lib/provider'
 import { wyslijScenariuszDoAgenta } from '../../lib/scenariusz'
 import { BRANZE, slownikBranzy, znanaBranza } from '../../lib/branze'
+import { MODELE, pobierzUstawienia, sprawdzUstawienia, zapiszUstawienia } from '../../lib/ustawienia-agenta'
 import { pobierzWiedze } from '../../lib/wiedza'
 
 const logger = createLogger('voicebot')
@@ -36,7 +37,14 @@ export async function GET(request: Request) {
     fetchProviderCatalog(),
   ])
 
+  // Ustawienia rozmowy zyja u dostawcy, nie u nas, wiec czytamy je przy
+  // kazdym wejsciu na ekran. Inaczej panel pokazywalby stan sprzed zmiany
+  // zrobionej gdzie indziej.
+  const ustawienia = new Map<string, Awaited<ReturnType<typeof pobierzUstawienia>>>()
+  await Promise.all(profile.map(async (p) => { ustawienia.set(p.agentId, await pobierzUstawienia(p.agentId)) }))
+
   return json({
+    modele: MODELE,
     profile: profile.map((p) => ({
       id: p.id,
       agentId: p.agentId,
@@ -49,6 +57,8 @@ export async function GET(request: Request) {
       knowledgeReadAt: p.knowledgeReadAt?.toISOString() ?? null,
       syncedAt: p.syncedAt?.toISOString() ?? null,
       syncResult: p.syncResult ?? null,
+      llm: ustawienia.get(p.agentId)?.llm ?? null,
+      cisza: ustawienia.get(p.agentId)?.cisza ?? null,
     })),
     // Lista agentów u dostawcy, żeby przypisanie szło z wyboru, a nie
     // z przepisywania identyfikatora. Ta sama zasada co przy numerach.
@@ -179,8 +189,21 @@ export async function POST(request: Request) {
     slownikBranzy(profil.industry),
   )
 
+  // Model i czas ciszy ida osobnym zadaniem, bo dotycza sposobu prowadzenia
+  // rozmowy, a nie jej tresci. Blad tutaj nie moze przewrocic zapisu pytan.
+  let bladUstawien: string | null = null
+  if (parsed.data.llm !== undefined || parsed.data.cisza !== undefined) {
+    const ocena = sprawdzUstawienia({ llm: parsed.data.llm ?? null, cisza: parsed.data.cisza ?? null })
+    if (!ocena.ok) bladUstawien = ocena.blad
+    else {
+      const zapis = await zapiszUstawienia(profil.agentId, ocena.dane)
+      if (!zapis.ok) bladUstawien = zapis.blad
+    }
+  }
+
   const czesci: string[] = []
   czesci.push(wysylka.ok ? 'Pytania przekazane do agenta.' : wysylka.blad)
+  if (bladUstawien) czesci.push(`Ustawien rozmowy nie zapisano: ${bladUstawien}`)
   if (bladWiedzy) czesci.push(`Strony nie udalo sie przeczytac: ${bladWiedzy}`)
   else if (profil.knowledgeText) czesci.push(`Wiedza ze strony wczytana, ${profil.knowledgeText.length} znakow.`)
   if (rozpoznanaBranza) {
@@ -203,7 +226,7 @@ export async function POST(request: Request) {
   return json({
     id: profil.id,
     agentId: profil.agentId,
-    wyslane: wysylka.ok && !bladWiedzy,
+    wyslane: wysylka.ok && !bladWiedzy && !bladUstawien,
     syncResult: profil.syncResult,
     knowledgeText: profil.knowledgeText ?? '',
   }, 201)

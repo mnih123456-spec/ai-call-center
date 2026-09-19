@@ -16,10 +16,13 @@ type Profil = {
   knowledgeReadAt: string | null
   syncedAt: string | null
   syncResult: string | null
+  llm: string | null
+  cisza: number | null
 }
 
 type AgentDostawcy = { agentId: string; name: string }
 type Branza = { id: string; nazwa: string }
+type Model = { id: string; nazwa: string }
 
 const PUSTY_FORMULARZ = {
   id: '' as string,
@@ -30,6 +33,8 @@ const PUSTY_FORMULARZ = {
   industry: '',
   knowledgeUrl: '',
   odswiez: false,
+  llm: '',
+  cisza: '',
 }
 
 export default function VoicebotAgenciPage() {
@@ -37,6 +42,7 @@ export default function VoicebotAgenciPage() {
   const [profile, setProfile] = React.useState<Profil[]>([])
   const [agenci, setAgenci] = React.useState<AgentDostawcy[]>([])
   const [branze, setBranze] = React.useState<Branza[]>([])
+  const [modele, setModele] = React.useState<Model[]>([])
   const [katalogDziala, setKatalogDziala] = React.useState(true)
   const [formularz, setFormularz] = React.useState(PUSTY_FORMULARZ)
   const [ladowanie, setLadowanie] = React.useState(true)
@@ -54,11 +60,13 @@ export default function VoicebotAgenciPage() {
         profile?: Profil[]
         agenci?: AgentDostawcy[]
         branze?: Branza[]
+        modele?: Model[]
         katalogDziala?: boolean
       }
       setProfile(Array.isArray(body.profile) ? body.profile : [])
       setAgenci(Array.isArray(body.agenci) ? body.agenci : [])
       setBranze(Array.isArray(body.branze) ? body.branze : [])
+      setModele(Array.isArray(body.modele) ? body.modele : [])
       setKatalogDziala(body.katalogDziala !== false)
     } catch {
       setBlad(t('voicebot.agents.loadError', 'Nie udało się pobrać agentów.'))
@@ -88,6 +96,8 @@ export default function VoicebotAgenciPage() {
           industry: formularz.industry,
           knowledgeUrl: formularz.knowledgeUrl,
           odswiezWiedze: formularz.odswiez,
+          llm: formularz.llm,
+          ...(formularz.cisza ? { cisza: Number(formularz.cisza) } : {}),
         }),
       })
       const body = (await res.json().catch(() => null)) as
@@ -122,6 +132,8 @@ export default function VoicebotAgenciPage() {
       industry: p.industry,
       knowledgeUrl: p.knowledgeUrl,
       odswiez: false,
+      llm: p.llm ?? '',
+      cisza: p.cisza === null ? '' : String(p.cisza),
     })
     setKomunikat(null)
     setBlad(null)
@@ -244,6 +256,47 @@ export default function VoicebotAgenciPage() {
                   <option value="inbound">{t('voicebot.agents.inbound', 'przychodzące')}</option>
                 </select>
               </label>
+
+              {/* Ustawienia rozmowy, a nie jej treści. Trzymamy je obok
+                  scenariusza, bo to tutaj widać skutek: bot, który myśli
+                  pięć sekund, brzmi jak zerwane połączenie. */}
+              <div className="grid gap-3 rounded border border-dashed p-3 sm:grid-cols-2">
+                <label className="flex flex-col gap-1 text-sm">
+                  <span>{t('voicebot.agents.field.llm', 'Model rozmowy')}</span>
+                  <select
+                    className="rounded border px-2 py-1"
+                    value={formularz.llm}
+                    onChange={(e) => setFormularz((f) => ({ ...f, llm: e.target.value }))}
+                  >
+                    <option value="">{t('voicebot.agents.field.llmKeep', 'Bez zmiany')}</option>
+                    {modele.map((m) => <option key={m.id} value={m.id}>{m.nazwa}</option>)}
+                    {formularz.llm && !modele.some((m) => m.id === formularz.llm) ? (
+                      <option value={formularz.llm}>{formularz.llm}</option>
+                    ) : null}
+                  </select>
+                </label>
+
+                <label className="flex flex-col gap-1 text-sm">
+                  <span>{t('voicebot.agents.field.cisza', 'Cisza kończąca wypowiedź, w sekundach')}</span>
+                  <input
+                    className="rounded border px-2 py-1"
+                    type="number"
+                    min={0.5}
+                    max={10}
+                    step={0.5}
+                    value={formularz.cisza}
+                    onChange={(e) => setFormularz((f) => ({ ...f, cisza: e.target.value }))}
+                    placeholder="1.5"
+                  />
+                </label>
+
+                <p className="text-xs text-muted-foreground sm:col-span-2">
+                  {t(
+                    'voicebot.agents.field.llmHint',
+                    'W rozmowie telefonicznej liczy się czas do pierwszego słowa. Cięższy model dokłada sekundy ciszy, w których rozmówca myśli, że połączenie padło. Krótsza cisza przyspiesza odpowiedź, ale zbyt krótka wchodzi rozmówcy w słowo.',
+                  )}
+                </p>
+              </div>
 
               <label className="flex flex-col gap-1 text-sm">
                 <span>{t('voicebot.agents.field.industry', 'Branża firmy')}</span>

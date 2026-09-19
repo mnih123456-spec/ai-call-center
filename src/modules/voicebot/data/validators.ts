@@ -93,6 +93,9 @@ export const agentProfileSchema = z.object({
   knowledgeUrl: z.string().url().max(500).nullable().optional().or(z.literal('')),
   /** Wymuszenie ponownego odczytu strony, gdy adres się nie zmienił. */
   odswiezWiedze: z.boolean().optional(),
+  /** Ustawienia rozmowy przekazywane dostawcy: model i czas ciszy. */
+  llm: z.string().max(80).nullable().optional().or(z.literal('')),
+  cisza: z.coerce.number().min(0.5).max(10).nullable().optional(),
 })
 
 export const callListSchema = z.object({
