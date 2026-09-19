@@ -1,5 +1,6 @@
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import { toE164 } from './phone'
+import { ocenNumer } from './dozwolone-numery'
 
 const logger = createLogger('voicebot')
 
@@ -24,6 +25,16 @@ const API_BASE = 'https://api.elevenlabs.io/v1/convai'
  * prawdziwego połączenia i bez ponoszenia jego kosztu.
  */
 export async function startOutboundCall(input: StartCallInput): Promise<StartCallResult> {
+  // Sprawdzenie zakresu numeru stoi tutaj, a nie w trasie API, bo tędy
+  // przechodzi każde połączenie wychodzące: z panelu, z importu listy,
+  // z kolejki i z API klienta. Umieszczone wyżej dałoby się obejść nową
+  // ścieżką, o której ktoś zapomni.
+  const ocena = ocenNumer(input.toNumber)
+  if (!ocena.ok) {
+    logger.warn('call blocked by number policy')
+    return { ok: false, error: ocena.powod }
+  }
+
   const apiKey = process.env.ELEVENLABS_API_KEY
   if (!apiKey) {
     logger.warn('provider key missing, simulating call')
