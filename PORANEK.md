@@ -6,10 +6,20 @@ Przeczytaj to jako pierwsze. Dalej jest `PODZIAL-PRACY-CODEX.md`.
 
 | Rzecz | Stan |
 |---|---|
-| Moja praca wieczorem | zacommitowana na `main`, ostatni commit `de2d08c` |
-| Kolejka połączeń od Codexa | na gałęzi `codex/kolejka`, sprawdzona, **niescalona** |
-| Ekran przeglądu i edycja kampanii | zlecone Codexowi po 1:25, wynik do sprawdzenia |
+| Moja praca wieczorem | zacommitowana na `main` |
+| Cała praca Codexa | na gałęzi `codex/noc`, sprawdzona, **niescalona** |
 | Powiązanie z modułem `customers` | **zatrzymane celowo**, powód niżej |
+
+Gałąź `codex/noc` zawiera trzy rzeczy: kolejkę połączeń z odstępem, ekran
+przeglądu i edycję kampanii. Sprawdziłem ją w całości: typy bez błędów
+w module, **42 testy w 5 zestawach przechodzą**.
+
+Scalenie, gdy uznasz, że jest dobre:
+
+    git merge codex/noc
+
+Gałęzie `codex/kolejka` i `codex/przeglad-edycja` to jej składowe, zostawione
+na wypadek, gdybyś chciał wziąć tylko część.
 
 ## Co zrobiłem wieczorem, już na `main`
 
@@ -30,31 +40,37 @@ kolejki, a worker uruchamia je pojedynczo na kampanię, pilnując
 `minIntervalSecs`. `callId` służy za klucz idempotencji, więc ponowne
 dostarczenie zadania nie dzwoni drugi raz.
 
-Dołożył też obejście dla Jesta na tym Windowsie, bo natywny resolver się nie
-ładuje (`ERR_DLOPEN_FAILED`). Stąd pliki `run-tests.cjs` i `test-resolver.cjs`.
+**Ekran przeglądu.** Widok zbiorczy z kaflami: rozmowy dziś i w tym tygodniu,
+skuteczność dodzwonień, liczba oddzwonień, koszt dziś i w miesiącu, rozkład
+produktów. Adres: `/backend/voicebot-przeglad`.
 
-**Co sprawdziłem osobiście:** `yarn typecheck` bez błędów w module,
-**23 testy w 3 zestawach przechodzą**.
+**Edycja kampanii.** Metoda PUT, komenda domenowa i edycja w ekranie kampanii,
+razem ze zmianą statusu. Wcześniej kampanii nie dało się zmienić, i właśnie
+dlatego raz telefon poszedł ze starego numeru testowego.
+
+**Co sprawdziłem osobiście:** typy bez błędów w module, 42 testy przechodzą.
 
 **Czego NIE sprawdziłem:** nie przeczytałem tego kodu linijka po linijce
-i nie uruchomiłem kolejki na żywo z prawdziwym telefonem. Dlatego siedzi
-na osobnej gałęzi, a nie na `main`.
+i nie uruchomiłem kolejki na żywo z prawdziwym telefonem. Dlatego to czeka
+na gałęzi, a nie na `main`.
 
-Scalenie, gdy uznasz, że jest dobre:
+**Jedną rzecz poprawiłem sam.** Po złożeniu obu tur trzy testy ekranu kampanii
+padały na `toHaveValue is not a function`. Wyglądało to na błąd logiki, a było
+brakiem biblioteki dopasowań: konfiguracja z pierwszej tury pomijała plik
+startowy szablonu, a testy z drugiej na nim polegały.
 
-```bash
-git merge codex/kolejka
-```
+## Dwie wpadki nocne, obie naprawione
 
-Powrót, gdyby było złe: nic nie trzeba robić, `main` już jest czysty.
+**Codex nie zacommitował ani razu**, mimo polecenia. Za pierwszym razem
+wyczerpał limit konta OpenAI w trakcie pierwszego zadania, za drugim Git
+odmówił zapisu (`index.lock: Permission denied`). Pracę zacommitowałem sam,
+opisując w każdym commicie, że kod nie był przejrzany.
 
-## Dlaczego Codex zrobił tylko jedno z trzech zadań
-
-Wyczerpał limit twojego konta OpenAI w trakcie pierwszego zadania.
-Komunikat: "You've hit your usage limit... try again at Sep 19th, 2026 1:20 AM".
-
-Ustawiłem drugą turę tak, żeby ruszyła sama po 1:25 i wzięła ekran przeglądu
-oraz edycję kampanii. Rano sprawdź, czy się udało.
+**Ja przypadkiem scaliłem `codex/noc` do `main`.** Cudzysłowy odwrotne
+w moim skrypcie wykonały się jako polecenia i jednym z nich był `git merge`.
+Cofnąłem to, `main` jest z powrotem tam, gdzie był, a praca leży nietknięta
+na gałęzi. Wniosek na przyszłość: nie generować plików skryptem powłoki,
+tylko zapisywać je wprost.
 
 ## Co zatrzymałem i dlaczego
 
@@ -66,7 +82,7 @@ Potrzebny jest ich mechanizm pól skrótu, opisany w
 `.ai/skills/om-data-model-design/references/sensitive-data.md`.
 
 Nie chciałem tego zgadywać w nocy, bo błąd w tym miejscu nie wywala się
-głośno, tylko po cichu nigdy nie dopasowuje. Wolę zrobić to rano, czytając
+głośno, tylko po cichu nigdy nie dopasowuje. Zrobię to rano, czytając
 ich kontrakt.
 
 ## Do zrobienia przez Ciebie, zanim ruszymy
@@ -75,7 +91,7 @@ ich kontrakt.
    deal 10021.
 2. **Wygenerować nowy webhook w Bitriksie**, bo poprzedni token wkleiłeś
    do czatu, więc jest w zapisie rozmowy. Stary skasować.
-3. Zdecydować, czy scalamy `codex/kolejka`.
+3. Zdecydować, czy scalamy `codex/noc`.
 
 ## Reszta decyzji
 
