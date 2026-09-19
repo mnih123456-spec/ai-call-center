@@ -197,7 +197,7 @@ Kopia z serwera w `strona-kopia-z-serwera/`.
 | Adres webhooka | Niezmienny. PATCH zwraca `{"status":"ok"}` i ignoruje zmiane. |
 | Webhook per agent | `platform_settings.workspace_overrides.webhooks.post_call_webhook_id` |
 | Pola do zebrania | `platform_settings.data_collection`, wszystkie jako `type:'string'` |
-| Model | Od 19.09 wieczor: `gemini-2.5-flash` (VOICEBOT_MODEL_DOMYSLNY, przelaczone tez na wszystkich istniejacych botach), `turn_timeout: 1.5`. Wczesniej `gemini-2.0-flash-lite`: szybszy (0,6 s vs 5,7 s zmierzone wczesniej), ale mowil "dzien dobry" dwa razy i czytal na glos "zakoncz polaczenie". Jesli cisza za dluga: `gemini-2.5-flash-lite` na ekranie pytan. |
+| Model | Od 19.09 noc: `gpt-4.1-mini` (VOICEBOT_MODEL_DOMYSLNY, przelaczone tez na wszystkich istniejacych botach), `turn_timeout: 1.5`. `gemini-2.0-flash-lite` mowil "dzien dobry" dwa razy i czytal na glos "zakoncz polaczenie". `gemini-2.5-flash` **odpada**: to model myslacy, w rozmowie wypowiedzial na glos swoj monolog po angielsku ("The user agreed to continue..."). Nie wybierac modeli z trybem myslenia. |
 | Numery | `phnum_9901kz8gc1xze21s4e307f9e0490` = +48457112147 (probny), `phnum_6901m0amey85ex397p35hac3mh77` = +48732129033 |
 
 ---

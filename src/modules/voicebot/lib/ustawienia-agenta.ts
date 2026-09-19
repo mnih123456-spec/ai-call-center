@@ -18,11 +18,11 @@ const API = 'https://api.elevenlabs.io/v1/convai'
 export const MODELE = [
   { id: 'gemini-2.5-flash-lite', nazwa: 'Gemini 2.5 Flash Lite (najszybszy)' },
   { id: 'gemini-2.0-flash-lite', nazwa: 'Gemini 2.0 Flash Lite' },
-  { id: 'gemini-2.5-flash', nazwa: 'Gemini 2.5 Flash (dokładniejszy, zalecany)' },
+  { id: 'gemini-2.5-flash', nazwa: 'Gemini 2.5 Flash (odradzany: czyta na głos swoje myśli po angielsku)' },
   { id: 'gemini-2.0-flash', nazwa: 'Gemini 2.0 Flash' },
   { id: 'gpt-4o-mini', nazwa: 'GPT-4o mini' },
   { id: 'gpt-4.1-nano', nazwa: 'GPT-4.1 nano' },
-  { id: 'gpt-4.1-mini', nazwa: 'GPT-4.1 mini' },
+  { id: 'gpt-4.1-mini', nazwa: 'GPT-4.1 mini (zalecany)' },
   { id: 'claude-haiku-4-5', nazwa: 'Claude Haiku 4.5' },
   { id: 'claude-3-5-sonnet', nazwa: 'Claude 3.5 Sonnet' },
 ]

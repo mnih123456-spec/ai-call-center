@@ -7,7 +7,11 @@ bootstrap()
 
 export const dynamic = 'force-dynamic'
 
-const HEALTHCHECK_TIMEOUT_MS = 1500
+// Panel deweloperski w trakcie kompilacji strony nie odpowiada przez kilka
+// sekund, a sonda supervisora uznawala to za martwa baze i wieszala zolty
+// komunikat. Baza odpowiada w kilkadziesiat milisekund, wiec dluzszy limit
+// nic nie ukrywa: prawdziwa awaria i tak przekroczy osiem sekund.
+const HEALTHCHECK_TIMEOUT_MS = Number(process.env.HEALTHCHECK_TIMEOUT_MS ?? 8000)
 const HEALTHCHECK_CACHE_KEY = '__open_mercato_healthcheck__'
 
 type HealthcheckDependencies = {
