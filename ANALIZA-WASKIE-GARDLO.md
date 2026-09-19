@@ -91,9 +91,9 @@ z numerów oznaczonych przez aplikacje jako spam.
 ## Czego NIE zakładać z góry
 
 Nie zakładaj, że odpowiedź brzmi "za późno dzwonimy". To najbardziej
-prawdopodobna hipoteza, ale trzy razy widziałem sytuacje, gdzie prawdziwą
-przyczyną było coś banalnego: numer oznaczony jako spam, albo formularz
-zbierający numery z literówkami bez walidacji.
+prawdopodobna hipoteza, ale nie jedyna, a przyczyna bywa banalna: numer
+oznaczony w aplikacjach jako spam albo formularz zbierający numery
+z literówkami, bez sprawdzania poprawności.
 
 **Sprawdź najpierw jakość samych numerów:** ile z tych 180 to numery
 w ogóle poprawne i osiągalne. Jeśli 20 procent to śmieci, to zmienia
