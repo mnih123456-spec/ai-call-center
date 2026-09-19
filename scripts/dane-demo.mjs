@@ -31,6 +31,17 @@ const KAMPANIA = 'Leady z formularza, wrzesień (demo)'
 const NUMERY_PRYWATNE = ['+48503956401', '+48570372252']
 
 /**
+ * Agent i numer, ktorymi dzwoni kampania demo.
+ *
+ * Wczesniej byly tu zaszyte identyfikatory produkcyjnego agenta. Skrypt
+ * zaklada kampanie od nowa przy kazdym uruchomieniu, wiec cofal recznie
+ * ustawionego agenta demo, a rozmowy szly bota produkcyjnego i ich wyniki
+ * trafialy do cudzego przeplywu.
+ */
+const AGENT_DEMO = process.env.VOICEBOT_AGENT_DEMO ?? 'agent_8101m2wgzvnmekwsdwnsyhg9v4je'
+const NUMER_DEMO = process.env.VOICEBOT_NUMER_DEMO ?? 'phnum_9901kz8gc1xze21s4e307f9e0490'
+
+/**
  * Dzień, w którym rozmowa się odbyła, liczony wstecz od teraz.
  * Rozrzut po kilku dniach sprawia, że lista wygląda jak praca, a nie
  * jak jeden wsad zrobiony minutę przed prezentacją.
@@ -194,8 +205,8 @@ async function main() {
       [
         KAMPANIA,
         'Zestaw pokazowy. Dane zmyslone na potrzeby demo.',
-        'agent_6701kympd8htf14rz0d4gf71nmpc',
-        'phnum_6901m0amey85ex397p35hac3mh77',
+        AGENT_DEMO,
+        NUMER_DEMO,
         tenantId,
         orgId,
       ],
