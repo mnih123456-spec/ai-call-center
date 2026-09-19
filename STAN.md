@@ -152,7 +152,16 @@ Wnioski z dzisiejszych rozmow, zeby nie powtarzac bledow:
 - Rozpoznawanie mowy (Scribe, jedyny silnik u dostawcy) myli rzadkie slowa;
   slowa kluczowe per branza pomagaja (Syrenka rozpoznana), ale nie lecza.
 
-### 3. Statusy nieodebranych
+### 3. Statusy nieodebranych - ZROBIONE 19.09 noc (czesciowo)
+
+Dostawca nie wysyla webhooka po polaczeniu, ktore nie doszlo do skutku, wiec
+wiersz zostawal w "dialing". Teraz `GET /api/voicebot/calls` przy kazdym
+wejsciu na liste dopytuje dostawce o najwyzej 5 najstarszych wierszy "dialing"
+starszych niz 90 s i mapuje kod SIP: 486/600 -> `busy`, 480/487/408 ->
+`no_answer`, reszta -> `failed` (`statusZBledu` w `rozmowa.ts`). Sprawdzone
+na regulach, nie na zywym zajetym numerze. Stara wersja opisu ponizej.
+
+### 3a. Statusy nieodebranych (stary opis)
 
 `termination_reason` od dostawcy nie jest mapowany na `no_answer` / `busy`.
 Te statusy nie powstaja nigdy, mimo ze tabela je przewiduje.

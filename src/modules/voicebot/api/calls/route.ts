@@ -5,6 +5,43 @@ import { createLogger } from '@open-mercato/shared/lib/logger'
 import { VoiceCall, VoiceCampaign } from '../../data/entities'
 import { callListSchema, callStartSchema } from '../../data/validators'
 import { enqueueCall } from '../../lib/call-queue'
+import { pobierzStanRozmowy, statusZBledu } from '../../lib/rozmowa'
+
+/** Po ilu sekundach od zlecenia wiersz "dialing" bez wyniku uznajemy za podejrzany. */
+const ZAWIESZONE_PO_SEKUNDACH = 90
+
+/**
+ * Domyka wiersze, o których dostawca nie dał znać webhookiem.
+ *
+ * Webhook przychodzi tylko po rozmowie, która się odbyła. Numer zajęty,
+ * nieodebrany albo odrzucony przez operatora zostawiał wiersz w "dialing"
+ * na zawsze i tabela klientowi kłamała. Przy każdym wejściu na listę
+ * dopytujemy dostawcę o kilka najstarszych zawieszonych i zapisujemy
+ * prawdziwy powód: zajęty, nieodebrany albo nieudany.
+ */
+async function uzgodnijZawieszone(em: EntityManager, tenantId: string, organizationId: string): Promise<void> {
+  const granica = new Date(Date.now() - ZAWIESZONE_PO_SEKUNDACH * 1000)
+  const zawieszone = await em.find(VoiceCall, {
+    tenantId, organizationId, deletedAt: null,
+    status: 'dialing', conversationId: { $ne: null }, createdAt: { $lt: granica },
+  }, { orderBy: { createdAt: 'asc' }, limit: 5 })
+  if (zawieszone.length === 0) return
+
+  let zmienione = 0
+  for (const call of zawieszone) {
+    const stan = await pobierzStanRozmowy(call.conversationId!)
+    if (!stan || stan.status !== 'failed') continue
+    call.status = statusZBledu(stan.blad)
+    call.failureReason = stan.blad
+    call.finishedAt = new Date()
+    call.updatedAt = new Date()
+    zmienione++
+  }
+  if (zmienione > 0) {
+    await em.flush()
+    logger.info('stuck calls reconciled', { zmienione })
+  }
+}
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 
 const logger = createLogger('voicebot')
@@ -37,6 +74,8 @@ export async function GET(request: Request) {
   }
   if (campaignId) where.campaignId = campaignId
   if (status) where.status = status
+
+  await uzgodnijZawieszone(em, auth.tenantId, auth.orgId)
 
   const orderField = sortField === 'created_at' ? 'createdAt' : sortField
   const [rows, total] = await em.findAndCount(VoiceCall, where, {
