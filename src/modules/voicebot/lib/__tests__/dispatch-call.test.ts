@@ -42,7 +42,7 @@ function fixture(count = 5) {
   }]
   const calls: VoiceCall[] = Array.from({ length: count }, (_, i) => ({
     ...scope, campaignId, id: `40000000-0000-4000-8000-${String(i + 1).padStart(12, '0')}`,
-    phone: '+48500100200', status: 'pending', direction: 'outbound',
+    phone: '+48500100200', status: 'pending', direction: 'outbound', isTest: false,
     createdAt: new Date(epoch + i), updatedAt: new Date(epoch),
   }))
   let transaction = Promise.resolve()

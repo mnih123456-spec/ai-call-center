@@ -62,6 +62,19 @@ export const listImportSchema = z.object({
   tekst: z.string().min(1).max(200000),
 })
 
+/**
+ * Polaczenie testowe.
+ *
+ * Ten sam ksztalt co zlecenie zwykle, tylko bez odwolania do leada: test nie
+ * dotyczy niczyjej sprawy, tylko sprawdzenia, jak bot brzmi.
+ */
+export const testCallSchema = z.object({
+  campaignId: z.string().uuid(),
+  phone: phoneSchema,
+  firstName: z.string().max(100).nullable().optional(),
+  lastName: z.string().max(100).nullable().optional(),
+})
+
 export const callListSchema = z.object({
   campaignId: z.string().uuid().optional(),
   status: callStatusSchema.optional(),

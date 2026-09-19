@@ -98,6 +98,7 @@ export async function POST(request: Request) {
       leadRef: pozycja.leadRef,
       status: 'pending',
       direction: 'outbound',
+      isTest: false,
       tenantId: auth.tenantId,
       organizationId: auth.orgId,
       createdAt: teraz,

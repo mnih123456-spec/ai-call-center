@@ -309,6 +309,7 @@ export async function POST(request: Request) {
       phone,
       direction: 'inbound',
       status: 'dialing',
+      isTest: false,
       startedAt: now,
       tenantId: kampania.tenantId ?? null,
       organizationId: kampania.organizationId ?? null,

@@ -209,6 +209,16 @@ export class VoiceCall {
   @Property({ name: 'last_name', type: 'text', nullable: true })
   lastName?: string | null
 
+  /**
+   * Polaczenie testowe, wykonane przyciskiem "zadzwon do mnie".
+   *
+   * Nie liczy sie do statystyk kampanii i nie trafia do CRM klienta, bo nie
+   * dotyczy zadnego leada. Bez tego rozroznienia pierwsze piec rozmow kazdej
+   * firmy psuloby jej wlasne wskazniki skutecznosci.
+   */
+  @Property({ name: 'is_test', type: 'boolean', default: false })
+  isTest: boolean = false
+
   /** pending, dialing, completed, failed, no_answer, busy */
   @Property({ type: 'text', default: 'pending' })
   status: string = 'pending'

@@ -116,6 +116,7 @@ export async function POST(request: Request) {
     lastName: parsed.data.lastName ?? null,
     status: 'pending',
     direction: 'outbound',
+    isTest: false,
     tenantId: auth.tenantId,
     organizationId: auth.orgId,
     createdAt: now,

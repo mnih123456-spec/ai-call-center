@@ -9,6 +9,7 @@ import { campaignCreateSchema, campaignUpdateSchema } from '../data/validators'
 import { Button } from '@open-mercato/ui/primitives/button'
 import type { LegacyColumnDef as ColumnDef } from '@tanstack/react-table/legacy'
 import { useT } from '@open-mercato/shared/lib/i18n/context'
+import { PolaczenieTestowe } from './PolaczenieTestowe'
 
 /**
  * Dokad prowadzi skrot "Zamow numer u partnera".
@@ -168,6 +169,7 @@ export default function VoicebotCampaignsPage() {
         }
       />
       <PageBody>
+        <PolaczenieTestowe kampanie={rows.map((r) => ({ id: r.id, name: r.name }))} />
         {!catalog.configured && !loading ? (
           <div className="mb-4 rounded border border-dashed p-3 text-sm text-muted-foreground">
             {t('voicebot.campaigns.noCatalog', 'Brak konfiguracji dostawcy głosu. Lista agentów i numerów jest niedostępna.')}
