@@ -41,7 +41,11 @@ export async function startOutboundCall(input: StartCallInput): Promise<StartCal
     return { ok: true, conversationId: `sim_${crypto.randomUUID()}`, simulated: true }
   }
 
-  const transport = process.env.VOICEBOT_TRANSPORT === 'twilio' ? 'twilio' : 'sip-trunk'
+  // Droga wyjscia zalezy od numeru, nie od jednego ustawienia na cala
+  // platforme. Numer z Twilio wychodzi przez Twilio, numer z trunka SIP przez
+  // trunk. Jedno globalne ustawienie oznaczalo, ze gdy trunk ACTIO odrzucal
+  // uwierzytelnienie, nie dalo sie przepiac proby na Twilio bez restartu.
+  const transport = await transportDlaNumeru(input.phoneNumberId)
   const body: Record<string, unknown> = {
     agent_id: input.agentId,
     to_number: input.toNumber,
@@ -67,6 +71,20 @@ export async function startOutboundCall(input: StartCallInput): Promise<StartCal
   } catch {
     logger.warn('provider call failed')
     return { ok: false, error: 'Nie udało się połączyć z dostawcą głosu.' }
+  }
+}
+
+/** Punkt koncowy dostawcy dla numeru: Twilio albo trunk SIP. Bez numeru decyduje ustawienie platformy. */
+async function transportDlaNumeru(phoneNumberId: string | null | undefined): Promise<'twilio' | 'sip-trunk'> {
+  const domyslny = process.env.VOICEBOT_TRANSPORT === 'twilio' ? 'twilio' : 'sip-trunk'
+  if (!phoneNumberId) return domyslny
+  try {
+    const katalog = await fetchProviderCatalog()
+    const numer = katalog.numbers.find((n) => n.phoneNumberId === phoneNumberId)
+    if (!numer) return domyslny
+    return numer.provider === 'twilio' ? 'twilio' : 'sip-trunk'
+  } catch {
+    return domyslny
   }
 }
 
