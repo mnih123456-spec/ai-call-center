@@ -7,7 +7,20 @@ export const callStatusSchema = z.enum([
 ])
 
 /** Numer w formacie E.164, np. +48500100200. */
-export const phoneSchema = z.string().regex(/^\+[1-9]\d{7,14}$/, 'Numer musi być w formacie E.164, np. +48500100200')
+/**
+ * Numer telefonu. Przyjmujemy to, co wpisuje Polak: 9 cyfr, ze spacjami albo
+ * bez, z 48 na przodzie albo bez, i zamieniamy na format międzynarodowy.
+ * Wymaganie "+48" od użytkownika, który zna swój numer jako 503 956 401,
+ * to błąd panelu, nie użytkownika.
+ */
+export const phoneSchema = z.preprocess((raw) => {
+  if (typeof raw !== 'string') return raw
+  const cyfry = raw.replace(/[^\d+]/g, '')
+  if (/^\d{9}$/.test(cyfry)) return `+48${cyfry}`
+  if (/^48\d{9}$/.test(cyfry)) return `+${cyfry}`
+  if (/^0048\d{9}$/.test(cyfry)) return `+${cyfry.slice(2)}`
+  return cyfry
+}, z.string().regex(/^\+[1-9]\d{7,14}$/, 'Numer musi mieć 9 cyfr, np. 503 956 401, albo format międzynarodowy'))
 
 export const campaignCreateSchema = z.object({
   name: z.string().min(1).max(200),

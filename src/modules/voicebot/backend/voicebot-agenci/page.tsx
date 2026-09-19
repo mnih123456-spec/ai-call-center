@@ -3,6 +3,7 @@ import * as React from 'react'
 import { Page, PageHeader, PageBody } from '@open-mercato/ui/backend/Page'
 import { Button } from '@open-mercato/ui/primitives/button'
 import { useT } from '@open-mercato/shared/lib/i18n/context'
+import { useWidokKlienta } from '@/components/WidokKlienta'
 
 type Profil = {
   id: string
@@ -61,6 +62,9 @@ export default function VoicebotAgenciPage() {
   // Model i czas ciszy to sprawa operatora platformy. Klient ma dostac bota,
   // ktory dziala, a nie liste modeli do eksperymentow na wlasnych rozmowach.
   const [operator, setOperator] = React.useState(false)
+  // Ustawienia operatora znikaja w widoku klienta, nawet gdy operator jest
+  // zalogowany. Inaczej pokaz "oczami klienta" pokazuje nasza kuchnie.
+  const { widok } = useWidokKlienta()
 
   // Rozwiniecie karty robimy raz, zaraz po wczytaniu. Bez tego "Zwin"
   // zamykaloby karte, ktora natychmiast otwieralaby sie z powrotem.
@@ -364,7 +368,7 @@ export default function VoicebotAgenciPage() {
                         </details>
                       ) : null}
 
-                      {operator ? (
+                      {operator && widok === 'admin' ? (
                         <details className="rounded border border-dashed p-3">
                           <summary className="cursor-pointer text-sm">
                             {t('voicebot.agents.operator', 'Ustawienia operatora')}
