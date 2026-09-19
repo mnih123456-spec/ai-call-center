@@ -6,6 +6,23 @@ nie tak".
 
 ---
 
+## Po przeniesieniu laptopa (hotel, sala)
+
+Laptop zmienił sieć, więc najpierw sprawdź tunel. W PowerShell:
+
+```
+Invoke-WebRequest -UseBasicParsing https://alive-goat-concerned-off.trycloudflare.com/api/healthz
+```
+
+Odpowiedź `200` ze `{"status":"ok"}` znaczy: tunel działa, wyniki rozmów będą
+wracać. Cokolwiek innego: tunel padł. Wtedy nowy tunel to nowy adres, nowy
+webhook u dostawcy, nowy sekret w `.env`, restart panelu i przepięcie botów.
+Procedura i pułapki w STAN.md, sekcja "Jak to uruchomic". Zajmuje 10 minut,
+więc sprawdź to zaraz po wejściu, nie 5 minut przed wystąpieniem.
+
+Webhook u dostawcy, który ma być aktywny: "AI call center - tunel 4"
+(`475d2d70243f42beadddd3549fc2e0a3`).
+
 ## Przed startem (5 minut przed)
 
 1. Trzy rzeczy muszą chodzić: baza (`docker compose up -d`), panel (`yarn dev`),
