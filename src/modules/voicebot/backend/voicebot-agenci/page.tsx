@@ -21,7 +21,7 @@ type Profil = {
 }
 
 type AgentDostawcy = { agentId: string; name: string }
-type Branza = { id: string; nazwa: string; przyklady?: string[] }
+type Branza = { id: string; nazwa: string; przyklady?: string[]; pytania?: string[] }
 type Model = { id: string; nazwa: string }
 
 const PUSTY_FORMULARZ = {
@@ -184,6 +184,11 @@ export default function VoicebotAgenciPage() {
       ? lista.join('\n')
       : t('voicebot.agents.field.questionsFallback', 'O co bot ma dopytać w rozmowie?')
   }, [branze, formularz.industry, t])
+
+  const gotowePytania = React.useMemo(
+    () => (branze.find((b) => b.id === formularz.industry)?.pytania ?? []).join('\n'),
+    [branze, formularz.industry],
+  )
 
   const edytuj = React.useCallback((p: Profil) => {
     setFormularz({
@@ -355,11 +360,17 @@ export default function VoicebotAgenciPage() {
               </div>
             )}
 
+            {/* Formularz pokazuje sie dopiero po kliknieciu Edytuj. Wczesniej
+                staly obok siebie dwie drogi dodania bota, kreator i recznie
+                wypelniany formularz, i nie bylo wiadomo, ktorej uzyc. Recznie
+                przypisac agenta moze jeszcze operator, bo tylko on widzi
+                agentow spoza tej firmy. */}
+            {formularz.id || operator ? (
             <div className="grid gap-3 rounded border p-4">
               <div className="text-sm font-medium">
                 {formularz.id
-                  ? t('voicebot.agents.formEdit', 'Edycja agenta')
-                  : t('voicebot.agents.formNew', 'Nowy agent')}
+                  ? t('voicebot.agents.formEdit', 'Edycja bota: ') + formularz.name
+                  : t('voicebot.agents.formNew', 'Przypisanie istniejącego agenta (operator)')}
               </div>
 
               <label className="flex flex-col gap-1 text-sm">
@@ -473,6 +484,20 @@ export default function VoicebotAgenciPage() {
                   onChange={(e) => setFormularz((f) => ({ ...f, questions: e.target.value }))}
                   placeholder={podpowiedzPytan}
                 />
+                {/* Kazda firma pyta o co innego, wiec gotowiec jest punktem
+                    wyjscia, a nie obowiazkiem. Nadpisujemy tylko na wyrazne
+                    klikniecie, zeby nie skasowac komus jego wlasnych pytan. */}
+                {gotowePytania ? (
+                  <button
+                    type="button"
+                    className="self-start text-xs underline text-muted-foreground"
+                    onClick={() => setFormularz((f) => ({ ...f, questions: gotowePytania }))}
+                  >
+                    {formularz.questions.trim()
+                      ? t('voicebot.agents.field.questionsReplace', 'Zastąp gotowym zestawem dla tej branży')
+                      : t('voicebot.agents.field.questionsFill', 'Wstaw gotowy zestaw pytań dla tej branży')}
+                  </button>
+                ) : null}
               </label>
 
               <label className="flex flex-col gap-1 text-sm">
@@ -529,6 +554,14 @@ export default function VoicebotAgenciPage() {
 
               {blad ? <div className="text-sm text-destructive">{blad}</div> : null}
             </div>
+            ) : null}
+
+            {blad && !formularz.id && !operator ? (
+              <div className="text-sm text-destructive">{blad}</div>
+            ) : null}
+            {komunikat && !formularz.id && !operator ? (
+              <div className="text-sm text-muted-foreground">{komunikat}</div>
+            ) : null}
           </div>
         )}
       </PageBody>

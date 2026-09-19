@@ -4,7 +4,7 @@ import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import { VoiceCampaign, VoiceAgentProfile, VoiceTenantLimits } from '../../../data/entities'
-import { znanaBranza } from '../../../lib/branze'
+import { pytaniaBranzy, znanaBranza } from '../../../lib/branze'
 import { zalozAgentaDlaFirmy } from '../../../lib/nowy-agent'
 import { filtrujNumery } from '../../../lib/limity'
 import { fetchProviderCatalog } from '../../../lib/provider'
@@ -79,7 +79,9 @@ export async function POST(request: Request) {
     agentId: wynik.agentId,
     name: wynik.nazwa,
     direction: 'outbound',
-    questions: null,
+    // Firma dostaje gotowy zestaw pytan swojej branzy i moze go zmienic.
+    // Puste pole na starcie zostawia klienta przed pytaniem, od czego zaczac.
+    questions: pytaniaBranzy(branzaKoncowa) || null,
     industry: branzaKoncowa,
     knowledgeUrl: parsed.data.knowledgeUrl || null,
     knowledgeText: wiedza,

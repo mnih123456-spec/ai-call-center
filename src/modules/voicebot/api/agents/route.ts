@@ -63,7 +63,7 @@ export async function GET(request: Request) {
     // Lista agentów u dostawcy, żeby przypisanie szło z wyboru, a nie
     // z przepisywania identyfikatora. Ta sama zasada co przy numerach.
     agenci: katalog.agents,
-    branze: BRANZE.map((b) => ({ id: b.id, nazwa: b.nazwa, przyklady: b.przyklady ?? [] })),
+    branze: BRANZE.map((b) => ({ id: b.id, nazwa: b.nazwa, przyklady: b.przyklady ?? [], pytania: b.pytania ?? [] })),
     katalogDziala: katalog.configured,
   })
 }
