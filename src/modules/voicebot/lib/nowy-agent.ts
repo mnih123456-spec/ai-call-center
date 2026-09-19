@@ -48,7 +48,7 @@ export async function zalozAgentaDlaFirmy(
   const apiKey = process.env.ELEVENLABS_API_KEY
   const szablon = process.env.VOICEBOT_AGENT_SZABLON
   const webhook = process.env.VOICEBOT_WEBHOOK_ID ?? null
-  const model = process.env.VOICEBOT_MODEL_DOMYSLNY ?? 'gpt-4.1-mini'
+  const model = process.env.VOICEBOT_MODEL_DOMYSLNY ?? 'gemini-2.0-flash-lite'
 
   if (!apiKey) return { ok: false, blad: 'Brak klucza dostawcy głosu.' }
   if (!szablon) return { ok: false, blad: 'Nie wskazano szablonu bota (VOICEBOT_AGENT_SZABLON).' }
