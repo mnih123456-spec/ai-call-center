@@ -276,3 +276,29 @@ ktorej nie da sie sprawdzic inaczej niz kolejnymi telefonami. Po hackatonie
 do sprawdzenia w tej kolejnosci: temperatura modelu (teraz 0, czyli zero
 swobody), stability glosu (teraz 0,8, czyli bardzo rowno), dlugosc zdan
 w scenariuszu i krotkie potwierdzenia typu "rozumiem" miedzy pytaniami.
+
+## 21. Branze jako dane, nie jako kod
+
+Michal, 19.09: "zrobimy tak, zeby na podstawie klientow glowny silnik uczyl sie
+branz i wyciagal wnioski, musi byc opcja dodania branzy i wiedzy o branzy".
+
+Dzis piec branz siedzi w pliku `lib/branze.ts`. Dodanie szostej wymaga
+programisty i wydania nowej wersji, co przy produkcie dla wielu firm jest
+waskim gardlem po naszej stronie.
+
+Docelowo, do zrobienia po hackatonie:
+
+- **Branza jako rekord w bazie**, a nie stala w kodzie. Wlasciciel platformy
+  dodaje branze z panelu: nazwe, powitanie, cel rozmowy, slownik pojec
+  i zestaw pytan startowych.
+- **Firma moze dolozyc wlasna wiedze branzowa** ponad to, co daje szablon.
+  Dzis ma tylko pytania i adres swojej strony.
+- **Silnik uczy sie z przeprowadzonych rozmow.** Z transkryptow widac, jakich
+  pojec uzywaja rozmowcy, o co pytaja i czego bot nie rozumial. To jest
+  material na uzupelnianie slownika branzy bez zgadywania.
+
+**Do rozstrzygniecia przed budowa:** czy wnioski z rozmow jednej firmy wolno
+przenosic na slownik calej branzy, czyli do innych firm. Technicznie latwe,
+prawnie i wizerunkowo nie: tresc rozmow z klientami jednej kancelarii nie
+moze zasilac bota konkurencji. Bezpieczny wariant to wnioski w obrebie jednej
+firmy, a na poziom branzy wylacznie to, co czlowiek swiadomie zatwierdzi.
