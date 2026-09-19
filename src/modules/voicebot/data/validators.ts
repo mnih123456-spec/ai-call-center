@@ -75,6 +75,23 @@ export const testCallSchema = z.object({
   lastName: z.string().max(100).nullable().optional(),
 })
 
+/**
+ * Profil agenta firmy.
+ *
+ * Klient podaje pytania do scenariusza rozmowy, a nie prompt. Prompt jest nasz
+ * i to on odpowiada za to, ze bot przedstawia sie, pyta o zgode i nie zmysla.
+ * Gdyby klient mogl go nadpisac, pierwsza firma, ktora skasuje zdanie o zgodzie,
+ * zrobilaby z tego problem prawny nasz, a nie swoj.
+ */
+export const agentProfileSchema = z.object({
+  id: z.string().uuid().optional(),
+  agentId: z.string().min(1).max(200),
+  name: z.string().min(1).max(200),
+  direction: z.enum(['outbound', 'inbound']).default('outbound'),
+  questions: z.string().max(5000).nullable().optional(),
+  knowledgeUrl: z.string().url().max(500).nullable().optional().or(z.literal('')),
+})
+
 export const callListSchema = z.object({
   campaignId: z.string().uuid().optional(),
   status: callStatusSchema.optional(),
