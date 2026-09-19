@@ -103,7 +103,7 @@ export async function POST(request: Request) {
 
   // Nieznana branza znaczy brak slownika, a nie blad zapisu: liste branz
   // rozwijamy, a stary wybor nie moze blokowac edycji agenta.
-  const branza = znanaBranza(parsed.data.industry) ? parsed.data.industry! : null
+  let branza = znanaBranza(parsed.data.industry) ? parsed.data.industry! : null
 
   const poprzedniAdres = profil?.knowledgeUrl ?? null
   const nowyAdres = parsed.data.knowledgeUrl || null
@@ -145,6 +145,7 @@ export async function POST(request: Request) {
   )
 
   let bladWiedzy: string | null = null
+  let rozpoznanaBranza: string | null = null
   if (!nowyAdres) {
     profil.knowledgeText = null
     profil.knowledgeReadAt = null
@@ -153,6 +154,14 @@ export async function POST(request: Request) {
     if (odczyt.ok) {
       profil.knowledgeText = odczyt.wiedza
       profil.knowledgeReadAt = new Date()
+      // Rozpoznana branza uzupelnia wybor, ale go nie nadpisuje. Czlowiek,
+      // ktory cos wybral, wie o swojej firmie wiecej niz model czytajacy
+      // jej strone.
+      if (!branza && odczyt.branza) {
+        branza = odczyt.branza
+        profil.industry = branza
+        rozpoznanaBranza = odczyt.branza
+      }
     } else {
       // Nieudany odczyt nie kasuje poprzedniej notatki: lepiej, zeby bot
       // wiedzial to, co wiedzial wczoraj, niz zeby nagle przestal wiedziec.
@@ -174,6 +183,10 @@ export async function POST(request: Request) {
   czesci.push(wysylka.ok ? 'Pytania przekazane do agenta.' : wysylka.blad)
   if (bladWiedzy) czesci.push(`Strony nie udalo sie przeczytac: ${bladWiedzy}`)
   else if (profil.knowledgeText) czesci.push(`Wiedza ze strony wczytana, ${profil.knowledgeText.length} znakow.`)
+  if (rozpoznanaBranza) {
+    const nazwa = BRANZE.find((b) => b.id === rozpoznanaBranza)?.nazwa ?? rozpoznanaBranza
+    czesci.push(`Rozpoznana branza: ${nazwa}.`)
+  }
 
   profil.syncedAt = new Date()
   profil.syncResult = czesci.join(' ')
