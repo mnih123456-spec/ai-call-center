@@ -130,6 +130,16 @@ ${oczyscWiedze(wiedzaBranzowa(branza, wiedzaWlasna))}`.trim()
           // pod koniec zdania, bywa przekrecone w zapisie.
           turn: { turn_timeout: 1.5, retranscribe_on_turn_timeout: true },
           asr: { keywords: slowaKluczoweBranzy(branza) },
+          // Silnik glosu z szablonu (Flash) brzmi sztucznie. Wersja trzecia
+          // dla rozmow brzmi jak czlowiek, kosztem ulamka sekundy. Stabilnosc
+          // 0,5 to u dostawcy ustawienie "naturalne"; 0,8 z szablonu splaszcza glos.
+          tts: {
+            model_id: process.env.VOICEBOT_TTS_MODEL ?? 'eleven_v3_conversational',
+            stability: 0.5,
+            similarity_boost: 0.8,
+            speed: 1.0,
+            optimize_streaming_latency: 2,
+          },
         },
         ...(Object.keys(platformSettings).length > 0 ? { platform_settings: platformSettings } : {}),
       }),
