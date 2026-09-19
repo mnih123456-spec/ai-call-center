@@ -10,6 +10,15 @@ import { Button } from '@open-mercato/ui/primitives/button'
 import type { LegacyColumnDef as ColumnDef } from '@tanstack/react-table/legacy'
 import { useT } from '@open-mercato/shared/lib/i18n/context'
 
+/**
+ * Dokad prowadzi skrot "Zamow numer u partnera".
+ *
+ * Nie odsprzedajemy numerow ani minut, bo to czynilo by nas przedsiebiorca
+ * telekomunikacyjnym z wpisem do rejestru UKE i odpowiedzialnoscia za ruch.
+ * Klient podpisuje umowe z operatorem sam, my tylko konfigurujemy lacze.
+ */
+const PARTNER_NUMEROW_URL = process.env.NEXT_PUBLIC_VOICEBOT_PARTNER_NUMEROW_URL ?? 'https://actio.pl'
+
 type CampaignRow = {
   id: string
   name: string
@@ -165,6 +174,34 @@ export default function VoicebotCampaignsPage() {
           </div>
         ) : null}
         {catalog.error ? <div role="alert" className="mb-4 text-sm text-destructive">{t('voicebot.campaigns.catalogError', 'Nie udało się pobrać agentów i numerów. Odśwież listę, aby spróbować ponownie.')}</div> : null}
+
+        {/*
+          Firma bez numeru nie ruszy z miejsca, a numeru komórkowego nie da się
+          tu podpiąć: operator komórkowy nie udostępnia łącza SIP. Dlatego
+          zamiast samego "brak numerów" pokazujemy, co z tym zrobić. Numer
+          klient zamawia u operatora sam, my go tylko konfigurujemy.
+        */}
+        {catalog.configured && !loading && catalog.numbers.length === 0 ? (
+          <div className="mb-4 rounded border border-dashed p-3 text-sm">
+            <div className="font-medium">
+              {t('voicebot.campaigns.noNumbers', 'Nie masz jeszcze numeru do dzwonienia')}
+            </div>
+            <div className="mt-1 text-muted-foreground">
+              {t(
+                'voicebot.campaigns.noNumbersHint',
+                'Numer zamawiasz u operatora telefonii, a potem podłączamy go tutaj. Możesz też podłączyć własną centralę przez łącze SIP. Zwykłego numeru komórkowego nie da się podpiąć.',
+              )}
+            </div>
+            <a
+              className="mt-2 inline-block underline"
+              href={PARTNER_NUMEROW_URL}
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              {t('voicebot.campaigns.orderNumber', 'Zamów numer u partnera')}
+            </a>
+          </div>
+        ) : null}
 
         {formOpen ? (
           <CrudForm
