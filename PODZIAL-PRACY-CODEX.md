@@ -132,7 +132,13 @@ identyfikatorów, nie relacji ORM między modułami.
 Pole `webhook_url` zawiera żeton, czyli hasło. Przed wpisaniem tam czegokolwiek
 prawdziwego trzeba objąć kolumnę mapą szyfrowania modułu.
 
-## K4. Profil agenta per tenant i widok dla admina
+## K4. W TOKU: profil agenta per tenant i widok dla admina
+
+**Zrobione:** encja VoiceAgentProfile i migracja (niezalozona na bazie,
+uruchomic yarn db:migrate albo wystarczy start serwera).
+
+**Zostalo:** trasa API, ekran klienta z pytaniami do scenariusza, widok dla
+admina z identyfikatorami agentow i numerow oraz wysylka pytan do dostawcy.
 
 Klient nie pisze promptu, tylko **dodaje pytania** do scenariusza rozmowy
 i podaje adres swojej strony. Prompt jest nasz i sprawdzony. Z tego wynika,
