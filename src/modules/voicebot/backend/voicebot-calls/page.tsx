@@ -6,6 +6,7 @@ import { Button } from '@open-mercato/ui/primitives/button'
 import type { LegacyColumnDef as ColumnDef } from '@tanstack/react-table/legacy'
 import { useT } from '@open-mercato/shared/lib/i18n/context'
 import { PrzyciskMaskowania, maskujNumer, maskujOsobe, useMaskowanie } from '../maskowanie'
+import { PodgladRozmowy } from '../PodgladRozmowy'
 import { kosztWierszaPln, naZlote, sumaUsd } from '../../lib/koszty'
 
 type CallRow = {
@@ -24,6 +25,7 @@ type CallRow = {
   requestsContact: boolean | null
   durationSecs: number | null
   costUsd: string | null
+  conversationId: string | null
   crmRecordRef: string | null
   crmError: string | null
   summary: string | null
@@ -64,6 +66,7 @@ export default function VoicebotCallsPage() {
   const [rows, setRows] = React.useState<CallRow[]>([])
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
+  const [wybrana, setWybrana] = React.useState<string | null>(null)
 
   const load = React.useCallback(async () => {
     setLoading(true)
@@ -117,6 +120,17 @@ export default function VoicebotCallsPage() {
     { id: 'czas', header: t('voicebot.calls.column.duration', 'Czas'), cell: ({ row }) => czas(row.original.durationSecs) },
     { id: 'koszt', header: t('voicebot.calls.column.cost', 'Koszt'), cell: ({ row }) => kosztWierszaPln(row.original.costUsd) },
     {
+      id: 'posluchaj',
+      header: t('voicebot.calls.column.listen', 'Rozmowa'),
+      cell: ({ row }) => row.original.conversationId ? (
+        <Button variant="outline" onClick={() => setWybrana(row.original.id === wybrana ? null : row.original.id)}>
+          {row.original.id === wybrana
+            ? t('voicebot.calls.hide', 'Ukryj')
+            : t('voicebot.calls.listen', 'Posłuchaj')}
+        </Button>
+      ) : null,
+    },
+    {
       id: 'crm',
       header: t('voicebot.calls.column.crm', 'CRM'),
       cell: ({ row }) => {
@@ -126,7 +140,7 @@ export default function VoicebotCallsPage() {
         return ''
       },
     },
-  ], [t, zaslonione])
+  ], [t, zaslonione, wybrana])
 
   const zebrane = rows.filter((r) => r.productCode && r.productCode !== 'NIEUSTALONY').length
   const prosiOKontakt = rows.filter((r) => r.requestsContact).length
@@ -174,6 +188,7 @@ export default function VoicebotCallsPage() {
         </div>
         {error ? <div className="mb-3 text-sm text-destructive">{error}</div> : null}
         <DataTable columns={columns} data={rows} isLoading={loading} />
+        {wybrana ? <PodgladRozmowy callId={wybrana} zamknij={() => setWybrana(null)} /> : null}
       </PageBody>
     </Page>
   )
