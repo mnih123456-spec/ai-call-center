@@ -79,13 +79,20 @@ export default function VoicebotAgenciPage() {
           knowledgeUrl: formularz.knowledgeUrl,
         }),
       })
-      const body = (await res.json().catch(() => null)) as { error?: string } | null
+      const body = (await res.json().catch(() => null)) as
+        | { error?: string; wyslane?: boolean; syncResult?: string }
+        | null
       if (!res.ok) {
         setBlad(body?.error ?? t('voicebot.agents.saveError', 'Nie udało się zapisać.'))
         return
       }
       setFormularz({ ...PUSTY_FORMULARZ })
-      setKomunikat(t('voicebot.agents.saved', 'Zapisano.'))
+      // Zapis u nas i przekazanie pytań do dostawcy to dwie różne rzeczy.
+      // Gdy druga zawiedzie, klient musi to wiedzieć, bo bot dalej mówi
+      // po staremu, a panel pokazuje nowe pytania.
+      setKomunikat(body?.wyslane === false
+        ? t('voicebot.agents.savedNotSynced', 'Zapisano u nas, ale nie udało się przekazać pytań do agenta: ') + (body?.syncResult ?? '')
+        : t('voicebot.agents.saved', 'Zapisano i przekazano do agenta.'))
       await wczytaj()
     } catch {
       setBlad(t('voicebot.agents.saveError', 'Nie udało się zapisać.'))
@@ -143,6 +150,9 @@ export default function VoicebotAgenciPage() {
                       <div className="font-mono text-xs text-muted-foreground">{p.agentId}</div>
                       {p.knowledgeUrl ? (
                         <div className="text-xs text-muted-foreground">{p.knowledgeUrl}</div>
+                      ) : null}
+                      {p.syncResult ? (
+                        <div className="text-xs text-muted-foreground">{p.syncResult}</div>
                       ) : null}
                     </div>
                     <Button variant="outline" onClick={() => edytuj(p)}>

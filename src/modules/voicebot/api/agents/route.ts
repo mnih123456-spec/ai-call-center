@@ -5,6 +5,7 @@ import { createLogger } from '@open-mercato/shared/lib/logger'
 import { VoiceAgentProfile } from '../../data/entities'
 import { agentProfileSchema } from '../../data/validators'
 import { fetchProviderCatalog } from '../../lib/provider'
+import { wyslijPytaniaDoAgenta } from '../../lib/scenariusz'
 
 const logger = createLogger('voicebot')
 
@@ -117,7 +118,24 @@ export async function POST(request: Request) {
 
   em.persist(profil)
   await em.flush()
-  logger.info('agent profile saved', { id: profil.id, direction: profil.direction })
 
-  return json({ id: profil.id, agentId: profil.agentId }, 201)
+  // Dopiero po zapisie u nas wysylamy pytania do dostawcy. Gdyby wysylka
+  // szla pierwsza i sie udala, a zapis padl, klient mialby bota mowiacego
+  // rzeczy, ktorych nie widzi w panelu.
+  const wysylka = await wyslijPytaniaDoAgenta(profil.agentId, profil.questions)
+  profil.syncedAt = new Date()
+  profil.syncResult = wysylka.ok
+    ? 'Pytania przekazane do agenta.'
+    : wysylka.blad
+  em.persist(profil)
+  await em.flush()
+
+  logger.info('agent profile saved', { id: profil.id, direction: profil.direction, wyslane: wysylka.ok })
+
+  return json({
+    id: profil.id,
+    agentId: profil.agentId,
+    wyslane: wysylka.ok,
+    syncResult: profil.syncResult,
+  }, 201)
 }
