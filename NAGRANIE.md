@@ -19,8 +19,8 @@ słowami. Kursywą to, co ma być w tym momencie na ekranie.
 > nie odebrało za pierwszym razem. W skali miesiąca to prawie tysiąc prób
 > i sześćdziesiąt pięć godzin jednej osoby.
 >
-> A jak ktoś oddzwoni, trafia na kogoś, kto nie wie, w jakiej sprawie
-> dzwoniliśmy.
+> A jak klient oddzwoni na nieodebrane, odbiera u nas ktoś, kto nie wie,
+> że do niego dzwoniliśmy ani po co. Klient tłumaczy wszystko od zera.
 
 ## 2. Nowy klient (0:30 do 1:00)
 
@@ -75,6 +75,12 @@ w trakcie.*
 
 > Każda firma to osobny tenant. Widzi tylko swoje rozmowy. Tej izolacji nie
 > pisaliśmy, dał ją framework.
+
+*Jeśli masz w tabeli parę wierszy z oddzwonieniem, pokaż ją tutaj.*
+
+> I to jest odpowiedź na to oddzwanianie: klient oddzwania, bot odbiera,
+> poznaje numer i dokleja rozmowę do naszej próby sprzed godziny. Nic nie
+> trzeba tłumaczyć od zera.
 
 *Ekran Przegląd, kafelek kosztu.*
 
