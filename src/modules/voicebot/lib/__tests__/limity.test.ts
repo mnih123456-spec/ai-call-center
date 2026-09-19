@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals'
-import { ocenGlosy, ocenProgi, poczatekMiesiaca, PROGI_DOMYSLNE, type Progi } from '../limity'
+import { filtrujNumery, ocenGlosy, ocenProgi, poczatekMiesiaca, PROGI_DOMYSLNE, type Progi } from '../limity'
 
 const bezLimitu: Progi = { minutesPerMonth: null, maxVoices: null, maxConcurrentCalls: null }
 
@@ -95,5 +95,36 @@ describe('poczatekMiesiaca', () => {
       .toBe('2026-09-01T00:00:00.000Z')
     expect(poczatekMiesiaca(new Date('2026-01-15T12:00:00.000Z')).toISOString())
       .toBe('2026-01-01T00:00:00.000Z')
+  })
+})
+
+describe('filtrujNumery', () => {
+  const numery = [
+    { phoneNumberId: 'phnum_a', phoneNumber: '+48732129033' },
+    { phoneNumberId: 'phnum_b', phoneNumber: '+48457112147' },
+    { phoneNumberId: 'phnum_c', phoneNumber: '+48503956401' },
+  ]
+
+  // Puste ustawienie na pojedynczym wdrozeniu nie moze blokowac wyboru numeru.
+  it.each([undefined, null, '', '  \n , ; '])('puste ustawienie %p przepuszcza wszystkie', (d) => {
+    expect(filtrujNumery(numery, d)).toHaveLength(3)
+  })
+
+  // Sedno: jedna firma nie moze zobaczyc numeru drugiej na wspolnym koncie.
+  it('zostawia wyłącznie wskazane numery', () => {
+    const wynik = filtrujNumery(numery, 'phnum_a\nphnum_b')
+    expect(wynik.map((n) => n.phoneNumber)).toEqual(['+48732129033', '+48457112147'])
+  })
+
+  it.each(['phnum_a, phnum_b', 'phnum_a;phnum_b', ' phnum_a \r\n phnum_b \n'])(
+    'przyjmuje rozdzielenie przecinkiem, średnikiem i nową linią: %p',
+    (zapis) => {
+      expect(filtrujNumery(numery, zapis).map((n) => n.phoneNumberId)).toEqual(['phnum_a', 'phnum_b'])
+    },
+  )
+
+  // Numer skasowany u dostawcy nie moze wywrocic ekranu ani wpuscic reszty.
+  it('nieznany identyfikator po prostu niczego nie dokłada', () => {
+    expect(filtrujNumery(numery, 'phnum_z')).toEqual([])
   })
 })

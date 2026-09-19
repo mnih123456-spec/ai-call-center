@@ -274,6 +274,19 @@ export class VoiceTenantLimits {
   @Property({ name: 'minutes_per_month', type: 'integer', nullable: true })
   minutesPerMonth?: number | null
 
+  /**
+   * Numery, z ktorych ta firma moze dzwonic, po jednym w wierszu.
+   *
+   * Wszystkie firmy korzystaja z jednego konta u dostawcy, wiec jego lista
+   * numerow jest wspolna. Bez tego pola kazdy klient widzi w panelu numery
+   * pozostalych, a to przeciek miedzy firmami, nie niewygoda.
+   *
+   * Puste znaczy: pokaz wszystkie. Tak zostaje na pojedynczym wdrozeniu,
+   * gdzie i tak jest jedna firma.
+   */
+  @Property({ name: 'allowed_numbers', type: 'text', nullable: true })
+  allowedNumbers?: string | null
+
   /** Ile głosów firma może mieć u dostawcy. Slotów jest 30 na całe konto. */
   @Property({ name: 'max_voices', type: 'integer', nullable: true })
   maxVoices?: number | null

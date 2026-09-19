@@ -139,3 +139,24 @@ export async function sprawdzLimity(
   ])
   return ocenProgi(progi, zuzycie)
 }
+
+/**
+ * Zawęża listę numerów dostawcy do tych, z których firma może dzwonić.
+ *
+ * Puste ustawienie znaczy "wszystkie": na pojedynczym wdrożeniu, gdzie i tak
+ * jest jedna firma, wymuszanie wyboru byłoby tylko przeszkodą. Dopiero gdy
+ * na koncie siedzi kilka firm, lista musi być zawężona, bo inaczej jedna
+ * widzi numery drugiej.
+ */
+export function filtrujNumery<T extends { phoneNumberId: string }>(
+  numery: T[],
+  dozwolone: string | null | undefined,
+): T[] {
+  const lista = (dozwolone ?? '')
+    .split(/[\r\n,;]+/)
+    .map((w) => w.trim())
+    .filter(Boolean)
+  if (lista.length === 0) return numery
+  const zbior = new Set(lista)
+  return numery.filter((n) => zbior.has(n.phoneNumberId))
+}

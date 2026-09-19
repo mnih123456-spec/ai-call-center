@@ -5,12 +5,19 @@ import { createLogger } from '@open-mercato/shared/lib/logger'
 import { VoiceProfile, VoiceTenantLimits } from '../../data/entities'
 import { limitsSchema } from '../../data/validators'
 import { pobierzProgi, pobierzWykorzystanie } from '../../lib/limity'
+import { fetchProviderCatalog } from '../../lib/provider'
 
 const logger = createLogger('voicebot')
 
 export const metadata = {
   GET: { requireAuth: true, requireFeatures: ['voicebot.campaigns.view'] },
   POST: { requireAuth: true, requireFeatures: ['voicebot.campaigns.manage'] },
+}
+
+/** Pusta lista znaczy "bez ograniczenia", wiec zapisujemy ja jako brak wpisu. */
+function zapiszNumery(lista: string[] | undefined): string | null {
+  const czyste = (lista ?? []).map((w) => w.trim()).filter(Boolean)
+  return czyste.length > 0 ? czyste.join('\n') : null
 }
 
 function json(body: unknown, status = 200) {
@@ -25,13 +32,27 @@ export async function GET(request: Request) {
   const em = resolve<EntityManager>('em')
   const zakres = { tenantId: auth.tenantId ?? null, organizationId: auth.orgId }
 
-  const [progi, zuzycie, glosy] = await Promise.all([
+  const [progi, zuzycie, glosy, katalog, wiersz] = await Promise.all([
     pobierzProgi(em, zakres),
     pobierzWykorzystanie(em, zakres),
     em.count(VoiceProfile, { ...zakres, deletedAt: null }),
+    fetchProviderCatalog(),
+    em.findOne(VoiceTenantLimits, { ...zakres, deletedAt: null }),
   ])
 
-  return json({ progi, zuzycie: { ...zuzycie, glosy } })
+  const wybrane = (wiersz?.allowedNumbers ?? '')
+    .split(/[\r\n,;]+/)
+    .map((w) => w.trim())
+    .filter(Boolean)
+
+  return json({
+    progi,
+    zuzycie: { ...zuzycie, glosy },
+    // Cala lista numerow konta, zeby bylo z czego wybierac. Sam wybor
+    // decyduje potem o tym, co widzi ta firma na ekranie kampanii.
+    numeryKonta: katalog.numbers,
+    allowedNumbers: wybrane,
+  })
 }
 
 /**
@@ -63,12 +84,14 @@ export async function POST(request: Request) {
 
   let wiersz = await em.findOne(VoiceTenantLimits, { ...zakres, deletedAt: null })
   if (wiersz) {
+    wiersz.allowedNumbers = zapiszNumery(parsed.data.allowedNumbers)
     wiersz.minutesPerMonth = parsed.data.minutesPerMonth ?? null
     wiersz.maxVoices = parsed.data.maxVoices ?? null
     wiersz.maxConcurrentCalls = parsed.data.maxConcurrentCalls ?? null
     wiersz.updatedAt = teraz
   } else {
     wiersz = em.create(VoiceTenantLimits, {
+      allowedNumbers: zapiszNumery(parsed.data.allowedNumbers),
       minutesPerMonth: parsed.data.minutesPerMonth ?? null,
       maxVoices: parsed.data.maxVoices ?? null,
       maxConcurrentCalls: parsed.data.maxConcurrentCalls ?? null,

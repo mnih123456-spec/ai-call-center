@@ -1486,6 +1486,23 @@
       "name": "voicebot_limits",
       "schema": "public",
       "columns": {
+        "allowed_numbers": {
+          "name": "allowed_numbers",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamptz(6)",

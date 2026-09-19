@@ -191,6 +191,8 @@ const progSchema = z.union([z.coerce.number().int().min(0).max(1_000_000), z.lit
   .optional()
 
 export const limitsSchema = z.object({
+  /** Identyfikatory numerow u dostawcy, z ktorych firma moze dzwonic. */
+  allowedNumbers: z.array(z.string().max(200)).max(50).optional(),
   minutesPerMonth: progSchema,
   maxVoices: progSchema,
   maxConcurrentCalls: progSchema,

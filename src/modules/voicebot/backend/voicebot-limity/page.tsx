@@ -11,6 +11,7 @@ type Progi = {
 }
 
 type Zuzycie = { minutyWMiesiacu: number; rozmowyTeraz: number; glosy: number }
+type Numer = { phoneNumberId: string; phoneNumber: string; provider: string }
 
 const PUSTE = { minutesPerMonth: '', maxVoices: '', maxConcurrentCalls: '' }
 
@@ -21,6 +22,8 @@ function naPole(wartosc: number | null): string {
 export default function VoicebotLimityPage() {
   const t = useT()
   const [formularz, setFormularz] = React.useState(PUSTE)
+  const [numery, setNumery] = React.useState<Numer[]>([])
+  const [wybrane, setWybrane] = React.useState<string[]>([])
   const [zuzycie, setZuzycie] = React.useState<Zuzycie | null>(null)
   const [ladowanie, setLadowanie] = React.useState(true)
   const [zapis, setZapis] = React.useState(false)
