@@ -3,6 +3,15 @@
 Zadanie do wykonania w poniedziałek, na spokojnie, przy panelu Bitriksa.
 Ten plik jest samodzielny: można go wkleić do nowego czatu i zacząć pracę.
 
+## WAZNE: ktory Bitrix
+
+Liczby ponizej pochodza z **Bitriksa kancelarii**, a nie z konta
+`adsignio.bitrix24.pl`. To sa dwa rozne systemy.
+
+Sprawdzone 19.09: w Adsignio za okres 1-18 wrzesnia sa tylko 3 leady,
+4 kontakty i 6 deali. Kto bedzie robil te analize, musi pracowac na tym
+drugim koncie, inaczej wyjdzie mu bzdura.
+
 ## Co wiemy dzisiaj
 
 Dane z panelu raportów, **1-18 września 2026**, czyli 18 dni:
@@ -40,7 +49,7 @@ przez kilka minut siedzi przy telefonie i czeka. Po godzinie już nie.
 telefonicznej. Nie średnią, tylko rozkład: mediana i to, ile prób wychodzi
 w pierwszych 5 minutach, do godziny, tego samego dnia, później.
 
-**Jak to wyciągnąć z Bitriksa:**
+**Jak to wyciągnąć z Bitriksa** (pamiętaj: konto kancelarii, nie Adsignio)**:**
 
 - `crm.deal.list` z polami `ID`, `DATE_CREATE`, `STAGE_ID`, filtrowane
   po dacie utworzenia i po lejku

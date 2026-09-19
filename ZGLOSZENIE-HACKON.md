@@ -37,7 +37,7 @@ historii kontaktu.
 
 ## Problem, stan obecny
 
-**Dane z panelu raportów, okres 1-18 września 2026, czyli 18 dni:**
+**Dane z panelu raportów kancelarii, okres 1-18 września 2026, czyli 18 dni:**
 
 - **180 nowych kontaktów**
 - **149 z nich na etapie "kontakt 2"**, czyli nie odebrali za pierwszym razem
