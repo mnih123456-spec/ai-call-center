@@ -49,6 +49,74 @@ export class VoiceCampaign {
 }
 
 /**
+ * Agent głosowy firmy-klienta.
+ *
+ * Każda firma ma własnego agenta u dostawcy, zrobionego z naszego sprawdzonego
+ * szablonu. Klient nie pisze promptu, tylko **dodaje pytania** do scenariusza
+ * rozmowy: prompt jest nasz i to on odpowiada za to, że bot przedstawia się,
+ * pyta o zgodę i nie zmyśla.
+ *
+ * Do tej pory identyfikator agenta siedział przy kampanii, czyli o poziom za
+ * nisko: dwie kampanie tej samej firmy mogły wskazywać na różnych agentów,
+ * a nikt nie widział, która firma ma którego.
+ *
+ * Ten wiersz jest też jedynym miejscem, w którym da się odpowiedzieć na
+ * pytanie "dlaczego bot u tego klienta mówi to, co mówi".
+ */
+@Entity({ tableName: 'voicebot_agents' })
+@Index({ properties: ['tenantId'] })
+export class VoiceAgentProfile {
+  @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
+  id!: string
+
+  /** Identyfikator agenta u dostawcy głosu. */
+  @Property({ name: 'agent_id', type: 'text' })
+  agentId!: string
+
+  @Property({ type: 'text' })
+  name!: string
+
+  /** outbound albo inbound: ten sam klient ma zwykle obu. */
+  @Property({ type: 'text', default: 'outbound' })
+  direction: string = 'outbound'
+
+  /**
+   * Pytania dodane przez klienta, po jednym w wierszu.
+   *
+   * Trzymamy je jako tekst, a nie listę w bazie, bo klient edytuje je
+   * w jednym polu i kolejność ma znaczenie.
+   */
+  @Property({ type: 'text', nullable: true })
+  questions?: string | null
+
+  /** Adres strony firmy, z której bot ma czerpać wiedzę o niej. */
+  @Property({ name: 'knowledge_url', type: 'text', nullable: true })
+  knowledgeUrl?: string | null
+
+  /** Kiedy ostatnio wysłaliśmy pytania do dostawcy. */
+  @Property({ name: 'synced_at', type: Date, nullable: true })
+  syncedAt?: Date | null
+
+  @Property({ name: 'sync_result', type: 'text', nullable: true })
+  syncResult?: string | null
+
+  @Property({ name: 'tenant_id', type: 'uuid', nullable: true })
+  tenantId?: string | null
+
+  @Property({ name: 'organization_id', type: 'uuid', nullable: true })
+  organizationId?: string | null
+
+  @Property({ name: 'created_at', type: Date, onCreate: () => new Date() })
+  createdAt: Date = new Date()
+
+  @Property({ name: 'updated_at', type: Date, onUpdate: () => new Date() })
+  updatedAt: Date = new Date()
+
+  @Property({ name: 'deleted_at', type: Date, nullable: true })
+  deletedAt?: Date | null
+}
+
+/**
  * Głos nagrany przez firmę-klienta i sklonowany u dostawcy.
  *
  * Trzymamy go u siebie z jednego powodu: **zgody**. Klonowanie cudzego głosu
