@@ -23,7 +23,7 @@ twój panel, a nie wygenerowaną animację.
 
 ## 1b. cezar-cli, kokpit do agentów programistycznych
 
-, alias na . Od zespołu Open Mercato,
+`npx cezar-cli`, alias na `@open-mercato/cezar`. Od zespołu Open Mercato,
 czyli od autorów frameworka, na licencji MIT. Lokalny kokpit do uruchamiania
 i śledzenia zadań agentów AI w repozytorium, otwiera się w przeglądarce.
 
