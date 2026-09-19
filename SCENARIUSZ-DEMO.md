@@ -46,6 +46,11 @@ Kolejność ma znaczenie. Pokazujesz to, za co są punkty za kompletność.
    zlecania połączeń.
    > Pracownik ogląda, ale nie uruchomi kosztownych połączeń.
 
+**Dodatkowo, jeśli starczy czasu, 20 sekund:** przełącz się na drugą firmę
+w przełączniku organizacji. Lista połączeń jest pusta, konfiguracja CRM też.
+To jest dowód wielotenantowości mocniejszy niż zdanie o niej: ta sama sesja,
+ten sam człowiek, zero przecieku między firmami.
+
 ## Minuta 3:45-4:45, liczby
 
 > Koszt rozmowy widać w panelu, bo pobieramy go od dostawcy. Typowa rozmowa

@@ -184,3 +184,23 @@ tego nie pisał.
 powtarzać.
 
 **Claude ma o tym przypomnieć**, gdy zegar zbliży się do tej godziny.
+
+## 16. Hasła wklejone do czatu, do zmiany po hackatonie
+
+W zapisie tej rozmowy znajdują się:
+
+- żeton webhooka Bitrix24 (wklejony 18.09 wieczorem)
+- hasło do konta `ai@aicallcenter.pl` (wklejone 19.09 rano)
+
+Oba trzeba zmienić po hackatonie. Zapis rozmowy jest przechowywany i nie
+należy zakładać, że nikt go nigdy nie przeczyta.
+
+## 17. Dwaj tenanci w bazie demo
+
+Założone 19.09 do pokazania wielotenantowości:
+
+- `Acme Corp` (`5fba395b-...`) - firma z danymi, 19 rozmów, Bitrix podłączony
+- `Kancelaria Nowak (demo)` (`0e4af89c-...`) - pusta, do pokazania izolacji
+
+Sprawdzone na żywo: przełączenie organizacji zmienia widok na pusty,
+bez przecieku danych. Każda firma ma własną konfigurację CRM.
