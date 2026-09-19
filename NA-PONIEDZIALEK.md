@@ -41,7 +41,8 @@ do nowego czatu. Pamiętaj: Bitrix kancelarii, nie Adsignio.
   ujawnione. Docelowo: `OM_INIT_SUPERADMIN_EMAIL` i
   `OM_INIT_SUPERADMIN_PASSWORD` w `.env`, przed wystawieniem czegokolwiek
   poza laptop.
-- Skasować `D:aicchackontp.netrc`, bo leży w nim hasło do konta FTP.
+- Skasować plik `ftp.netrc` z katalogu hackatonu, bo leży w nim hasło do
+  konta FTP.
 - Usunąć z konta ElevenLabs agenta "DEMO HackOn - Potwierdzanie leadow"
   i webhook "AI call center - Open Mercato", jeśli nie wchodzą do produkcji.
 
