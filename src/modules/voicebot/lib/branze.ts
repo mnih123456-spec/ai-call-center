@@ -40,6 +40,15 @@ export type Branza = {
    * klient siedzi i nie wie, od czego zaczac.
    */
   pytania?: string[]
+  /**
+   * Pola, ktore bot zbiera w rozmowie tej branzy.
+   *
+   * Klucz musi odpowiadac nazwie pola u dostawcy. Stale kolumny w bazie sa
+   * pojeciami jednej branzy wbitymi w schemat, wiec kazda kolejna wymagalaby
+   * migracji. Tutaj branza deklaruje swoje pola, a tabela wynikow czyta
+   * z deklaracji.
+   */
+  pola?: Array<{ klucz: string; etykieta: string }>
 }
 
 /**
@@ -68,6 +77,7 @@ export const ZASTRZEZENIE = `Nie udzielasz porady prawnej i nie oceniasz szans w
 const KREDYTY: Branza = {
   id: 'kredyty',
   nazwa: 'Kancelaria kredytowa',
+  pola: [{"klucz":"produkt_opis","etykieta":"Produkt"},{"klucz":"bank","etykieta":"Bank"},{"klucz":"rok_umowy","etykieta":"Rok umowy"},{"klucz":"kwota","etykieta":"Kwota"},{"klucz":"prosi_o_kontakt","etykieta":"Prosi o kontakt"},{"klucz":"preferowany_termin_kontaktu","etykieta":"Termin kontaktu"}],
   pytania: ["Czy umowa kredytowa jest nadal aktywna?","W którym banku został zaciągnięty kredyt?","Z którego roku jest umowa?","Na jaką kwotę opiewał kredyt?","Czy to kredyt hipoteczny, gotówkowy czy walutowy?","Kiedy możemy oddzwonić z doradcą?"],
   przyklady: ["Czy umowa jest nadal aktywna?","W którym banku?","Z którego roku?"],
   powitanie: "Dzien dobry, z tej strony wirtualna asystentka {FIRMA}. Dzwonie w sprawie formularza dotyczacego bezplatnej analizy umowy kredytowej. Czy rozmawiam z osoba, ktora wypelnila formularz?",
@@ -89,6 +99,7 @@ Czego potrzebujesz od rozmowcy: o ktory produkt chodzi, w ktorym banku, z ktoreg
 const FOTOWOLTAIKA: Branza = {
   id: 'fotowoltaika',
   nazwa: 'Fotowoltaika i pompy ciepła',
+  pola: [{"klucz":"ogrzewanie","etykieta":"Ogrzewanie"},{"klucz":"rachunek_roczny","etykieta":"Rachunek za prąd"},{"klucz":"ma_instalacje","etykieta":"Ma instalację"},{"klucz":"wlasciciel_budynku","etykieta":"Właściciel budynku"},{"klucz":"prosi_o_kontakt","etykieta":"Prosi o kontakt"},{"klucz":"preferowany_termin_kontaktu","etykieta":"Termin kontaktu"}],
   pytania: ["Czy ma Pan już instalację, czy dopiero planuje?","Czym ogrzewa Pan dom?","Jaki jest roczny rachunek za prąd?","Czy budynek jest Pana własnością?","Jaka jest powierzchnia dachu i jego strona świata?","Kiedy technik może zadzwonić po szczegóły?"],
   przyklady: ["Jaki jest roczny rachunek za prąd?","Czym ogrzewa Pan dom?","Czy budynek jest Pana własnością?"],
   powitanie: "Dzien dobry, z tej strony wirtualna asystentka {FIRMA}. Dzwonie w sprawie zgloszenia o wycene instalacji. Czy rozmawiam z osoba, ktora je zostawila?",
@@ -110,6 +121,7 @@ Czego potrzebujesz od rozmowcy: czy ma juz instalacje czy dopiero planuje, jaki 
 const NIERUCHOMOSCI: Branza = {
   id: 'nieruchomosci',
   nazwa: 'Biuro nieruchomości',
+  pola: [{"klucz":"kupuje_czy_sprzedaje","etykieta":"Kupno czy sprzedaż"},{"klucz":"lokalizacja","etykieta":"Lokalizacja"},{"klucz":"metraz","etykieta":"Metraż"},{"klucz":"budzet","etykieta":"Budżet"},{"klucz":"ma_kredyt","etykieta":"Ma kredyt"},{"klucz":"preferowany_termin_kontaktu","etykieta":"Termin kontaktu"}],
   pytania: ["Czy kupuje Pan, czy sprzedaje?","Jaka lokalizacja Pana interesuje?","Jaki metraż i ile pokoi?","W jakim budżecie się Pan porusza?","Czy ma Pan już załatwiony kredyt?","Kiedy agent może oddzwonić?"],
   przyklady: ["W jakiej dzielnicy szuka Pan mieszkania?","Jaki metraż?","Czy ma Pan załatwiony kredyt?"],
   powitanie: "Dzien dobry, z tej strony wirtualna asystentka {FIRMA}. Dzwonie w sprawie zapytania o nieruchomosc. Czy rozmawiam z osoba, ktora je zostawila?",
@@ -130,6 +142,7 @@ Czego potrzebujesz od rozmowcy: czy kupuje czy sprzedaje, jaka lokalizacja go in
 const MOTORYZACJA: Branza = {
   id: 'motoryzacja',
   nazwa: 'Serwis samochodowy',
+  pola: [{"klucz":"marka_model","etykieta":"Marka i model"},{"klucz":"rocznik","etykieta":"Rocznik"},{"klucz":"przebieg","etykieta":"Przebieg"},{"klucz":"objaw","etykieta":"Co się dzieje z autem"},{"klucz":"termin_podstawienia","etykieta":"Kiedy podstawi auto"},{"klucz":"auto_zastepcze","etykieta":"Auto zastępcze"}],
   pytania: ["Jaka marka i model samochodu?","Z którego rocznika i jaki przebieg?","Co dokładnie dzieje się z autem?","Czy zapala się kontrolka na desce?","Kiedy może Pan podstawić samochód?","Czy potrzebuje Pan auta zastępczego?"],
   przyklady: ["Jaka marka i rocznik?","Jaki przebieg?","Kiedy może Pan podstawić auto?"],
   powitanie: "Dzien dobry, z tej strony wirtualna asystentka {FIRMA}. Dzwonie w sprawie wizyty w serwisie. Czy rozmawiam z wlascicielem samochodu?",
@@ -150,6 +163,7 @@ Czego potrzebujesz od rozmowcy: marka i model, rocznik, przebieg, co dokladnie s
 const MEDYCYNA: Branza = {
   id: 'medycyna',
   nazwa: 'Gabinet lekarski lub stomatologiczny',
+  pola: [{"klucz":"specjalista","etykieta":"Specjalista"},{"klucz":"pierwsza_wizyta","etykieta":"Pierwsza wizyta"},{"klucz":"prywatnie_czy_nfz","etykieta":"Prywatnie czy NFZ"},{"klucz":"preferowany_termin_kontaktu","etykieta":"Termin wizyty"}],
   pytania: ["Czy to wizyta pierwsza, czy kolejna?","U którego specjalisty?","Wizyta prywatna czy w ramach NFZ?","Jaki termin Panu odpowiada?","Czy woli Pan godziny poranne czy popołudniowe?"],
   przyklady: ["U którego specjalisty?","Wizyta prywatna czy na NFZ?","Jaki termin Panu pasuje?"],
   powitanie: "Dzien dobry, z tej strony wirtualna asystentka {FIRMA}. Dzwonie w sprawie terminu wizyty. Czy rozmawiam z osoba, ktora sie zapisywala?",
@@ -235,4 +249,9 @@ export function scenariuszBranzy(id: string | null | undefined, nazwaFirmy: stri
 /** Gotowy zestaw pytań dla branży, jako tekst do pola formularza. */
 export function pytaniaBranzy(id: string | null | undefined): string {
   return (znajdzBranze(id)?.pytania ?? []).join('\n')
+}
+
+/** Pola, które w tej branży mają pojawić się jako kolumny wyniku rozmowy. */
+export function polaBranzy(id: string | null | undefined): Array<{ klucz: string; etykieta: string }> {
+  return znajdzBranze(id)?.pola ?? []
 }

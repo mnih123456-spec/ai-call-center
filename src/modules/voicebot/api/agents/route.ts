@@ -7,7 +7,8 @@ import { agentProfileSchema } from '../../data/validators'
 import { fetchProviderCatalog } from '../../lib/provider'
 import { wyslijScenariuszDoAgenta } from '../../lib/scenariusz'
 import { BRANZE, slownikBranzy, znanaBranza } from '../../lib/branze'
-import { MODELE, pobierzUstawienia, sprawdzUstawienia, zapiszUstawienia } from '../../lib/ustawienia-agenta'
+import { MODELE, pobierzUstawienia, sprawdzUstawienia, wyslijPolaDoAgenta, zapiszUstawienia } from '../../lib/ustawienia-agenta'
+import { dataCollectionDlaDostawcy, polaZPytan } from '../../lib/pola-z-pytan'
 import { pobierzWiedze } from '../../lib/wiedza'
 
 const logger = createLogger('voicebot')
@@ -205,8 +206,16 @@ export async function POST(request: Request) {
     }
   }
 
+  // Pytania klienta zamieniamy na pola, ktore bot ma zebrac. Bez tego kroku
+  // bot zada pytanie, ale odpowiedz utonie w transkrypcji zamiast trafic do
+  // tabeli wynikow jako kolumna.
+  const pola = polaZPytan(profil.questions)
+  const wysylkaPol = await wyslijPolaDoAgenta(profil.agentId, dataCollectionDlaDostawcy(pola))
+
   const czesci: string[] = []
   czesci.push(wysylka.ok ? 'Pytania przekazane do agenta.' : wysylka.blad)
+  if (!wysylkaPol.ok) czesci.push(`Pol do zebrania nie zapisano: ${wysylkaPol.blad}`)
+  else if (pola.length > 0) czesci.push(`Bot zbierze ${pola.length} odpowiedzi.`)
   if (bladUstawien) czesci.push(`Ustawien rozmowy nie zapisano: ${bladUstawien}`)
   if (bladWiedzy) czesci.push(`Strony nie udalo sie przeczytac: ${bladWiedzy}`)
   else if (profil.knowledgeText) czesci.push(`Wiedza ze strony wczytana, ${profil.knowledgeText.length} znakow.`)

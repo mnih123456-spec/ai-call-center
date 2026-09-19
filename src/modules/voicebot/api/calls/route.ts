@@ -71,6 +71,7 @@ export async function GET(request: Request) {
       requestsContact: r.requestsContact ?? null,
       preferredContactTime: r.preferredContactTime ?? null,
       summary: r.summary ?? null,
+      collected: r.collected ?? null,
       failureReason: r.failureReason ?? null,
       createdAt: r.createdAt.toISOString(),
     })),

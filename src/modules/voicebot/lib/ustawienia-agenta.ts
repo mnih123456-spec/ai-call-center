@@ -118,3 +118,35 @@ export async function zapiszUstawienia(
     return { ok: false, blad: 'Nie udało się połączyć z dostawcą głosu.' }
   }
 }
+
+/**
+ * Przekazuje dostawcy listę pól, które bot ma zebrać w rozmowie.
+ *
+ * Bez tego pytania klienta żyją wyłącznie w treści scenariusza: bot je zada,
+ * ale odpowiedzi nie wrócą jako dane, tylko utoną w transkrypcji. Dopiero to
+ * sprawia, że dopisanie pytania daje kolumnę w tabeli wyników.
+ */
+export async function wyslijPolaDoAgenta(
+  agentId: string,
+  dataCollection: Record<string, unknown>,
+): Promise<WynikZapisu> {
+  const apiKey = process.env.ELEVENLABS_API_KEY
+  if (!apiKey) return { ok: false, blad: 'Brak klucza dostawcy głosu.' }
+
+  try {
+    const res = await fetch(`${API}/agents/${agentId}`, {
+      method: 'PATCH',
+      headers: { 'xi-api-key': apiKey, 'content-type': 'application/json' },
+      body: JSON.stringify({ platform_settings: { data_collection: dataCollection } }),
+      signal: AbortSignal.timeout(20000),
+    })
+    if (!res.ok) {
+      const tekst = await res.text().catch(() => '')
+      return { ok: false, blad: `Dostawca odrzucił listę pól, status ${res.status}. ${tekst.slice(0, 160)}` }
+    }
+    logger.info('agent data collection saved', { agentId, pol: Object.keys(dataCollection).length })
+    return { ok: true }
+  } catch {
+    return { ok: false, blad: 'Nie udało się połączyć z dostawcą głosu.' }
+  }
+}

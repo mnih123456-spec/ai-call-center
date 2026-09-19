@@ -29,6 +29,7 @@ type CallRow = {
   crmRecordRef: string | null
   crmError: string | null
   summary: string | null
+  collected: Record<string, unknown> | null
   createdAt: string
 }
 
@@ -85,6 +86,31 @@ export default function VoicebotCallsPage() {
 
   React.useEffect(() => { void load() }, [load])
 
+  /**
+   * Kolumny z odpowiedzi, ktore bot faktycznie zebral.
+   *
+   * Zrodlem sa pytania klienta, a nie lista wpisana przez nas na sztywno.
+   * Dzieki temu firma z branzy, ktorej nie przewidzielismy, dopisuje pytanie
+   * i dostaje kolumne, bez naszego udzialu i bez migracji bazy.
+   */
+  const kolumnyZebrane: ColumnDef<CallRow>[] = React.useMemo(() => {
+    const klucze: string[] = []
+    for (const r of rows) {
+      for (const k of Object.keys(r.collected ?? {})) {
+        if (!klucze.includes(k)) klucze.push(k)
+      }
+    }
+    return klucze.slice(0, 8).map((klucz) => ({
+      id: `zebrane_${klucz}`,
+      header: klucz.replace(/_/g, ' ').replace(/^./, (z) => z.toUpperCase()),
+      cell: ({ row }: { row: { original: CallRow } }) => {
+        const v = (row.original.collected ?? {})[klucz]
+        if (v === null || v === undefined || v === '') return ''
+        return zaslonione ? '•••' : String(v)
+      },
+    }))
+  }, [rows, zaslonione])
+
   const columns: ColumnDef<CallRow>[] = React.useMemo(() => [
     {
       id: 'osoba',
@@ -117,6 +143,7 @@ export default function VoicebotCallsPage() {
     { id: 'kwota', header: t('voicebot.calls.column.amount', 'Kwota'), cell: ({ row }) => kwota(row.original) },
     { accessorKey: 'contractYear', header: t('voicebot.calls.column.year', 'Rok umowy') },
     { accessorKey: 'bank', header: t('voicebot.calls.column.bank', 'Bank') },
+    ...kolumnyZebrane,
     { id: 'czas', header: t('voicebot.calls.column.duration', 'Czas'), cell: ({ row }) => czas(row.original.durationSecs) },
     { id: 'koszt', header: t('voicebot.calls.column.cost', 'Koszt'), cell: ({ row }) => kosztWierszaPln(row.original.costUsd) },
     {

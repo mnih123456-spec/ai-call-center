@@ -382,6 +382,16 @@ export async function POST(request: Request) {
   call.preferredContactTime = firstString(pick('preferowany_termin_kontaktu'))
   call.extraNotes = firstString(pick('dodatkowe_informacje'))
 
+  // Wszystko, co bot zebral, zapisujemy takze w postaci ogolnej. Dzieki temu
+  // branza, ktorej pojec nie ma w kolumnach, nie traci wyniku rozmowy.
+  const zebrane: Record<string, unknown> = {}
+  for (const [klucz, wartosc] of Object.entries(results as Record<string, { value?: unknown }>)) {
+    if (wartosc?.value !== undefined && wartosc.value !== null && wartosc.value !== '') {
+      zebrane[klucz] = wartosc.value
+    }
+  }
+  call.collected = Object.keys(zebrane).length > 0 ? zebrane : null
+
   em.persist(call)
   await em.flush()
   logger.info('call result stored', { id: call.id, direction: call.direction, product: call.productCode })

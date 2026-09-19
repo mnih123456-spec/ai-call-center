@@ -442,6 +442,20 @@ export class VoiceCall {
   @Property({ name: 'preferred_contact_time', type: 'text', nullable: true })
   preferredContactTime?: string | null
 
+  /**
+   * Wszystko, co bot zebral w rozmowie, jako pary nazwa-wartosc.
+   *
+   * Stale kolumny obok, takie jak bank czy rok umowy, sa pojeciami jednej
+   * branzy wbitymi w schemat bazy. Kazda kolejna branza wymagalaby wtedy
+   * migracji i programisty przy kazdym kliencie. Tutaj laduje to, co branza
+   * zadeklarowala, bez zmiany schematu.
+   *
+   * Stare kolumny zostaja i nadal sa wypelniane, bo na nich opiera sie widok
+   * kredytowy i dane demo.
+   */
+  @Property({ name: 'collected', type: 'json', nullable: true })
+  collected?: Record<string, unknown> | null
+
   @Property({ name: 'extra_notes', type: 'text', nullable: true })
   extraNotes?: string | null
 
