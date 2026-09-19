@@ -49,6 +49,56 @@ export class VoiceCampaign {
 }
 
 /**
+ * Głos nagrany przez firmę-klienta i sklonowany u dostawcy.
+ *
+ * Trzymamy go u siebie z jednego powodu: **zgody**. Klonowanie cudzego głosu
+ * wymaga zgody osoby, która go użyczyła, a dostawca przyjmuje tylko nasze
+ * oświadczenie, że ją mamy. Gdyby kiedyś ktoś zapytał, czyj to głos i kto
+ * pozwolił, odpowiedź musi być w naszej bazie, a nie w czyjejś pamięci.
+ *
+ * Dlatego pola zgody są wymagane, a nie opcjonalne.
+ */
+@Entity({ tableName: 'voicebot_voices' })
+@Index({ properties: ['tenantId'] })
+export class VoiceProfile {
+  @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
+  id!: string
+
+  /** Identyfikator głosu u dostawcy. */
+  @Property({ name: 'voice_id', type: 'text' })
+  voiceId!: string
+
+  @Property({ type: 'text' })
+  name!: string
+
+  /** Imię i nazwisko osoby, której głos sklonowano. */
+  @Property({ name: 'consent_person', type: 'text' })
+  consentPerson!: string
+
+  /** Kto w firmie potwierdził, że zgoda została udzielona. */
+  @Property({ name: 'consent_confirmed_by', type: 'uuid', nullable: true })
+  consentConfirmedBy?: string | null
+
+  @Property({ name: 'consent_at', type: Date })
+  consentAt: Date = new Date()
+
+  @Property({ name: 'tenant_id', type: 'uuid', nullable: true })
+  tenantId?: string | null
+
+  @Property({ name: 'organization_id', type: 'uuid', nullable: true })
+  organizationId?: string | null
+
+  @Property({ name: 'created_at', type: Date, onCreate: () => new Date() })
+  createdAt: Date = new Date()
+
+  @Property({ name: 'updated_at', type: Date, onUpdate: () => new Date() })
+  updatedAt: Date = new Date()
+
+  @Property({ name: 'deleted_at', type: Date, nullable: true })
+  deletedAt?: Date | null
+}
+
+/**
  * Połączenie tenanta z jego własnym systemem CRM.
  *
  * Każda firma-klient ma swój CRM i swoje dane dostępowe, dlatego to jest

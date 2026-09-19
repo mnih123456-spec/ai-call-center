@@ -30,7 +30,8 @@ Potrzebne do kryterium wartego 30% w ścieżce 03. Tylko Michał je zna:
 
 ## 4. Nazwa produktu
 
-Propozycje: Oddzwoni, HaloLead, Kredytofon, Pierwszy Kontakt, Kredka.
+Nazwa robocza ustalona 19.09: **AI call center**. Docelowa nadal otwarta.
+W grze: Oddzwoni, Odbiera, Telefonistka, Dyzurka, Linia, Pierwszy Kontakt.
 Żadna nie wybrana.
 
 ## 5. Nieznane połączenie na telefon Michała
@@ -86,3 +87,37 @@ Zaproponowana: licznik kosztów, potem złącze CRM z Bitrixem,
 potem powiązanie z kartami klientów z modułu `customers`.
 
 Bez odpowiedzi, więc idę po kolei od licznika kosztów.
+
+## 11. Limity dla firm-klientów
+
+Wszyscy klienci korzystają z jednego konta u dostawcy głosu, więc limity
+dostawcy są wspólne i jeden klient może je zjeść pozostałym.
+
+**Najpilniejsze, bo kosztowe:** zakresy numerów, na które wolno dzwonić.
+Bez tego klient wkleja listę z numerami premium albo zagranicznymi, a rachunek
+idzie na nas. Dopuścić polskie komórki i stacjonarne, zakresy premium
+zablokować wprost.
+
+Pozostałe do ustalenia:
+
+- minuty na tenanta w miesiącu
+- liczba głosów na tenanta (slotów jest 30 na całe konto, 9 już zajętych)
+- rozmowy równoczesne na tenanta (kolejka pilnuje odstępu w kampanii,
+  ale klient może założyć pięćdziesiąt kampanii)
+
+## 12. Skąd firmy biorą numer, wersja rozstrzygnięta technicznie
+
+Zwykłego numeru komórkowego nie da się podpiąć do dostawcy głosu, bo operator
+komórkowy nie daje łącza SIP. Firma ma trzy wyjścia: przenieść numer do
+operatora SIP, ustawić przekierowanie z komórki na numer SIP (działa tylko dla
+przychodzących), albo wziąć nowy numer.
+
+Fonio robi to samo: "numer od fonio albo podłącz swoją centralę przez SIP".
+Centrala, nie komórka.
+
+**Rekomendacja:** nie podpisywać umowy na odsprzedaż numerów. To czyni nas
+przedsiębiorcą telekomunikacyjnym z wpisem do UKE i odpowiedzialnością za ruch.
+Lepiej, żeby klient podpisał umowę z operatorem sam, a my tylko konfigurujemy
+łącze. Sprzedajemy oprogramowanie, nie minuty.
+
+**Do decyzji przez Michała:** czy tak zostaje.
