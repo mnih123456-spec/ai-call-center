@@ -34,6 +34,16 @@ do nowego czatu. Pamiętaj: Bitrix kancelarii, nie Adsignio.
 - Skasować rekordy testowe w Bitriksie: leady 83 i 85, kontakt 3341,
   deal 10021.
 - Usunąć z bazy demo dwa wiersze "Michal Test" z prawdziwym numerem.
+- Wymienić klucz ElevenLabs. Na czas hackatonu zdjęliśmy z niego wszystkie
+  ograniczenia, więc daje pełny dostęp do konta.
+- Ustawić własne dane logowania do panelu. Teraz działa domyślne
+  `superadmin@acme.com` z hasłem `secret`, które Chrome słusznie zgłasza jako
+  ujawnione. Docelowo: `OM_INIT_SUPERADMIN_EMAIL` i
+  `OM_INIT_SUPERADMIN_PASSWORD` w `.env`, przed wystawieniem czegokolwiek
+  poza laptop.
+- Skasować `D:aicchackontp.netrc`, bo leży w nim hasło do konta FTP.
+- Usunąć z konta ElevenLabs agenta "DEMO HackOn - Potwierdzanie leadow"
+  i webhook "AI call center - Open Mercato", jeśli nie wchodzą do produkcji.
 
 ## 4. Brakująca biblioteka na laptopie
 
