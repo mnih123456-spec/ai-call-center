@@ -43,10 +43,11 @@ Zmień domyślne "mich's Project". To samo w obu ścieżkach.
 
 ## PROBLEM
 
-    Prowadzę kancelarię, która pomaga ludziom z umowami kredytowymi. Ludzie
+    Współpracuję z kancelariami, które pomagają ludziom z umowami kredytowymi,
+    i dostarczam im zgłoszenia z reklam. To przypadek jednej z nich. Ludzie
     zostawiają zgłoszenie w formularzu i czekają na telefon.
 
-    Dane z naszego CRM za wrzesień, przeliczone na miesiąc: 300 nowych
+    Dane z CRM tej kancelarii za wrzesień, przeliczone na miesiąc: 300 nowych
     zgłoszeń, z czego 248 nie odbiera za pierwszym razem. Doliczając kolejne
     etapy kontaktu, od trzeciego do szóstego, wychodzi 972 próby telefoniczne
     miesięcznie. Średnio ponad trzy telefony na jedno zgłoszenie.
@@ -59,7 +60,7 @@ Zmień domyślne "mich's Project". To samo w obu ścieżkach.
     Najgorsze jest to, co dzieje się, gdy klient oddzwoni na nieodebrane. Dzwoni
     na numer pracownika, który akurat prowadzi inną rozmowę albo jest po godzinach.
     Nikt nie odbiera, klient próbuje raz i odpuszcza. Zgłoszenie, za które
-    zapłaciliśmy w reklamie, przepada.
+    kancelaria zapłaciła w reklamie, przepada.
 
 ## ROZWIĄZANIE
 

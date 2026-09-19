@@ -12,7 +12,8 @@ słowami. Kursywą to, co ma być w tym momencie na ekranie.
 
 *Ekran logowania albo czarny, ważny jest głos.*
 
-> Prowadzę kancelarię od umów kredytowych. Ludzie zostawiają numer
+> Współpracuję z kancelariami od umów kredytowych, dostarczam im zgłoszenia
+> z reklam. To przypadek jednej z nich. Ludzie zostawiają numer
 > w formularzu, a potem ktoś musi do każdego zadzwonić.
 >
 > We wrześniu weszło sto osiemdziesiąt zgłoszeń. Sto czterdzieści dziewięć

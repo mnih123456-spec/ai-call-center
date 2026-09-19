@@ -16,7 +16,8 @@ Wnioski: **najpierw liczby, potem wyjątki.** Efektowne UI tu nie punktuje.
 
 Mówisz od siebie, bez slajdu z definicją.
 
-> Prowadzę kancelarię, która pomaga ludziom z umowami kredytowymi. Ludzie
+> Współpracuję z kancelariami, które pomagają ludziom z umowami kredytowymi,
+> i dostarczam im zgłoszenia z reklam. To przypadek jednej z nich. Ludzie
 > zostawiają zgłoszenie w formularzu, a potem ktoś musi do każdego zadzwonić,
 > potwierdzić, że to ta osoba, uzyskać zgodę i ustalić, o jaki kredyt chodzi.
 >
