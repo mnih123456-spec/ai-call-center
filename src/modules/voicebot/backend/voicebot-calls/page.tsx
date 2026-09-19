@@ -5,6 +5,7 @@ import { DataTable } from '@open-mercato/ui/backend/DataTable'
 import { Button } from '@open-mercato/ui/primitives/button'
 import type { LegacyColumnDef as ColumnDef } from '@tanstack/react-table/legacy'
 import { useT } from '@open-mercato/shared/lib/i18n/context'
+import { PrzyciskMaskowania, maskujNumer, maskujOsobe, useMaskowanie } from '../maskowanie'
 import { kosztWierszaPln, naZlote, sumaUsd } from '../../lib/koszty'
 
 type CallRow = {
@@ -59,6 +60,7 @@ function jestOddzwonieniem(row: CallRow): boolean {
 
 export default function VoicebotCallsPage() {
   const t = useT()
+  const { zaslonione, przelacz } = useMaskowanie()
   const [rows, setRows] = React.useState<CallRow[]>([])
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
@@ -81,8 +83,16 @@ export default function VoicebotCallsPage() {
   React.useEffect(() => { void load() }, [load])
 
   const columns: ColumnDef<CallRow>[] = React.useMemo(() => [
-    { id: 'osoba', header: t('voicebot.calls.column.person', 'Rozmówca'), cell: ({ row }) => osoba(row.original) },
-    { accessorKey: 'phone', header: t('voicebot.calls.column.phone', 'Numer') },
+    {
+      id: 'osoba',
+      header: t('voicebot.calls.column.person', 'Rozmówca'),
+      cell: ({ row }) => zaslonione ? maskujOsobe(osoba(row.original)) : osoba(row.original),
+    },
+    {
+      accessorKey: 'phone',
+      header: t('voicebot.calls.column.phone', 'Numer'),
+      cell: ({ row }) => zaslonione ? maskujNumer(row.original.phone) : row.original.phone,
+    },
     {
       id: 'kierunek',
       header: t('voicebot.calls.column.direction', 'Kierunek'),
@@ -116,7 +126,7 @@ export default function VoicebotCallsPage() {
         return ''
       },
     },
-  ], [t])
+  ], [t, zaslonione])
 
   const zebrane = rows.filter((r) => r.productCode && r.productCode !== 'NIEUSTALONY').length
   const prosiOKontakt = rows.filter((r) => r.requestsContact).length
@@ -127,7 +137,17 @@ export default function VoicebotCallsPage() {
       <PageHeader
         title={t('voicebot.calls.title', 'Połączenia i wyniki')}
         description={t('voicebot.calls.subtitle', 'Rozmowy zlecone przez bota wraz z danymi zebranymi podczas rozmowy.')}
-        actions={<Button variant="outline" onClick={() => void load()}>{t('voicebot.calls.refresh', 'Odśwież')}</Button>}
+        actions={
+          <div className="flex gap-2">
+            <PrzyciskMaskowania
+              zaslonione={zaslonione}
+              przelacz={przelacz}
+              etykietaWlacz={t('voicebot.mask.on', 'Zasłoń dane')}
+              etykietaWylacz={t('voicebot.mask.off', 'Pokaż dane')}
+            />
+            <Button variant="outline" onClick={() => void load()}>{t('voicebot.calls.refresh', 'Odśwież')}</Button>
+          </div>
+        }
       />
       <PageBody>
         <div className="mb-4 flex flex-wrap gap-6 text-sm">

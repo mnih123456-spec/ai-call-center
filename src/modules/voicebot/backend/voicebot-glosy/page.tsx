@@ -3,6 +3,7 @@ import * as React from 'react'
 import { Page, PageHeader, PageBody } from '@open-mercato/ui/backend/Page'
 import { Button } from '@open-mercato/ui/primitives/button'
 import { useT } from '@open-mercato/shared/lib/i18n/context'
+import { PrzyciskMaskowania, maskujOsobe, useMaskowanie } from '../maskowanie'
 
 type Glos = {
   voiceId: string
@@ -23,6 +24,7 @@ type Kampania = { id: string; name: string; agentId: string }
 
 export default function VoicebotGlosyPage() {
   const t = useT()
+  const { zaslonione, przelacz } = useMaskowanie()
   const [glosy, setGlosy] = React.useState<Glos[]>([])
   const [wlasne, setWlasne] = React.useState<Wlasny[]>([])
   const [kampanie, setKampanie] = React.useState<Kampania[]>([])
@@ -131,15 +133,26 @@ export default function VoicebotGlosyPage() {
   const opisZgody = React.useCallback((voiceId: string) => {
     const w = wlasne.find((x) => x.voiceId === voiceId)
     if (!w) return null
-    return `${w.consentPerson}, zgoda ${new Date(w.consentAt).toLocaleDateString('pl-PL')}`
-  }, [wlasne])
+    const kto = zaslonione ? maskujOsobe(w.consentPerson) : w.consentPerson
+    return `${kto}, zgoda ${new Date(w.consentAt).toLocaleDateString('pl-PL')}`
+  }, [wlasne, zaslonione])
 
   return (
     <Page>
       <PageHeader
         title={t('voicebot.voices.title', 'Głosy')}
         description={t('voicebot.voices.subtitle', 'Wybierz, jakim głosem bot rozmawia z Twoimi klientami.')}
-        actions={<Button variant="outline" onClick={() => void wczytaj()}>{t('voicebot.voices.refresh', 'Odśwież')}</Button>}
+        actions={
+          <div className="flex gap-2">
+            <PrzyciskMaskowania
+              zaslonione={zaslonione}
+              przelacz={przelacz}
+              etykietaWlacz={t('voicebot.mask.on', 'Zasłoń dane')}
+              etykietaWylacz={t('voicebot.mask.off', 'Pokaż dane')}
+            />
+            <Button variant="outline" onClick={() => void wczytaj()}>{t('voicebot.voices.refresh', 'Odśwież')}</Button>
+          </div>
+        }
       />
       <PageBody>
         {ladowanie ? (
