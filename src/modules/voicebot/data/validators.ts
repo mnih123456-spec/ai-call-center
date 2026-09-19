@@ -189,8 +189,16 @@ export type PostCallWebhook = z.infer<typeof postCallWebhookSchema>
  * Puste pole znaczy "bez limitu", dlatego dopuszczamy null i pusty ciąg:
  * w formularzu wyczyszczenie pola ma zdejmować próg, a nie ustawiać zero.
  */
-const progSchema = z.union([z.coerce.number().int().min(0).max(1_000_000), z.literal(''), z.null()])
-  .transform((v) => (v === '' || v === null ? null : v))
+const progSchema = z
+  // Kolejnosc w unii jest tu cala istota rzeczy. z.coerce.number() zamienia
+  // zarowno pusty ciag, jak i null na zero, wiec postawiony pierwszy zamienia
+  // "bez limitu" w "zero minut", czyli w zakaz dzwonienia. Puste wartosci
+  // musza zostac rozpoznane, zanim cokolwiek sprobuje je przeliczyc.
+  .union([
+    z.null(),
+    z.literal('').transform(() => null),
+    z.coerce.number().int().min(0).max(1_000_000),
+  ])
   .optional()
 
 export const limitsSchema = z.object({

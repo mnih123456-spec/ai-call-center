@@ -4,7 +4,7 @@ import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import { VoiceProfile, VoiceTenantLimits } from '../../data/entities'
 import { limitsSchema } from '../../data/validators'
-import { pobierzProgi, pobierzWykorzystanie } from '../../lib/limity'
+import { filtrujNumery, pobierzProgi, pobierzWykorzystanie } from '../../lib/limity'
 import { fetchProviderCatalog } from '../../lib/provider'
 
 const logger = createLogger('voicebot')
@@ -14,9 +14,16 @@ export const metadata = {
   POST: { requireAuth: true, requireFeatures: ['voicebot.campaigns.manage'] },
 }
 
-/** Pusta lista znaczy "bez ograniczenia", wiec zapisujemy ja jako brak wpisu. */
-function zapiszNumery(lista: string[] | undefined): string | null {
-  const czyste = (lista ?? []).map((w) => w.trim()).filter(Boolean)
+/**
+ * Pusta lista znaczy "bez ograniczenia", wiec zapisujemy ja jako brak wpisu.
+ *
+ * Brak pola w zadaniu to co innego niz pusta lista: znaczy "nie ruszaj tego".
+ * Bez tego rozroznienia zapis samych minut kasowal firmie przypisane numery,
+ * bo ekran limitow ich nie wysyla.
+ */
+function zapiszNumery(lista: string[] | undefined, poprzednie: string | null): string | null {
+  if (lista === undefined) return poprzednie
+  const czyste = lista.map((w) => w.trim()).filter(Boolean)
   return czyste.length > 0 ? czyste.join('\n') : null
 }
 
@@ -50,7 +57,7 @@ export async function GET(request: Request) {
     zuzycie: { ...zuzycie, glosy },
     // Cala lista numerow konta, zeby bylo z czego wybierac. Sam wybor
     // decyduje potem o tym, co widzi ta firma na ekranie kampanii.
-    numeryKonta: katalog.numbers,
+    numeryKonta: filtrujNumery(katalog.numbers, wiersz?.allowedNumbers || process.env.VOICEBOT_NUMERY_DOZWOLONE),
     allowedNumbers: wybrane,
   })
 }
@@ -84,14 +91,14 @@ export async function POST(request: Request) {
 
   let wiersz = await em.findOne(VoiceTenantLimits, { ...zakres, deletedAt: null })
   if (wiersz) {
-    wiersz.allowedNumbers = zapiszNumery(parsed.data.allowedNumbers)
-    wiersz.minutesPerMonth = parsed.data.minutesPerMonth ?? null
-    wiersz.maxVoices = parsed.data.maxVoices ?? null
-    wiersz.maxConcurrentCalls = parsed.data.maxConcurrentCalls ?? null
+    wiersz.allowedNumbers = zapiszNumery(parsed.data.allowedNumbers, wiersz.allowedNumbers ?? null)
+    if (parsed.data.minutesPerMonth !== undefined) wiersz.minutesPerMonth = parsed.data.minutesPerMonth
+    if (parsed.data.maxVoices !== undefined) wiersz.maxVoices = parsed.data.maxVoices
+    if (parsed.data.maxConcurrentCalls !== undefined) wiersz.maxConcurrentCalls = parsed.data.maxConcurrentCalls
     wiersz.updatedAt = teraz
   } else {
     wiersz = em.create(VoiceTenantLimits, {
-      allowedNumbers: zapiszNumery(parsed.data.allowedNumbers),
+      allowedNumbers: zapiszNumery(parsed.data.allowedNumbers, null),
       minutesPerMonth: parsed.data.minutesPerMonth ?? null,
       maxVoices: parsed.data.maxVoices ?? null,
       maxConcurrentCalls: parsed.data.maxConcurrentCalls ?? null,

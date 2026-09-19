@@ -203,10 +203,6 @@ export default function VoicebotAgenciPage() {
     <Page>
       <PageHeader
         title={t('voicebot.agents.title', 'Boty telefoniczne')}
-        description={t(
-          'voicebot.agents.subtitle',
-          'Każda firma ma własnego bota. Przedstawia się jej nazwą, mówi językiem jej branży i zadaje pytania, które tu ustawisz.',
-        )}
         actions={<Button variant="outline" onClick={() => void wczytaj()}>{t('voicebot.agents.refresh', 'Odśwież')}</Button>}
       />
       <PageBody>

@@ -1,4 +1,5 @@
 import { describe, expect, it } from '@jest/globals'
+import { limitsSchema } from '../../data/validators'
 import { filtrujNumery, ocenGlosy, ocenProgi, poczatekMiesiaca, PROGI_DOMYSLNE, type Progi } from '../limity'
 
 const bezLimitu: Progi = { minutesPerMonth: null, maxVoices: null, maxConcurrentCalls: null }
@@ -126,5 +127,38 @@ describe('filtrujNumery', () => {
   // Numer skasowany u dostawcy nie moze wywrocic ekranu ani wpuscic reszty.
   it('nieznany identyfikator po prostu niczego nie dokłada', () => {
     expect(filtrujNumery(numery, 'phnum_z')).toEqual([])
+  })
+})
+
+describe('walidacja progów z formularza', () => {
+  // Blad znaleziony przez Codexa 19.09: z.coerce.number() zamienia pusty ciag
+  // i null na zero, wiec postawiony pierwszy w unii zamienial napis
+  // "bez limitu" w zakaz dzwonienia. Jedno wejscie w ekran limitow i zapis
+  // zamykalby wszystkie telefony jako nieudane.
+  it.each([
+    [{ minutesPerMonth: '', maxVoices: '', maxConcurrentCalls: '' }],
+    [{ minutesPerMonth: null, maxVoices: null, maxConcurrentCalls: null }],
+  ])('puste pola %p znaczą brak limitu, a nie zero', (wejscie) => {
+    const wynik = limitsSchema.parse(wejscie)
+    expect(wynik.minutesPerMonth).toBeNull()
+    expect(wynik.maxVoices).toBeNull()
+    expect(wynik.maxConcurrentCalls).toBeNull()
+  })
+
+  // Pole nieprzeslane ma zostac bez zmian, a nie wyzerowac progu.
+  it('brak pola zostawia je nieokreślonym', () => {
+    const wynik = limitsSchema.parse({})
+    expect(wynik.minutesPerMonth).toBeUndefined()
+    expect(wynik.maxVoices).toBeUndefined()
+    expect(wynik.maxConcurrentCalls).toBeUndefined()
+  })
+
+  it('liczba przechodzi, także jawne zero', () => {
+    expect(limitsSchema.parse({ minutesPerMonth: '100' }).minutesPerMonth).toBe(100)
+    expect(limitsSchema.parse({ minutesPerMonth: 0 }).minutesPerMonth).toBe(0)
+  })
+
+  it('tekst, który nie jest liczbą, jest odrzucany', () => {
+    expect(limitsSchema.safeParse({ minutesPerMonth: 'abc' }).success).toBe(false)
   })
 })

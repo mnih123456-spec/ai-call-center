@@ -60,10 +60,15 @@ export async function POST(request: Request) {
   // Bez limitu przycisk "zadzwoń do mnie" jest gotowym narzędziem do nękania
   // dowolnego numeru, w dodatku na nasz rachunek.
   const godzinaWstecz = new Date(Date.now() - 3600 * 1000)
+  // Liczymy proby, ktore faktycznie wyszly. Telefon odrzucony przez dostawce
+  // albo przez polityke numerow nikogo nie nekal i nikt za niego nie zaplacil,
+  // a wliczany do limitu potrafil zablokowac przycisk na godzine w trakcie
+  // poprawiania konfiguracji.
   const ostatnieTesty = await em.count(VoiceCall, {
     tenantId: auth.tenantId,
     organizationId: auth.orgId,
     isTest: true,
+    status: { $ne: 'failed' },
     createdAt: { $gte: godzinaWstecz },
     deletedAt: null,
   })
