@@ -12,6 +12,7 @@ type Stan = {
   provider?: string
   active?: boolean
   adresSkrocony?: string
+  wymagaAdresu?: boolean
   pipelineId?: string | null
   stageId?: string | null
   lejki?: Pozycja[]
@@ -151,23 +152,33 @@ export default function VoicebotCrmPage() {
                 </select>
               </label>
 
-              <label className="flex flex-col gap-1 text-sm">
-                <span>
-                  {stan.configured
-                    ? t('voicebot.crm.field.urlChange', 'Nowy adres webhooka (zostaw puste, żeby nie zmieniać)')
-                    : t('voicebot.crm.field.url', 'Adres webhooka przychodzącego')}
-                </span>
-                <input
-                  className="rounded border px-2 py-1 font-mono text-xs"
-                  value={adres}
-                  onChange={(e) => setAdres(e.target.value)}
-                  placeholder="https://firma.bitrix24.pl/rest/1/xxxxxxxxxxxx"
-                  autoComplete="off"
-                  spellCheck={false}
-                />
-              </label>
+              {/* Wbudowany CRM nie ma adresu ani żetonu: pisze do własnej bazy. */}
+              {dostawca !== 'mercato' ? (
+                <label className="flex flex-col gap-1 text-sm">
+                  <span>
+                    {stan.configured && stan.wymagaAdresu
+                      ? t('voicebot.crm.field.urlChange', 'Nowy adres webhooka (zostaw puste, żeby nie zmieniać)')
+                      : t('voicebot.crm.field.url', 'Adres webhooka przychodzącego')}
+                  </span>
+                  <input
+                    className="rounded border px-2 py-1 font-mono text-xs"
+                    value={adres}
+                    onChange={(e) => setAdres(e.target.value)}
+                    placeholder="https://firma.bitrix24.pl/rest/1/xxxxxxxxxxxx"
+                    autoComplete="off"
+                    spellCheck={false}
+                  />
+                </label>
+              ) : (
+                <div className="rounded border border-dashed p-3 text-sm text-muted-foreground">
+                  {t(
+                    'voicebot.crm.builtinHint',
+                    'Wyniki rozmów trafiają na karty klientów w tym panelu. Nie trzeba nic podłączać.',
+                  )}
+                </div>
+              )}
 
-              {stan.configured ? (
+              {stan.configured && dostawca !== 'mercato' ? (
                 <>
                   <label className="flex flex-col gap-1 text-sm">
                     <span>{t('voicebot.crm.field.pipeline', 'Lejek')}</span>
@@ -202,15 +213,20 @@ export default function VoicebotCrmPage() {
               <div className="mt-3 text-sm text-destructive">{stan.bladDostawcy}</div>
             ) : null}
 
-            <p className="mt-3 text-xs text-muted-foreground">
-              {t(
-                'voicebot.crm.hint',
-                'Adres znajdziesz w Bitriksie: Aplikacje, Webhooki, Webhook przychodzący. Potrzebne uprawnienie do modułu CRM. Adres zawiera token, więc traktuj go jak hasło.',
-              )}
-            </p>
+            {dostawca !== 'mercato' ? (
+              <p className="mt-3 text-xs text-muted-foreground">
+                {t(
+                  'voicebot.crm.hint',
+                  'Adres znajdziesz w Bitriksie: Aplikacje, Webhooki, Webhook przychodzący. Potrzebne uprawnienie do modułu CRM. Adres zawiera token, więc traktuj go jak hasło.',
+                )}
+              </p>
+            ) : null}
 
             <div className="mt-4 flex items-center gap-3">
-              <Button onClick={() => void zapisz()} disabled={zapis || (!stan.configured && !adres.trim())}>
+              <Button
+                onClick={() => void zapisz()}
+                disabled={zapis || (dostawca !== 'mercato' && !stan.configured && !adres.trim())}
+              >
                 {zapis
                   ? t('voicebot.crm.checking', 'Sprawdzam połączenie...')
                   : t('voicebot.crm.save', 'Sprawdź i zapisz')}

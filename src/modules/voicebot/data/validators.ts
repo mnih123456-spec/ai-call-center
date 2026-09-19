@@ -67,7 +67,7 @@ export const callListSchema = z.object({
  * pierwszej rozmowie, czyli w najgorszym możliwym momencie.
  */
 export const crmConnectionSchema = z.object({
-  provider: z.enum(['bitrix24']).default('bitrix24'),
+  provider: z.enum(['bitrix24', 'mercato']).default('bitrix24'),
   /**
    * Pomijany przy zmianie samego lejka albo etapu: adres jest już zapisany,
    * a wymaganie ponownego wklejania hasła przy każdej drobnej zmianie

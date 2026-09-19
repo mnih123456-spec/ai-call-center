@@ -27,10 +27,24 @@ export type DanePolaczenia = {
 }
 
 export type ZnalezionyRekord = {
-  /** LEAD, CONTACT albo COMPANY po stronie CRM. */
+  /** LEAD, CONTACT, DEAL albo CUSTOMER, zależnie od modelu dostawcy. */
   typ: string
   id: string
 }
+
+/**
+ * Rekord w CRM, o którym już wiemy, że dotyczy tego rozmówcy.
+ *
+ * Bierze się z naszej własnej historii połączeń: jeśli pod ten numer
+ * dzwoniliśmy wcześniej i wtedy powstał rekord, to jest to ten sam człowiek.
+ *
+ * Ma to znaczenie przy wbudowanym CRM Open Mercato, gdzie numer telefonu
+ * klienta jest szyfrowany i nie ma pola skrótu do wyszukiwania. Bez tej
+ * podpowiedzi trzeba by odszyfrowywać wszystkie karty klientów tenanta przy
+ * każdej rozmowie, co przy tysiącu klientów jest tysiącem odszyfrowań na
+ * jeden telefon.
+ */
+export type PodpowiedzRekordu = ZnalezionyRekord | null
 
 export type WynikCrm =
   | { ok: true; utworzono: boolean; rekord: ZnalezionyRekord | null }
@@ -75,7 +89,7 @@ export interface ZlaczeCrm {
    * ma inny model: jeden pracuje na leadach, inny na kontaktach i szansach,
    * a jeszcze inny na zgłoszeniach. Reszta modułu nie musi o tym wiedzieć.
    */
-  zapiszWynikRozmowy(dane: DanePolaczenia): Promise<ZnalezionyRekord>
+  zapiszWynikRozmowy(dane: DanePolaczenia, znany?: PodpowiedzRekordu): Promise<ZnalezionyRekord>
 }
 
 /**

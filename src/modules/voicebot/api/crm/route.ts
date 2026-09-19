@@ -20,7 +20,15 @@ export const metadata = {
  * Lista jest po stronie serwera, a nie wpisana w ekran, bo dołożenie
  * kolejnego systemu ma być zmianą w jednym miejscu.
  */
-const DOSTAWCY = [{ id: 'bitrix24', nazwa: 'Bitrix24' }]
+const DOSTAWCY = [
+  { id: 'mercato', nazwa: 'Wbudowany CRM Open Mercato' },
+  { id: 'bitrix24', nazwa: 'Bitrix24' },
+]
+
+/** Czy ten dostawca wymaga adresu i danych dostępowych. */
+function wymagaAdresu(provider: string): boolean {
+  return provider !== 'mercato'
+}
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
@@ -56,7 +64,7 @@ export async function GET() {
   const polaczenie = await findOneWithDecryption(
     em,
     VoiceCrmConnection,
-    { tenantId: auth.tenantId, organizationId: auth.orgId, deletedAt: null },
+    { tenantId: auth.tenantId, organizationId: auth.orgId, active: true, deletedAt: null },
     undefined,
     { tenantId: auth.tenantId ?? null, organizationId: auth.orgId },
   )
@@ -70,13 +78,15 @@ export async function GET() {
   let etapy: Array<{ id: string; nazwa: string }> = []
   let bladDostawcy: string | null = null
 
-  try {
-    const zlacze = new BitrixCrm(polaczenie.webhookUrl)
-    lejki = await zlacze.pobierzLejki()
-    const wybrany = polaczenie.pipelineId ?? lejki[0]?.id
-    if (wybrany) etapy = await zlacze.pobierzEtapy(wybrany)
-  } catch (e) {
-    bladDostawcy = e instanceof Error ? e.message : 'Nie udało się pobrać list z CRM.'
+  if (wymagaAdresu(polaczenie.provider)) {
+    try {
+      const zlacze = new BitrixCrm(polaczenie.webhookUrl)
+      lejki = await zlacze.pobierzLejki()
+      const wybrany = polaczenie.pipelineId ?? lejki[0]?.id
+      if (wybrany) etapy = await zlacze.pobierzEtapy(wybrany)
+    } catch (e) {
+      bladDostawcy = e instanceof Error ? e.message : 'Nie udało się pobrać list z CRM.'
+    }
   }
 
   return json({
@@ -84,7 +94,8 @@ export async function GET() {
     dostawcy: DOSTAWCY,
     provider: polaczenie.provider,
     active: polaczenie.active,
-    adresSkrocony: skrocAdres(polaczenie.webhookUrl),
+    adresSkrocony: polaczenie.webhookUrl ? skrocAdres(polaczenie.webhookUrl) : '',
+    wymagaAdresu: wymagaAdresu(polaczenie.provider),
     pipelineId: polaczenie.pipelineId ?? null,
     stageId: polaczenie.stageId ?? null,
     lejki,
@@ -128,18 +139,25 @@ export async function POST(request: Request) {
     { tenantId: auth.tenantId ?? null, organizationId: auth.orgId },
   )
 
-  const adres = parsed.data.webhookUrl ?? polaczenie?.webhookUrl
-  if (!adres) {
-    return json({ error: 'Podaj adres webhooka, bo żaden nie jest jeszcze zapisany' }, 400)
-  }
+  // Wbudowany CRM nie ma adresu ani żetonu: piszemy do własnej bazy przez
+  // komendy modułu customers. Pole adresu zostaje puste.
+  let adres = ''
+  let sprawdzenie = { ok: true, opis: 'Zapisujemy do wbudowanego CRM Open Mercato.' }
 
-  // Adres sprawdzamy, zanim go zapiszemy. Zapisany, ale niedziałający adres
-  // byłby gorszy od jego braku: system wyglądałby na skonfigurowany, a wyniki
-  // rozmów po cichu nie trafiałyby do CRM klienta.
-  const zlacze = new BitrixCrm(adres)
-  const sprawdzenie = await zlacze.sprawdzPolaczenie()
-  if (!sprawdzenie.ok) {
-    return json({ error: 'Nie udało się połączyć z CRM', szczegoly: sprawdzenie.opis }, 400)
+  if (wymagaAdresu(parsed.data.provider)) {
+    const podany = parsed.data.webhookUrl ?? polaczenie?.webhookUrl
+    if (!podany) {
+      return json({ error: 'Podaj adres webhooka, bo żaden nie jest jeszcze zapisany' }, 400)
+    }
+    adres = podany
+
+    // Adres sprawdzamy, zanim go zapiszemy. Zapisany, ale niedziałający adres
+    // byłby gorszy od jego braku: system wyglądałby na skonfigurowany, a wyniki
+    // rozmów po cichu nie trafiałyby do CRM klienta.
+    sprawdzenie = await new BitrixCrm(adres).sprawdzPolaczenie()
+    if (!sprawdzenie.ok) {
+      return json({ error: 'Nie udało się połączyć z CRM', szczegoly: sprawdzenie.opis }, 400)
+    }
   }
 
   if (polaczenie) {
@@ -166,15 +184,32 @@ export async function POST(request: Request) {
     })
   }
 
+  // Jeden tenant, jeden aktywny odbiorca wyników. Unikalność w bazie jest po
+  // parze tenant i dostawca, więc bez tego dałoby się mieć dwa aktywne naraz,
+  // a webhook wybierałby jeden z nich w sposób nieokreślony. Wyniki rozmów
+  // trafiałyby raz tu, raz tam, i nikt by nie wiedział dlaczego.
+  const pozostale = await em.find(VoiceCrmConnection, {
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId,
+    provider: { $ne: parsed.data.provider },
+    active: true,
+    deletedAt: null,
+  })
+  for (const inne of pozostale) {
+    inne.active = false
+    inne.updatedAt = teraz
+    em.persist(inne)
+  }
+
   em.persist(polaczenie)
   await em.flush()
-  logger.info('crm connection saved', { provider: polaczenie.provider })
+  logger.info('crm connection saved', { provider: polaczenie.provider, wylaczone: pozostale.length })
 
   return json({
     ok: true,
     provider: polaczenie.provider,
     active: polaczenie.active,
-    adresSkrocony: skrocAdres(polaczenie.webhookUrl),
+    adresSkrocony: polaczenie.webhookUrl ? skrocAdres(polaczenie.webhookUrl) : '',
     checkResult: sprawdzenie.opis,
   })
 }

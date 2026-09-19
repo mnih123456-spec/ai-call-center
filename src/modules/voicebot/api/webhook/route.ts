@@ -6,8 +6,10 @@ import { VoiceCall, VoiceCampaign, VoiceCrmConnection } from '../../data/entitie
 import { postCallWebhookSchema } from '../../data/validators'
 import { findOneWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import { toE164 } from '../../lib/phone'
-import { type DanePolaczenia, czyWartoZakladac } from '../../lib/crm'
+import type { AwilixContainer } from 'awilix'
+import { type DanePolaczenia, type ZnalezionyRekord, czyWartoZakladac } from '../../lib/crm'
 import { BitrixCrm } from '../../lib/crm-bitrix'
+import { MercatoCrm } from '../../lib/crm-mercato'
 
 const logger = createLogger('voicebot')
 
@@ -149,6 +151,39 @@ function daneDoCrm(call: VoiceCall): DanePolaczenia {
 }
 
 /**
+ * Rekord w CRM, który już dotyczy tego rozmówcy.
+ *
+ * Szukamy go we własnej historii połączeń, a nie w CRM-ie. Jeśli pod ten sam
+ * numer dzwoniliśmy wcześniej i wtedy coś powstało, to jest ten sam człowiek.
+ *
+ * Dzięki temu wbudowany CRM Open Mercato w ogóle daje się obsłużyć: numer
+ * telefonu klienta jest tam szyfrowany i nie ma przy nim kolumny skrótu, więc
+ * wyszukanie po numerze wymagałoby odszyfrowania wszystkich kart tenanta przy
+ * każdej rozmowie. Nasza tabela połączeń pełni tu rolę indeksu.
+ */
+async function znanyRekord(em: EntityManager, call: VoiceCall): Promise<ZnalezionyRekord | null> {
+  const wczesniejsze = await em.findOne(
+    VoiceCall,
+    {
+      tenantId: call.tenantId,
+      phone: call.phone,
+      crmRecordRef: { $ne: null },
+      id: { $ne: call.id },
+      deletedAt: null,
+    },
+    { orderBy: { createdAt: 'desc' } },
+  )
+  if (!wczesniejsze?.crmRecordRef) return null
+
+  const rozdzielnik = wczesniejsze.crmRecordRef.indexOf(':')
+  if (rozdzielnik < 1) return null
+  return {
+    typ: wczesniejsze.crmRecordRef.slice(0, rozdzielnik),
+    id: wczesniejsze.crmRecordRef.slice(rozdzielnik + 1),
+  }
+}
+
+/**
  * Wysyła wynik rozmowy do CRM klienta.
  *
  * Uruchamiane dopiero po zapisaniu rozmowy u nas, bo wynik rozmowy jest
@@ -161,6 +196,7 @@ function daneDoCrm(call: VoiceCall): DanePolaczenia {
  */
 async function wyslijDoCrm(
   em: EntityManager,
+  container: AwilixContainer,
   call: VoiceCall,
 ): Promise<{ ref: string | null; blad: string | null }> {
   // Adres jest szyfrowany w spoczynku. Zakres podajemy z samego połączenia,
@@ -181,11 +217,17 @@ async function wyslijDoCrm(
   }
 
   try {
-    const zlacze = new BitrixCrm(polaczenie.webhookUrl, {
-      pipelineId: polaczenie.pipelineId,
-      stageId: polaczenie.stageId,
-    })
-    const rekord = await zlacze.zapiszWynikRozmowy(dane)
+    const zlacze = polaczenie.provider === 'mercato'
+      ? new MercatoCrm(container, {
+          tenantId: call.tenantId!,
+          organizationId: call.organizationId!,
+        })
+      : new BitrixCrm(polaczenie.webhookUrl, {
+          pipelineId: polaczenie.pipelineId,
+          stageId: polaczenie.stageId,
+        })
+
+    const rekord = await zlacze.zapiszWynikRozmowy(dane, await znanyRekord(em, call))
     return { ref: `${rekord.typ}:${rekord.id}`, blad: null }
   } catch (e) {
     const powod = e instanceof Error ? e.message : 'Nieznany błąd CRM'
@@ -216,8 +258,8 @@ export async function POST(request: Request) {
   if (!parsed.success) return json({ error: 'Nieznany kształt zdarzenia' }, 400)
 
   const { type, data } = parsed.data
-  const { resolve } = await createRequestContainer()
-  const em = resolve<EntityManager>('em')
+  const kontener = await createRequestContainer()
+  const em = kontener.resolve<EntityManager>('em')
 
   const polaczenie = data.metadata?.phone_call
   const kierunek = polaczenie?.direction === 'inbound' ? 'inbound' : 'outbound'
@@ -329,7 +371,7 @@ export async function POST(request: Request) {
   logger.info('call result stored', { id: call.id, direction: call.direction, product: call.productCode })
 
   // Dopiero teraz, gdy wynik rozmowy jest już bezpiecznie u nas.
-  const crm = await wyslijDoCrm(em, call)
+  const crm = await wyslijDoCrm(em, kontener, call)
   if (crm.ref || crm.blad) {
     call.crmRecordRef = crm.ref
     call.crmError = crm.blad
