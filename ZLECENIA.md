@@ -1,30 +1,28 @@
 # Zlecenia Michala - zapis na biezaco
 
-Kazda rzecz, ktora Michal zlecil. Odhaczam dopiero, gdy sam to zobaczy dzialajace.
-
 ## 2026-09-19, wieczor
 
 | # | Zlecenie | Stan |
 |---|---|---|
-| 1 | Zdjac zakladanie nowego klienta z ekranu "Boty telefoniczne" (3. miejsce, gdzie to wyskakuje) | robie |
-| 2 | Zdjac "Zaloz kolejnego klienta" z ekranu po zalozeniu | robie |
-| 3 | "Zmien pytania" ma wchodzic prosto w edycje pytan, a nie na ekran z kolejnym klikaniem | robie |
-| 4 | "Rozmowa testowa" ma byc mozliwa do wykonania z ekranu kampanii - teraz nie ma czym zadzwonic | robie |
-| 5 | Pytania branzy samochodowej sa dretwe, to rownowazniki zdan, nie pytania do czlowieka | robie |
-| 6 | "Ostatnia operacja: Utworz organizacje" - techniczny napis na ekranie klienta, zdjac | robie |
-| 7 | Mozliwosc dodania wlasnej branzy razem z jej wiedza branzowa | robie |
-| 8 | Zapisywac wszystkie jego zlecenia w osobnym pliku (ten plik) | zrobione |
-| 9 | Wszystko po polsku, zero nazw technicznych na ekranie klienta | stale |
-| 10 | Poprawic wylogowywanie sie z panelu | zrobione (pula polaczen do bazy) |
+| 1 | Wyciac zakladanie nowego klienta z ekranu z pytaniami bota | zrobione |
+| 2 | Wyciac "Zaloz kolejnego klienta" z ekranu po zalozeniu | zrobione |
+| 3 | "Zmien pytania" ma wchodzic prosto w edycje pytan | zrobione, karta otwiera sie sama |
+| 4 | Rozmowa probna ma byc wykonalna zaraz po zalozeniu | zrobione, wychodzi z numeru platformy |
+| 5 | Pytania branzy samochodowej maja brzmiec jak pytania do czlowieka | zrobione |
+| 6 | Zdjac "Ostatnia operacja: Utworz organizacje" | zrobione |
+| 7 | Wlasna branza z wiedza branzowa | NIE, zostaje na jutro |
+| 8 | Zapisywac zlecenia w osobnym pliku | ten plik |
+| 9 | Menu w kolejnosci sciezki klienta | zrobione |
+| 10 | Poprawic wylogowywanie | zrobione wczesniej |
 
-## Wczesniej
+## Znalezione i naprawione przy okazji
 
-| # | Zlecenie | Stan |
-|---|---|---|
-| A | Kolumny wyniku z pytan klienta, nie z branzy | zrobione, niesprawdzone na zywo |
-| B | Klient nie widzi modeli, modele zmienia operator | zrobione |
-| C | Przycisk usuniecia bota | zrobione |
-| D | Przebudowa strony bez nazw technicznych | zlecone Codexowi |
+- Bot zakladany dla warsztatu zbieral pola kredytowe z szablonu (kwota, bank,
+  rok umowy) zamiast pol z pytan branzy. To bylo ogniwo, przez ktore kolumny
+  wynikow nie mialy szans dzialac.
+- Przycisk "Usun bota" nie dzialal nigdy: blokowala go kampania startowa,
+  ktora sami zakladamy przy kazdym bocie. Teraz kampania gasnie razem z botem.
+- Rozmowa probna znikala firmie, ktora przed chwila zalozyla konto.
 
 ## TODO po hackathonie
 

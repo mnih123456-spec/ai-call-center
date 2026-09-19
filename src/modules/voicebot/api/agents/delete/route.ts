@@ -54,15 +54,20 @@ export async function POST(request: Request) {
     agentId: profil.agentId,
     deletedAt: null,
   })
-  if (kampanie.length > 0) {
-    return json({
-      error: `Tego bota używa ${kampanie.length === 1 ? 'kampania' : 'kampanie'}: `
-        + kampanie.map((k) => k.name).join(', ')
-        + '. Usuń ją albo przestaw na innego bota.',
-    }, 409)
+  const teraz = new Date()
+
+  // Kampanie bota gasna razem z nim.
+  //
+  // Wczesniej ich istnienie blokowalo usuniecie, a to bylo nie do przejscia:
+  // kampanie startowa zakladamy sami przy kazdym bocie, wiec przycisk "Usun
+  // bota" nie dzialal nigdy i dla nikogo. Klient nie ma tez gdzie zobaczyc,
+  // ze "kampania" to cos innego niz bot - dla niego to jedna rzecz.
+  for (const k of kampanie) {
+    k.deletedAt = teraz
+    k.updatedAt = teraz
+    em.persist(k)
   }
 
-  const teraz = new Date()
   profil.deletedAt = teraz
   profil.updatedAt = teraz
   em.persist(profil)
