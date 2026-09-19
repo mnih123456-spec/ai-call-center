@@ -128,3 +128,31 @@ ${slownikBranzy(branza)}`.trim()
     return { ok: false, blad: 'Nie udało się połączyć z dostawcą głosu.' }
   }
 }
+
+/**
+ * Kasuje bota u dostawcy.
+ *
+ * Slotów na agentów jest na koncie skończona liczba, a bot zapomniany na
+ * koncie dalej ją zajmuje. Brak agenta u dostawcy traktujemy jak sukces:
+ * skoro go nie ma, to cel został osiągnięty.
+ */
+export async function usunAgentaUDostawcy(agentId: string): Promise<{ ok: true } | { ok: false; blad: string }> {
+  const apiKey = process.env.ELEVENLABS_API_KEY
+  if (!apiKey) return { ok: false, blad: 'Brak klucza dostawcy głosu.' }
+
+  try {
+    const res = await fetch(`${API}/agents/${agentId}`, {
+      method: 'DELETE',
+      headers: { 'xi-api-key': apiKey },
+      signal: AbortSignal.timeout(20000),
+    })
+    if (res.ok || res.status === 404) {
+      logger.info('agent removed at provider', { agentId, status: res.status })
+      return { ok: true }
+    }
+    const tekst = await res.text().catch(() => '')
+    return { ok: false, blad: `status ${res.status}. ${tekst.slice(0, 120)}` }
+  } catch {
+    return { ok: false, blad: 'brak połączenia z dostawcą' }
+  }
+}

@@ -58,6 +58,7 @@ export default function VoicebotAgenciPage() {
   const [ladowanie, setLadowanie] = React.useState(true)
   const [zapis, setZapis] = React.useState(false)
   const [zakladanie, setZakladanie] = React.useState(false)
+  const [kasowany, setKasowany] = React.useState<string | null>(null)
   const [blad, setBlad] = React.useState<string | null>(null)
   const [komunikat, setKomunikat] = React.useState<string | null>(null)
 
@@ -193,6 +194,39 @@ export default function VoicebotAgenciPage() {
       setZakladanie(false)
     }
   }, [nowa, wczytaj, t])
+
+  const usunBota = React.useCallback(async (p: Profil) => {
+    // Potwierdzenie jest tu konieczne: bot znika razem ze swoim scenariuszem
+    // u dostawcy i nie da sie go odtworzyc jednym klikniecem.
+    const zgoda = window.confirm(
+      t('voicebot.agents.deleteConfirm', 'Usunąć bota ') + p.name +
+      t('voicebot.agents.deleteConfirmTail', '? Zniknie też jego scenariusz u dostawcy. Tego nie da się cofnąć.'),
+    )
+    if (!zgoda) return
+    setKasowany(p.id)
+    setBlad(null)
+    setKomunikat(null)
+    try {
+      const res = await fetch('/api/voicebot/agents/delete', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ id: p.id }),
+      })
+      const body = (await res.json().catch(() => null)) as { error?: string; uwaga?: string } | null
+      if (!res.ok) {
+        setBlad(body?.error ?? t('voicebot.agents.deleteError', 'Nie udało się usunąć bota.'))
+        return
+      }
+      setEdycja(null)
+      setKomunikat(body?.uwaga ?? t('voicebot.agents.deleted', 'Bot usunięty.'))
+      await wczytaj()
+    } catch {
+      setBlad(t('voicebot.agents.deleteError', 'Nie udało się usunąć bota.'))
+    } finally {
+      setKasowany(null)
+    }
+  }, [wczytaj, t])
 
   const nazwaBranzy = React.useCallback(
     (id: string) => branze.find((b) => b.id === id)?.nazwa ?? '',
@@ -367,6 +401,16 @@ export default function VoicebotAgenciPage() {
                         <a className="text-sm underline" href="/backend/voicebot">
                           {t('voicebot.agents.toCampaigns', 'Rozmowa testowa')}
                         </a>
+                        <button
+                          type="button"
+                          className="ml-auto text-sm text-destructive underline"
+                          onClick={() => void usunBota(p)}
+                          disabled={kasowany === p.id || zapis}
+                        >
+                          {kasowany === p.id
+                            ? t('voicebot.agents.deleting', 'Usuwam...')
+                            : t('voicebot.agents.delete', 'Usuń bota')}
+                        </button>
                       </div>
 
                       <p className="text-xs text-muted-foreground">
