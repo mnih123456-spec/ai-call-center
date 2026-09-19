@@ -74,6 +74,24 @@ ten sam człowiek, zero przecieku między firmami.
 > Tysiac czterysta osiemdziesiat wobec stu dziesieciu. I tydzien pracy
 > oddany z powrotem czlowiekowi.
 
+**A potem druga liczba, mocniejsza:**
+
+> W tym samym okresie dwanascie z tych stu osiemdziesieciu kontaktow doszlo
+> do podpisanej umowy. Co pietnasty lead. Srednia umowa to dwadziescia kilka
+> tysiecy zlotych.
+>
+> Wiec kazde pietnascie leadow, ktore dzis przepadaja przy trzeciej nieudanej
+> probie, to **jedna umowa wiecej**.
+
+**Powiedz to uczciwie, zanim ktos zapyta:**
+
+> Wynagrodzenie za sukces placi sie po wygranej, a proces trwa latami.
+> Od reki wplywa tylko oplata wstepna. To nie jest gotowka jutro, tylko
+> wartosc, ktora dojrzewa.
+
+To zdanie robi lepsze wrazenie niz jego brak. Jury, ktore samo wylapie
+przemilczenie, przestaje wierzyc w cala reszte liczb.
+
 ## Minuta 4:45-5:30, wdrożenie
 
 > To nie jest prototyp na weekend. Stoi na Open Mercato, ma migracje,

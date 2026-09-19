@@ -110,9 +110,27 @@ rozmowę odbytą i 2 grosze za nieodebraną próbę.
 **Różnica to około 1370 zł miesięcznie i tydzień roboczy odzyskany.**
 
 Ale najważniejsza liczba jest inna. W tym samym okresie **12 kontaktów ze 180
-doszło do podpisanej umowy**, czyli **co piętnasty lead**. Skoro tak, to każde
-piętnaście leadów uratowanych od przepadnięcia przy trzeciej nieudanej próbie
-oznacza **jedną dodatkową umowę**.
+doszło do podpisanej umowy**, czyli **co piętnasty lead**.
+
+**Ile warta jest jedna umowa**, według cennika kancelarii:
+
+| Produkt | Opłata wstępna | Wynagrodzenie za sukces |
+|---|---|---|
+| WIBOR | 3 000 zł | 30 000 zł |
+| SKD | brak | 30% korzyści, minimum 10 000 zł |
+| Kredyty walutowe | wg kapitału | 12 000 - 33 800 zł |
+
+Przy obecnej strukturze spraw daje to **średnio około 20-25 tysięcy złotych
+na umowę**.
+
+**Uczciwe zastrzeżenie, które mówimy wprost:** wynagrodzenie za sukces jest
+płatne **po wygranej sprawie**, a proces trwa latami. To nie jest gotówka od
+ręki, tylko wartość, która dojrzewa. Natychmiast wpływa wyłącznie opłata
+wstępna: 3 000 zł przy WIBOR, przy SKD zero.
+
+Dlatego właściwe zdanie brzmi tak: każde piętnaście leadów uratowanych od
+przepadnięcia to **jedna dodatkowa umowa warta dwadzieścia kilka tysięcy
+w perspektywie procesu**, przy koszcie bota 110 zł miesięcznie.
 
 Bot nie musi być lepszy od człowieka w rozmowie. Wystarczy, że dzwoni
 w sekundę po zgłoszeniu, ponawia bez zmęczenia i odbiera, gdy klient
