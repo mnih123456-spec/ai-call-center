@@ -102,8 +102,10 @@ pamiątka po teście prawdziwym telefonem z 16.09.
 
 Na scenie i na relacji wyświetliłby się prawdziwy numer.
 
-**Do decyzji:** skasować je przy uruchamianiu danych demo. Dowód z tamtego
-testu jest opisany w dzienniku, więc nic nie ginie.
+**ROZSTRZYGNIETE 19.09.** Skrypt `scripts/dane-demo.mjs` kasuje je przy kazdym
+uruchomieniu, razem z numerem `+48570372252`. Nie jest to juz decyzja do
+podjecia recznie przed demem. Dowod z tamtego testu jest opisany w dzienniku,
+wiec nic nie ginie.
 
 ## 10. Kolejność prac
 

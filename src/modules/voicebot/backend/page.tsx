@@ -203,6 +203,23 @@ export default function VoicebotCampaignsPage() {
               {t('voicebot.campaigns.orderNumber', 'Zamów numer u partnera')}
             </a>
           </div>
+        ) : catalog.configured && !loading ? (
+          /*
+            Firma z jednym numerem potrzebuje drugiego, gdy rusza druga
+            kampania albo gdy chce dzwonić z numeru lokalnego dla swojego
+            miasta. Dlatego skrót zostaje na ekranie także wtedy, gdy numery
+            już są, tyle że dyskretnie.
+          */
+          <div className="mb-4 text-sm text-muted-foreground">
+            <a
+              className="underline"
+              href={PARTNER_NUMEROW_URL}
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              {t('voicebot.campaigns.orderNumber', 'Zamów numer u partnera')}
+            </a>
+          </div>
         ) : null}
 
         {formOpen ? (

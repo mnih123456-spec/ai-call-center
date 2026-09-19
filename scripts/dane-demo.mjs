@@ -22,6 +22,15 @@ const PRZEDROSTEK = 'DEMO-'
 const KAMPANIA = 'Leady z formularza, wrzesień (demo)'
 
 /**
+ * Numery prawdziwych osób, które nie mogą zostać na liście demo.
+ *
+ * Trafiły tam z ręcznych testów prowadzonych z telefonem w dłoni. Skrypt
+ * kasuje je przy każdym uruchomieniu, żeby jedno przeoczenie nie skończyło
+ * się pokazaniem czyjegoś numeru na ekranie przed salą.
+ */
+const NUMERY_PRYWATNE = ['+48503956401', '+48570372252']
+
+/**
  * Dzień, w którym rozmowa się odbyła, liczony wstecz od teraz.
  * Rozrzut po kilku dniach sprawia, że lista wygląda jak praca, a nie
  * jak jeden wsad zrobiony minutę przed prezentacją.
@@ -160,6 +169,20 @@ async function main() {
           or conversation_id like 'sim_%'`,
       [`${PRZEDROSTEK}%`],
     )
+
+    // Numery, które należą do prawdziwych osób, a nie do danych demo.
+    // Zostały po ręcznych testach z telefonem w dłoni. Na scenie i na
+    // nagraniu byłyby widoczne jako czyjś prawdziwy numer, a regulamin
+    // ścieżki 03 zabrania pokazywania prawdziwych danych.
+    const prywatne = await client.query(
+      `delete from voicebot_calls
+       where phone = any($1::text[])
+       returning phone`,
+      [NUMERY_PRYWATNE],
+    )
+    if (prywatne.rowCount > 0) {
+      console.log(`Usunieto ${prywatne.rowCount} rozmow z prawdziwymi numerami prywatnymi.`)
+    }
     await client.query(`delete from voicebot_campaigns where name = $1`, [KAMPANIA])
 
     const kampania = await client.query(
