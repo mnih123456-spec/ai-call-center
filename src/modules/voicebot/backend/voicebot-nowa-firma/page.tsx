@@ -149,6 +149,10 @@ export default function VoicebotNowaFirmaPage() {
       <PageHeader title={t('voicebot.newCompany.title', 'Nowy klient')} />
       <PageBody>
         <div className="grid max-w-xl gap-4">
+          {/* Po zalozeniu formularz znika. Zostawiony na ekranie zaprasza do
+              zalozenia kolejnej firmy, a tego nikt w tym momencie nie chce:
+              wlasnie zalozyl jedna i ma ja skonfigurowac. */}
+          {wynik ? null : (
           <div className="grid gap-3 rounded border p-4">
             <p className="text-sm text-muted-foreground">
               {t(
@@ -207,6 +211,7 @@ export default function VoicebotNowaFirmaPage() {
 
             {blad ? <div className="text-sm text-destructive">{blad}</div> : null}
           </div>
+          )}
 
           {wynik ? (
             <div className="rounded border p-4 text-sm">
@@ -228,6 +233,13 @@ export default function VoicebotNowaFirmaPage() {
                 <a className="underline" href="/backend/voicebot-agenci">
                   {t('voicebot.newCompany.ctaBot', 'Zmień pytania')}
                 </a>
+                <button
+                  type="button"
+                  className="underline text-muted-foreground"
+                  onClick={() => { setWynik(null); setEtap(null) }}
+                >
+                  {t('voicebot.newCompany.ctaNext', 'Załóż kolejnego klienta')}
+                </button>
               </div>
             </div>
           ) : null}

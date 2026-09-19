@@ -98,11 +98,26 @@ function asBool(value: unknown): boolean | null {
  */
 async function kampaniaNumeru(em: EntityManager, phoneNumberId: string | null | undefined) {
   if (!phoneNumberId) return null
-  return em.findOne(
+  const kampanie = await em.find(
     VoiceCampaign,
     { phoneNumberId, deletedAt: null },
     { orderBy: { createdAt: 'desc' } },
   )
+  if (kampanie.length === 0) return null
+
+  // Numer moze byc uzywany przez kilka kampanii jednej firmy i to jest
+  // normalne. Nie moze natomiast nalezec do dwoch firm naraz: wtedy nie da sie
+  // ustalic, czyja jest ta rozmowa, a zgadniecie oznacza wpisanie cudzego
+  // wyniku do cudzej bazy. Wolimy odrzucic zdarzenie i zostawic slad w logu.
+  const firmy = new Set(kampanie.map((k) => `${k.tenantId ?? ''}|${k.organizationId ?? ''}`))
+  if (firmy.size > 1) {
+    logger.error('numer nalezy do wiecej niz jednej firmy', {
+      phoneNumberId,
+      firm: firmy.size,
+    })
+    return null
+  }
+  return kampanie[0]
 }
 
 /**

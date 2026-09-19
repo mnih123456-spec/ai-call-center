@@ -19,6 +19,28 @@ export function PolaczenieTestowe({ kampanie, domyslnyNumer }: {
   kampanie: Kampania[]
   domyslnyNumer?: string | null
 }) {
+  // Scenariusz demo obiecuje, ze pracownik oglada wyniki, ale nie uruchamia
+  // platnych polaczen. Bez tego sprawdzenia przycisk widzial kazdy, kto ma
+  // wglad w kampanie, i obietnice dalo sie obalic na scenie w pol minuty.
+  const [wolno, setWolno] = React.useState<boolean | null>(null)
+  React.useEffect(() => {
+    let zywe = true
+    void (async () => {
+      try {
+        const res = await fetch('/api/auth/feature-check', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ features: ['voicebot.calls.start'] }),
+        })
+        if (!res.ok) { if (zywe) setWolno(false); return }
+        const body = (await res.json()) as { granted?: Record<string, boolean> }
+        if (zywe) setWolno(body?.granted?.['voicebot.calls.start'] === true)
+      } catch { if (zywe) setWolno(false) }
+    })()
+    return () => { zywe = false }
+  }, [])
+
   const t = useT()
   const [otwarte, setOtwarte] = React.useState(false)
   const [kampania, setKampania] = React.useState('')
@@ -62,6 +84,9 @@ export function PolaczenieTestowe({ kampanie, domyslnyNumer }: {
   }, [kampania, numer, t])
 
   if (kampanie.length === 0) return null
+  // Dopoki nie wiemy, czy wolno, nie pokazujemy nic: mignieciecie przyciskiem
+  // i jego zniknieciem wyglada gorzej niz jego brak.
+  if (wolno !== true) return null
 
   return (
     <div className="mb-4 rounded border p-3">

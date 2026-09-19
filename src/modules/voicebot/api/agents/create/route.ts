@@ -104,8 +104,20 @@ export async function POST(request: Request) {
   const limity = await em.findOne(VoiceTenantLimits, {
     tenantId: auth.tenantId ?? null, organizationId: auth.orgId, deletedAt: null,
   })
+  // Numer musi byc wolny. Webhook rozpoznaje wlasciciela rozmowy po numerze,
+  // wiec dwie firmy na jednym numerze znacza, ze wyniki jednej trafiaja do
+  // drugiej albo nigdzie. Dlatego bierzemy pierwszy numer z puli tej firmy,
+  // ktorego nie uzywa jeszcze kampania innej firmy.
   const katalog = await fetchProviderCatalog()
-  const numery = filtrujNumery(katalog.numbers, limity?.allowedNumbers || process.env.VOICEBOT_NUMERY_DOZWOLONE)
+  const dozwolone = filtrujNumery(katalog.numbers, limity?.allowedNumbers || process.env.VOICEBOT_NUMERY_DOZWOLONE)
+  const zajete = await em.find(VoiceCampaign, { deletedAt: null }, { fields: ['phoneNumberId', 'tenantId', 'organizationId'] })
+  const cudze = new Set(
+    zajete
+      .filter((k) => k.tenantId !== (auth.tenantId ?? null) || k.organizationId !== auth.orgId)
+      .map((k) => k.phoneNumberId)
+      .filter(Boolean) as string[],
+  )
+  const numery = dozwolone.filter((n) => !cudze.has(n.phoneNumberId))
   const kampania = em.create(VoiceCampaign, {
     name: `${wynik.nazwa} - kampania startowa`,
     description: null,
