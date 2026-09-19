@@ -177,6 +177,16 @@ Kopia z serwera w `strona-kopia-z-serwera/`.
 
 ## Po hackathonie
 
+- **Limit rozmow testowych** podniesiony z 5 do 60 na godzine
+  (`LIMIT_TESTOW_NA_GODZINE` w `api/calls/test/route.ts`, nadpisywalny przez
+  `VOICEBOT_LIMIT_TESTOW_NA_GODZINE`). Przed uruchomieniem dla klientow
+  wrocic do 5: rozmowa testowa idzie na nasz koszt i z naszego numeru.
+
+- Rozpoznawanie mowy to najslabsze ogniwo ElevenLabs (jeden silnik Scribe, bez
+  wyboru). Fonio sklada wlasny pipeline: SIP -> Deepgram STT -> OpenAI LLM ->
+  ElevenLabs/Azure TTS. Jesli jakosc rozpoznawania zablokuje sprzedaz: wlasny
+  pipeline na LiveKit Agents albo Pipecat z Deepgram. Wymiana dotyczy tylko
+  `nowy-agent.ts`, `dispatch-call.ts`/`rozmowa.ts` i `webhook/route.ts`.
 - Branze jako dane w bazie zamiast listy w kodzie. Silnik uczy sie branz
   z rozmow klientow i wyciaga wnioski.
 - Rotacja: klucz ElevenLabs, haslo `ai@aicallcenter.pl`, token Bitrix.

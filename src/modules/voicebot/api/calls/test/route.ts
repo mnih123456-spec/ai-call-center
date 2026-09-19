@@ -8,8 +8,14 @@ import { startOutboundCall } from '../../../lib/provider'
 
 const logger = createLogger('voicebot')
 
-/** Ile połączeń testowych wolno wykonać w ciągu godziny na jedną firmę. */
-const LIMIT_TESTOW_NA_GODZINE = 5
+/**
+ * Ile połączeń testowych wolno wykonać w ciągu godziny na jedną firmę.
+ *
+ * Na czas testów przed pokazem podniesione z 5 do 60. Przed uruchomieniem
+ * dla klientów wrócić do małej liczby: rozmowa testowa idzie na nasz koszt
+ * i z naszego numeru.
+ */
+const LIMIT_TESTOW_NA_GODZINE = Number(process.env.VOICEBOT_LIMIT_TESTOW_NA_GODZINE ?? 60)
 
 export const metadata = {
   POST: { requireAuth: true, requireFeatures: ['voicebot.calls.start'] },
