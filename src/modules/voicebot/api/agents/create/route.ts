@@ -3,9 +3,11 @@ import { z } from 'zod'
 import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import { createLogger } from '@open-mercato/shared/lib/logger'
-import { VoiceAgentProfile } from '../../../data/entities'
+import { VoiceCampaign, VoiceAgentProfile, VoiceTenantLimits } from '../../../data/entities'
 import { znanaBranza } from '../../../lib/branze'
 import { zalozAgentaDlaFirmy } from '../../../lib/nowy-agent'
+import { filtrujNumery } from '../../../lib/limity'
+import { fetchProviderCatalog } from '../../../lib/provider'
 import { pobierzWiedze } from '../../../lib/wiedza'
 
 const logger = createLogger('voicebot')
@@ -94,7 +96,30 @@ export async function POST(request: Request) {
   em.persist(profil)
   await em.flush()
 
-  logger.info('company bot created', { id: profil.id, agentId: wynik.agentId, branza: branzaKoncowa })
+  // Sam bot nie pozwala jeszcze zadzwonic. Zakladamy od razu kampanie, zeby
+  // kreator konczyl sie czyms, co da sie kliknac, a nie ekranem bez dalszego
+  // kroku. Kampania startuje jako szkic, wiec nic samo nie wydzwoni.
+  const limity = await em.findOne(VoiceTenantLimits, {
+    tenantId: auth.tenantId ?? null, organizationId: auth.orgId, deletedAt: null,
+  })
+  const katalog = await fetchProviderCatalog()
+  const numery = filtrujNumery(katalog.numbers, limity?.allowedNumbers || process.env.VOICEBOT_NUMERY_DOZWOLONE)
+  const kampania = em.create(VoiceCampaign, {
+    name: `${wynik.nazwa} - kampania startowa`,
+    description: null,
+    agentId: wynik.agentId,
+    phoneNumberId: numery[0]?.phoneNumberId ?? null,
+    minIntervalSecs: 180,
+    status: 'draft',
+    tenantId: auth.tenantId ?? null,
+    organizationId: auth.orgId,
+    createdAt: teraz,
+    updatedAt: teraz,
+  })
+  em.persist(kampania)
+  await em.flush()
+
+  logger.info('company bot created', { id: profil.id, agentId: wynik.agentId, branza: branzaKoncowa, campaignId: kampania.id })
 
   return json({
     id: profil.id,
@@ -103,5 +128,8 @@ export async function POST(request: Request) {
     industry: branzaKoncowa,
     knowledgeText: wiedza ?? '',
     uwaga: uwagaWiedzy,
+    kampaniaId: kampania.id,
+    kampaniaNazwa: kampania.name,
+    numerPrzypisany: numery[0]?.phoneNumber ?? null,
   }, 201)
 }

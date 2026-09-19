@@ -47,6 +47,11 @@ export default function VoicebotAgenciPage() {
   const [formularz, setFormularz] = React.useState(PUSTY_FORMULARZ)
   const [nowa, setNowa] = React.useState({ nazwaFirmy: '', industry: '', knowledgeUrl: '' })
   const [zakladanie, setZakladanie] = React.useState(false)
+  const [gotowe, setGotowe] = React.useState<{ nazwa: string; kampania: string; numer: string | null; uwaga: string | null } | null>(null)
+  // Wybor modelu to sprawa operatora platformy, nie klienta. Klient ma dostac
+  // bota, ktory dziala, a nie liste modeli do eksperymentow na wlasnych
+  // rozmowach.
+  const [operator, setOperator] = React.useState(false)
   const [ladowanie, setLadowanie] = React.useState(true)
   const [zapis, setZapis] = React.useState(false)
   const [blad, setBlad] = React.useState<string | null>(null)
@@ -78,6 +83,19 @@ export default function VoicebotAgenciPage() {
   }, [t])
 
   React.useEffect(() => { void wczytaj() }, [wczytaj])
+
+  React.useEffect(() => {
+    let zywe = true
+    void (async () => {
+      try {
+        const res = await fetch('/api/directory/organization-switcher', { credentials: 'same-origin' })
+        if (!res.ok) return
+        const body = (await res.json()) as { isSuperAdmin?: boolean }
+        if (zywe) setOperator(body.isSuperAdmin === true)
+      } catch { /* brak odpowiedzi znaczy: nie operator */ }
+    })()
+    return () => { zywe = false }
+  }, [])
 
   const zapisz = React.useCallback(async () => {
     if (!formularz.agentId || !formularz.name.trim()) return
@@ -136,17 +154,19 @@ export default function VoicebotAgenciPage() {
         body: JSON.stringify(nowa),
       })
       const body = (await res.json().catch(() => null)) as
-        | { error?: string; nazwa?: string; uwaga?: string }
+        | { error?: string; nazwa?: string; uwaga?: string; kampaniaNazwa?: string; numerPrzypisany?: string | null }
         | null
       if (!res.ok) {
         setBlad(body?.error ?? t('voicebot.agents.new.error', 'Nie udało się założyć bota.'))
         return
       }
       setNowa({ nazwaFirmy: '', industry: '', knowledgeUrl: '' })
-      setKomunikat(
-        t('voicebot.agents.new.done', 'Bot założony dla firmy ') + (body?.nazwa ?? '') +
-        (body?.uwaga ? `. ${body.uwaga}` : '.'),
-      )
+      setGotowe({
+        nazwa: body?.nazwa ?? '',
+        kampania: body?.kampaniaNazwa ?? '',
+        numer: body?.numerPrzypisany ?? null,
+        uwaga: body?.uwaga ?? null,
+      })
       await wczytaj()
     } catch {
       setBlad(t('voicebot.agents.new.error', 'Nie udało się założyć bota.'))
@@ -249,6 +269,30 @@ export default function VoicebotAgenciPage() {
                   </span>
                 ) : null}
               </div>
+
+              {/* Zalozony bot sam jeszcze nie dzwoni. Bez tego kroku kreator
+                  konczyl sie komunikatem i nie bylo wiadomo, co dalej. */}
+              {gotowe ? (
+                <div className="mt-2 rounded border border-dashed p-3 text-sm">
+                  <div className="font-medium">
+                    {t('voicebot.agents.new.readyTitle', 'Bot gotowy: ')}{gotowe.nazwa}
+                  </div>
+                  <div className="mt-1 text-muted-foreground">
+                    {t('voicebot.agents.new.readyCampaign', 'Założyliśmy dla niego kampanię ')}
+                    <span className="font-medium">{gotowe.kampania}</span>
+                    {gotowe.numer
+                      ? t('voicebot.agents.new.readyNumber', ' i przypisaliśmy numer ') + gotowe.numer
+                      : t('voicebot.agents.new.readyNoNumber', ', ale bez numeru: przypisz go na ekranie kampanii')}
+                    {'.'}
+                  </div>
+                  {gotowe.uwaga ? (
+                    <div className="mt-1 text-muted-foreground">{gotowe.uwaga}</div>
+                  ) : null}
+                  <a className="mt-2 inline-block underline" href="/backend/voicebot">
+                    {t('voicebot.agents.new.readyCta', 'Przejdź do kampanii i wykonaj rozmowę testową')}
+                  </a>
+                </div>
+              ) : null}
             </div>
 
             {profile.length > 0 ? (
@@ -351,9 +395,10 @@ export default function VoicebotAgenciPage() {
                 </select>
               </label>
 
-              {/* Ustawienia rozmowy, a nie jej treści. Trzymamy je obok
-                  scenariusza, bo to tutaj widać skutek: bot, który myśli
-                  pięć sekund, brzmi jak zerwane połączenie. */}
+              {/* Ustawienia rozmowy, a nie jej treści. Widoczne wyłącznie dla
+                  operatora platformy: klient ma dostać bota, który działa,
+                  a nie listę modeli do eksperymentów na własnych rozmowach. */}
+              {operator ? (
               <div className="grid gap-3 rounded border border-dashed p-3 sm:grid-cols-2">
                 <label className="flex flex-col gap-1 text-sm">
                   <span>{t('voicebot.agents.field.llm', 'Model rozmowy')}</span>
@@ -391,6 +436,7 @@ export default function VoicebotAgenciPage() {
                   )}
                 </p>
               </div>
+              ) : null}
 
               <label className="flex flex-col gap-1 text-sm">
                 <span>{t('voicebot.agents.field.industry', 'Branża firmy')}</span>
