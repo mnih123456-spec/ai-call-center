@@ -45,6 +45,8 @@ export default function VoicebotAgenciPage() {
   const [modele, setModele] = React.useState<Model[]>([])
   const [katalogDziala, setKatalogDziala] = React.useState(true)
   const [formularz, setFormularz] = React.useState(PUSTY_FORMULARZ)
+  const [nowa, setNowa] = React.useState({ nazwaFirmy: '', industry: '', knowledgeUrl: '' })
+  const [zakladanie, setZakladanie] = React.useState(false)
   const [ladowanie, setLadowanie] = React.useState(true)
   const [zapis, setZapis] = React.useState(false)
   const [blad, setBlad] = React.useState<string | null>(null)
@@ -122,6 +124,37 @@ export default function VoicebotAgenciPage() {
     }
   }, [formularz, wczytaj, t])
 
+  const zalozBota = React.useCallback(async () => {
+    setZakladanie(true)
+    setBlad(null)
+    setKomunikat(null)
+    try {
+      const res = await fetch('/api/voicebot/agents/create', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(nowa),
+      })
+      const body = (await res.json().catch(() => null)) as
+        | { error?: string; nazwa?: string; uwaga?: string }
+        | null
+      if (!res.ok) {
+        setBlad(body?.error ?? t('voicebot.agents.new.error', 'Nie udało się założyć bota.'))
+        return
+      }
+      setNowa({ nazwaFirmy: '', industry: '', knowledgeUrl: '' })
+      setKomunikat(
+        t('voicebot.agents.new.done', 'Bot założony dla firmy ') + (body?.nazwa ?? '') +
+        (body?.uwaga ? `. ${body.uwaga}` : '.'),
+      )
+      await wczytaj()
+    } catch {
+      setBlad(t('voicebot.agents.new.error', 'Nie udało się założyć bota.'))
+    } finally {
+      setZakladanie(false)
+    }
+  }, [nowa, wczytaj, t])
+
   const edytuj = React.useCallback((p: Profil) => {
     setFormularz({
       id: p.id,
@@ -156,6 +189,67 @@ export default function VoicebotAgenciPage() {
                 {t('voicebot.agents.noCatalog', 'Brak połączenia z dostawcą głosu. Identyfikator agenta trzeba wpisać ręcznie.')}
               </div>
             ) : null}
+
+            {/* Zakladanie bota od zera. Stoi nad lista, bo firma, ktora
+                dopiero zaczyna, nie ma czego edytowac, a wybieranie agenta
+                z listy konta konczylo sie tym, ze bot mowil cudza nazwa. */}
+            <div className="mb-6 grid gap-3 rounded border p-4">
+              <div className="text-sm font-medium">
+                {t('voicebot.agents.new.title', 'Nowy bot dla tej firmy')}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {t(
+                  'voicebot.agents.new.hint',
+                  'Zakładamy bota od zera, na naszym sprawdzonym scenariuszu. Przedstawi się nazwą Twojej firmy, dostanie słownik pojęć z jej branży, a z podanego adresu przeczytamy, czym firma się zajmuje.',
+                )}
+              </p>
+
+              <div className="grid gap-3 sm:grid-cols-3">
+                <label className="flex flex-col gap-1 text-sm">
+                  <span>{t('voicebot.agents.new.company', 'Nazwa firmy')}</span>
+                  <input
+                    className="rounded border px-2 py-1"
+                    value={nowa.nazwaFirmy}
+                    onChange={(e) => setNowa((n) => ({ ...n, nazwaFirmy: e.target.value }))}
+                    placeholder={t('voicebot.agents.new.companyPlaceholder', 'np. Kancelaria Nowak')}
+                  />
+                </label>
+
+                <label className="flex flex-col gap-1 text-sm">
+                  <span>{t('voicebot.agents.field.industry', 'Branża firmy')}</span>
+                  <select
+                    className="rounded border px-2 py-1"
+                    value={nowa.industry}
+                    onChange={(e) => setNowa((n) => ({ ...n, industry: e.target.value }))}
+                  >
+                    {branze.map((b) => <option key={b.id} value={b.id}>{b.nazwa}</option>)}
+                  </select>
+                </label>
+
+                <label className="flex flex-col gap-1 text-sm">
+                  <span>{t('voicebot.agents.new.site', 'Adres strony firmy')}</span>
+                  <input
+                    className="rounded border px-2 py-1"
+                    value={nowa.knowledgeUrl}
+                    onChange={(e) => setNowa((n) => ({ ...n, knowledgeUrl: e.target.value }))}
+                    placeholder="https://twojafirma.pl"
+                  />
+                </label>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Button onClick={() => void zalozBota()} disabled={zakladanie || nowa.nazwaFirmy.trim().length < 2}>
+                  {zakladanie
+                    ? t('voicebot.agents.new.working', 'Zakładam bota...')
+                    : t('voicebot.agents.new.submit', 'Załóż bota')}
+                </Button>
+                {nowa.knowledgeUrl ? (
+                  <span className="text-xs text-muted-foreground">
+                    {t('voicebot.agents.new.slow', 'Z odczytem strony potrwa to kilkanaście sekund.')}
+                  </span>
+                ) : null}
+              </div>
+            </div>
 
             {profile.length > 0 ? (
               <ul className="mb-6 divide-y rounded border">
