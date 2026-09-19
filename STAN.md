@@ -138,10 +138,19 @@ pisze ja klient.
 **Nie sprawdzone na zywo w przegladarce** - panel wymaga restartu po migracji
 (instancja ORM zyje w procesie i nie zna nowej kolumny do restartu).
 
-### 2. Pelna rozmowa od poczatku do konca
+### 2. Pelna rozmowa od poczatku do konca - SPRAWDZONE 19.09 wieczor
 
-Nigdy niesprawdzone: pytanie w panelu -> pole u dostawcy -> prawdziwa rozmowa
--> webhook -> kolumna w tabeli. Kazdy kawalek sprawdzony osobno, calosc nie.
+Bot samciagplug (motoryzacja): pytania z panelu -> pola u dostawcy -> prawdziwa
+rozmowa na telefon Michala -> webhook -> kolumny w tabeli z odpowiedziami
+(Syrenka, rocznik, przebieg cyframi). Ostatnia proba o 20:05 z numeru
+produkcyjnego ACTIO na gpt-4.1-mini: "poszlo, dziala".
+
+Wnioski z dzisiejszych rozmow, zeby nie powtarzac bledow:
+- `gemini-2.0-flash-lite`: dwa razy "dzien dobry", czyta na glos "zakoncz polaczenie".
+- `gemini-2.5-flash`: model myslacy, wypowiedzial monolog po angielsku. Odpada.
+- `gpt-4.1-mini`: trzyma sie regul, polski, szybki. Zostaje.
+- Rozpoznawanie mowy (Scribe, jedyny silnik u dostawcy) myli rzadkie slowa;
+  slowa kluczowe per branza pomagaja (Syrenka rozpoznana), ale nie lecza.
 
 ### 3. Statusy nieodebranych
 
