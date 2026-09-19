@@ -57,9 +57,9 @@ describe('słownik w scenariuszu', () => {
 
 describe('pozostałe branże', () => {
   it.each([
-    ['fotowoltaika', ['kWp', 'Net-billing', 'Pompa ciepla']],
-    ['nieruchomosci', ['Ksiega wieczysta', 'Rynek pierwotny', 'Zdolnosc kredytowa']],
-    ['motoryzacja', ['Geometria kol', 'rozrzadu', 'Diagnostyka']],
+    ['fotowoltaika', ['kWp', 'Net-billing', 'Pompa ciepła']],
+    ['nieruchomosci', ['Księga wieczysta', 'Rynek pierwotny', 'Zdolność kredytowa']],
+    ['motoryzacja', ['Geometria kół', 'rozrządu', 'Diagnostyka']],
     ['medycyna', ['e-recepta', 'NFZ', 'higienizacja']],
   ])('%s zna swoje pojęcia', (id, pojecia) => {
     const slownik = slownikBranzy(id)
@@ -67,18 +67,18 @@ describe('pozostałe branże', () => {
     for (const p of pojecia) expect(slownik).toContain(p)
   })
 
-  // Dane o zdrowiu to dane szczegolnej kategorii. Automat dzwoniacy w imieniu
+  // Dane o zdrowiu to dane szczególnej kategorii. Automat dzwoniacy w imieniu
   // gabinetu nie moze ich zbierac ani ocieniac pilnosci przypadku.
   it('gabinet ma ostrzejszą granicę niż pozostałe branże', () => {
     const s = slownikBranzy('medycyna')
     expect(s).toContain('Nie pytasz o objawy')
     expect(s).toContain('112')
-    expect(s).toContain('szczegolnej kategorii')
+    expect(s).toContain('szczególnej kategorii')
   })
 
   it('wszystkie branże z listy dają niepusty słownik poza ogólną', () => {
     for (const b of BRANZE) {
-      if (b.id === 'ogolna') expect(slownikBranzy(b.id)).toBe('')
+      if (b.id === 'ogolna' || b.id === 'wlasna') expect(slownikBranzy(b.id)).toBe('')
       else expect(slownikBranzy(b.id).length).toBeGreaterThan(200)
     }
   })
@@ -89,7 +89,7 @@ describe('scenariusz per branża', () => {
   // dlatego, ze szablon powstal dla kancelarii.
   it('każda branża ma własny cel rozmowy, nie kredytowy', () => {
     const serwis = scenariuszBranzy('motoryzacja', 'Warsztat Kowalski')
-    expect(serwis).toContain('wizyte w serwisie')
+    expect(serwis).toContain('wizytę w serwisie')
     expect(serwis).not.toContain('umowy kredytowej')
     expect(serwis).toContain('Warsztat Kowalski')
   })
@@ -98,7 +98,7 @@ describe('scenariusz per branża', () => {
     const p = powitanieBranzy('fotowoltaika', 'Solar Nowak')
     expect(p).toContain('Solar Nowak')
     expect(p).not.toContain('{FIRMA}')
-    expect(p).toContain('wycene instalacji')
+    expect(p).toContain('wycenę instalacji')
   })
 
   // Reguly chroniace zgodnosc rozmowy z prawem nie moga zalezec od branzy.
@@ -106,8 +106,8 @@ describe('scenariusz per branża', () => {
     for (const b of BRANZE) {
       const s = scenariuszBranzy(b.id, 'Firma')
       if (!s) continue
-      expect(s).toContain('nigdy jako czlowiek')
-      expect(s).toContain('pytasz o zgode')
+      expect(s).toContain('nigdy jako człowiek')
+      expect(s).toContain('pytasz o zgodę')
     }
   })
 

@@ -30,6 +30,9 @@ export function PolaczenieTestowe({ kampanie, domyslnyNumer }: {
   const [wolno, setWolno] = React.useState<boolean | null>(null)
   React.useEffect(() => {
     let zywe = true
+    // W teście komponentu nie ma `fetch`. Bez tej furtki każdy test ekranu
+    // kampanii wywracałby się na sprawdzeniu, które go nie dotyczy.
+    if (typeof fetch !== 'function') { setWolno(false); return }
     void (async () => {
       const [uprawnienie, operator] = await Promise.all([
         fetch('/api/auth/feature-check', {
