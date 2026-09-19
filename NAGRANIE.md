@@ -10,19 +10,19 @@ słowami. Kursywą to, co ma być w tym momencie na ekranie.
 
 ## 1. Problem (0:00 do 0:30)
 
-*Ekran logowania albo czarny, ważny jest głos.*
+*Strona aicallcenter.pl na ekranie, przewijasz ją powoli przez te trzy akapity,
+nie zatrzymujesz się na sekcjach. Na ostatnim zdaniu przechodzisz do panelu.*
 
-> Współpracuję z kancelariami od umów kredytowych, dostarczam im zgłoszenia
-> z reklam. To przypadek jednej z nich. Ludzie zostawiają numer
-> w formularzu, a potem ktoś musi do każdego zadzwonić.
+> Buduję kancelariom kredytowym automatyzacje: od reklamy i formularza, przez
+> CRM, po analizę umowy i ofertę. Jednego w tej układance nie dało się
+> zautomatyzować: telefonu do klienta.
 >
-> We wrześniu weszło sto osiemdziesiąt zgłoszeń. Sto czterdzieści dziewięć
-> nie odebrało za pierwszym razem. W skali miesiąca to prawie tysiąc prób
-> i sześćdziesiąt pięć godzin jednej osoby.
+> We wrześniu u jednej z kancelarii osiemdziesiąt procent zgłoszeń nie
+> odebrało za pierwszym razem. Każda próba to cztery minuty człowieka,
+> a klient, który oddzwania, trafia na zajęty numer albo dzwoni po godzinach.
 >
-> A jak klient oddzwoni na nieodebrane, dzwoni na numer pracownika, który
-> akurat rozmawia z kimś innym albo jest po godzinach. Nikt nie odbiera. Klient
-> próbuje raz i odpuszcza.
+> Stąd potrzeba: dodzwonić się do klienta w minutę od zapisu, nie następnego
+> dnia, i nie stracić żadnego oddzwonienia.
 
 ## 2. Nowy klient (0:30 do 1:00)
 
