@@ -59,8 +59,7 @@ function fixture(initialCalls: VoiceCall[] = []) {
     status: 'running', minIntervalSecs: 10, createdAt: new Date(epoch), updatedAt: new Date(epoch),
   }]
   // Mock filtruje rzeczywiste warunki zapytań, żeby nie wskazywać oddzwonienia wyłącznie kolejnością wywołań.
-  const fake = {
-    findOne: jest.fn(async (entity: unknown, where: Record<string, unknown>, options?: { orderBy?: Record<string, string> }) => {
+  const dopasuj = (entity: unknown, where: Record<string, unknown>, options?: { orderBy?: Record<string, string> }) => {
       const rows = (entity === VoiceCampaign ? campaigns : calls).filter((row) =>
         Object.entries(where).every(([key, value]) => {
           const actual = (row as unknown as Record<string, unknown>)[key] ?? null
@@ -75,8 +74,15 @@ function fixture(initialCalls: VoiceCall[] = []) {
         const sign = options.orderBy.createdAt === 'desc' ? -1 : 1
         rows.sort((a, b) => sign * (a.createdAt.getTime() - b.createdAt.getTime()))
       }
-      return rows[0] ?? null
-    }),
+      return rows
+  }
+  const fake = {
+    findOne: jest.fn(async (entity: unknown, where: Record<string, unknown>, options?: { orderBy?: Record<string, string> }) =>
+      dopasuj(entity, where, options)[0] ?? null),
+    // Webhook czyta wszystkie kampanie numeru, zeby wykryc, ze nalezy on do
+    // dwoch firm naraz. Wtedy nie da sie ustalic, czyja jest rozmowa.
+    find: jest.fn(async (entity: unknown, where: Record<string, unknown>, options?: { orderBy?: Record<string, string> }) =>
+      dopasuj(entity, where, options)),
     create: jest.fn((_entity: unknown, data: Partial<VoiceCall>) => ({
       ...data, id: '40000000-0000-4000-8000-000000000099',
     } as VoiceCall)),

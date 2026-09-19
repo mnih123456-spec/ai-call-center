@@ -23,7 +23,11 @@ function json(body: unknown, status = 200) {
 
 export async function GET(request: Request) {
   const auth = await getAuthFromRequest(request)
-  if (!auth?.orgId) return json({ profile: [], agenci: [] })
+  // Lista branz nie zalezy od firmy: to nasz katalog, taki sam dla wszystkich.
+  // Zwracamy ja nawet wtedy, gdy nie rozpoznajemy zakresu, bo inaczej ekran
+  // zakladania klienta pokazuje puste pole wyboru i nie da sie przejsc dalej.
+  const katalogBranz = BRANZE.map((b) => ({ id: b.id, nazwa: b.nazwa, przyklady: b.przyklady ?? [], pytania: b.pytania ?? [] }))
+  if (!auth?.orgId) return json({ profile: [], agenci: [], branze: katalogBranz, modele: MODELE })
 
   const { resolve } = await createRequestContainer()
   const em = resolve<EntityManager>('em')
@@ -63,7 +67,7 @@ export async function GET(request: Request) {
     // Lista agentów u dostawcy, żeby przypisanie szło z wyboru, a nie
     // z przepisywania identyfikatora. Ta sama zasada co przy numerach.
     agenci: katalog.agents,
-    branze: BRANZE.map((b) => ({ id: b.id, nazwa: b.nazwa, przyklady: b.przyklady ?? [], pytania: b.pytania ?? [] })),
+    branze: katalogBranz,
     katalogDziala: katalog.configured,
   })
 }

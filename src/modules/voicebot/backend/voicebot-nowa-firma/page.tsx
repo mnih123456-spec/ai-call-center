@@ -180,7 +180,9 @@ export default function VoicebotNowaFirmaPage() {
                 onChange={(e) => setBranza(e.target.value)}
                 disabled={pracuje}
               >
-                {branze.map((b) => <option key={b.id} value={b.id}>{b.nazwa}</option>)}
+                {branze.length > 0
+                  ? branze.map((b) => <option key={b.id} value={b.id}>{b.nazwa}</option>)
+                  : <option value="">{t('voicebot.newCompany.industryEmpty', 'Bez wiedzy branżowej')}</option>}
               </select>
               <span className="text-xs text-muted-foreground">
                 {t('voicebot.newCompany.industryHint', 'Decyduje, po co bot dzwoni i jakich pojęć używa.')}
