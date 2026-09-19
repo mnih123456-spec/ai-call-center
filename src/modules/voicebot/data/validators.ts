@@ -19,6 +19,9 @@ export const campaignCreateSchema = z.object({
 
 export const campaignUpdateSchema = campaignCreateSchema.partial().extend({
   id: z.string().uuid(),
+  updatedAt: z.string().datetime(),
+  // Częściowa edycja nie może przywracać domyślnego odstępu z tworzenia.
+  minIntervalSecs: z.coerce.number().int().min(0).max(3600).optional(),
   status: z.enum(['draft', 'running', 'paused', 'finished']).optional(),
 })
 
@@ -36,6 +39,16 @@ export const callStartSchema = z.object({
   firstName: z.string().max(100).nullable().optional(),
   lastName: z.string().max(100).nullable().optional(),
 })
+
+// Zakres zadania ustala API z sesji; nie jest czescia publicznego formularza.
+export const callJobSchema = z.object({
+  type: z.literal('voicebot.call.dispatch'),
+  tenantId: z.string().uuid(),
+  organizationId: z.string().uuid(),
+  campaignId: z.string().uuid(),
+  callId: z.string().uuid(),
+})
+export const callDispatchSchema = z.object({ campaignId: z.string().uuid() })
 
 /**
  * Wklejona lista kontaktów.

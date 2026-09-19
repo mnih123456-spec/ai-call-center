@@ -4,7 +4,8 @@ import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import { VoiceCall, VoiceCampaign } from '../../data/entities'
 import { callListSchema, callStartSchema } from '../../data/validators'
-import { startOutboundCall } from '../../lib/provider'
+import { enqueueCall } from '../../lib/call-queue'
+import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 
 const logger = createLogger('voicebot')
 
@@ -19,7 +20,7 @@ function json(body: unknown, status = 200) {
 
 export async function GET(request: Request) {
   const auth = await getAuthFromRequest(request)
-  if (!auth?.orgId) return json({ items: [], total: 0 })
+  if (!auth?.orgId || !auth.tenantId) return json({ items: [], total: 0 })
 
   const url = new URL(request.url)
   const parsed = callListSchema.safeParse(Object.fromEntries(url.searchParams))
@@ -81,7 +82,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const auth = await getAuthFromRequest(request)
-  if (!auth?.orgId) return json({ error: 'Brak kontekstu organizacji' }, 403)
+  if (!auth?.orgId || !auth.tenantId) return json({ error: 'Brak kontekstu organizacji' }, 403)
 
   let raw: unknown
   try {
@@ -113,10 +114,9 @@ export async function POST(request: Request) {
     phone: parsed.data.phone,
     firstName: parsed.data.firstName ?? null,
     lastName: parsed.data.lastName ?? null,
-    status: 'dialing',
+    status: 'pending',
     direction: 'outbound',
-    startedAt: new Date(),
-    tenantId: auth.tenantId ?? null,
+    tenantId: auth.tenantId,
     organizationId: auth.orgId,
     createdAt: now,
     updatedAt: now,
@@ -124,30 +124,32 @@ export async function POST(request: Request) {
   em.persist(call)
   await em.flush()
 
-  const result = await startOutboundCall({
-    agentId: campaign.agentId,
-    phoneNumberId: campaign.phoneNumberId ?? null,
-    toNumber: parsed.data.phone,
-    variables: {
-      lead_id: call.id,
-      imie: parsed.data.firstName ?? '',
-      nazwisko: parsed.data.lastName ?? '',
-    },
-  })
-
-  if (!result.ok) {
-    call.status = 'failed'
-    call.failureReason = result.error
-    call.finishedAt = new Date()
-    em.persist(call)
-  await em.flush()
-    return json({ id: call.id, status: call.status, error: result.error }, 502)
+  // Pojedyncze zlecenie przechodzi ta sama kolejke co import. Inaczej sto
+  // rownoleglych POST-ow nadal obchodziloby limit ustawiony w kampanii.
+  let queuePending = false
+  try {
+    await enqueueCall({
+      type: 'voicebot.call.dispatch', callId: call.id, campaignId: campaign.id,
+      tenantId: auth.tenantId, organizationId: auth.orgId,
+    })
+  } catch {
+    // Rekord juz istnieje; zwrot 500 zachecalby klienta do utworzenia drugiego.
+    queuePending = true
+    logger.warn('call queue publication incomplete', { callId: call.id })
   }
+  logger.info('call queued', { id: call.id })
+  return json({ id: call.id, status: 'pending', conversationId: null, simulated: false,
+    queuePending }, 201)
+}
 
-  call.conversationId = result.conversationId
-  em.persist(call)
-  await em.flush()
-  logger.info('call started', { id: call.id, simulated: result.simulated })
-
-  return json({ id: call.id, status: call.status, conversationId: call.conversationId, simulated: result.simulated }, 201)
+export const openApi: OpenApiRouteDoc = {
+  methods: {
+    GET: { summary: 'List voice calls', query: callListSchema, responses: [{ status: 200 }] },
+    POST: {
+      summary: 'Queue an outbound call',
+      description: 'Returns pending. Provider results arrive asynchronously on the call record.',
+      requestBody: { schema: callStartSchema },
+      responses: [{ status: 201, description: 'Call saved; queuePending indicates publication needs recovery.' }],
+    },
+  },
 }
