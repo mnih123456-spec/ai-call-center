@@ -58,7 +58,13 @@ W grze: Oddzwoni, Odbiera, Telefonistka, Dyzurka, Linia, Pierwszy Kontakt.
 ElevenLabs nic tego dnia nie wychodziło, ostatnia rozmowa jest z 16.09 15:42.
 Czyli szło skądinąd, prawdopodobnie ze starej konfiguracji Make.
 
-**Do ustalenia:** jaki numer się wyświetlił. Bez tego nie ma czego szukać.
+**ROZSTRZYGNIETE 19.09.** Na koncie ElevenLabs jest dokladnie jeden webhook:
+"Make - wynik rozmowy AdSignio", wskazujacy na `hook.eu2.make.com`, wlaczony.
+Czyli stary przeplyw przez Make dziala do dzis i to z niego szedl tamten
+telefon. Nasz modul nie mial z tym nic wspolnego.
+
+**Do decyzji:** czy wylaczyc ten webhook przed demem. Zostawiony bedzie
+rownolegle wysylal wyniki rozmow do Make.
 
 ## 6. Wideo zapasowe
 
