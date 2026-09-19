@@ -230,3 +230,49 @@ Założone 19.09 do pokazania wielotenantowości:
 
 Sprawdzone na żywo: przełączenie organizacji zmienia widok na pusty,
 bez przecieku danych. Każda firma ma własną konfigurację CRM.
+
+## 18. Zakladanie firmy ma tworzyc agenta u dostawcy
+
+Michal, 19.09: przy rejestracji nowej firmy system powinien sam zakladac jej
+agenta w ElevenLabs, zamiast kazac wybierac z listy agentow konta.
+
+To jest wlasciwy kierunek i wynika wprost z tego, co dzis zobaczylismy: agenta
+demo zakladalem recznie przez API, a kampania po uruchomieniu skryptu danych
+wrocila na agenta produkcyjnego. Dopoki agent nie powstaje razem z firma, takie
+pomylki beda sie powtarzac.
+
+Ksztalt do zrobienia po hackatonie:
+
+- przy zakladaniu tenanta powielamy nasz sprawdzony szablon agenta,
+- podmieniamy w nim nazwe firmy i podpinamy nasz webhook jako wlasny tego
+  agenta, a nie domyslny calego konta,
+- zapisujemy identyfikator agenta w profilu firmy,
+- przy usunieciu firmy kasujemy jej agenta, bo slotow jest skonczona liczba.
+
+**Do decyzji:** czy kazda firma dostaje tez wlasny klucz API u dostawcy.
+Dzis wszystkie firmy dziela jeden klucz konta, wiec limity i rachunek sa
+wspolne, a to samo zrodlo problemu co przy numerach i glosach.
+
+## 19. Polaczenie testowe na dowolny numer
+
+Dzis kazdy, kto ma dostep do panelu, moze wpisac dowolny numer i zlecic
+polaczenie. Michal, 19.09: klient testowy nie powinien tego miec.
+
+To jest sluszne. Numer wpisany z reki omija liste kontaktow i zgody, a koszt
+idzie na wspolne konto. Docelowo: polaczenie testowe wylacznie na numery
+potwierdzone przez firme, albo tylko na numer osoby zalogowanej.
+
+**Swiadomie zostawiamy jak jest na hackaton**, bo na scenie moze byc potrzeba
+zadzwonienia do kogos z publicznosci. Zakres numerow i tak pilnuje, zeby nie
+poszlo za granice ani na numer o podwyzszonej oplacie, a limity pilnuja kosztu.
+
+## 20. Rozmowa brzmi nieludzko
+
+Michal, 19.09, po pierwszym udanym polaczeniu: przerwy juz nie ma, ale rozmowa
+jest sztywna.
+
+Nie ruszamy tego przed demem, bo strojenie scenariusza to zmiana jakosciowa,
+ktorej nie da sie sprawdzic inaczej niz kolejnymi telefonami. Po hackatonie
+do sprawdzenia w tej kolejnosci: temperatura modelu (teraz 0, czyli zero
+swobody), stability glosu (teraz 0,8, czyli bardzo rowno), dlugosc zdan
+w scenariuszu i krotkie potwierdzenia typu "rozumiem" miedzy pytaniami.
