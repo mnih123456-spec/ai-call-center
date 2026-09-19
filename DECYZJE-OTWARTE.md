@@ -166,3 +166,21 @@ z kimś, kto jest jednocześnie partnerem i konkurentem.
 
 **Do decyzji:** czy przy rozmowie o prowizji pokazujemy im produkt, czy tylko
 pytamy o warunki na numery i SMS.
+
+## 15. PRZYPOMNIENIE: przegląd kodu o 15:00
+
+**19.09 około 15:00 Michał uruchamia w czacie komendę:**
+
+    /code-review ultra
+
+To wielogłowy przegląd całej gałęzi w chmurze, płatny, uruchamiany wyłącznie
+przez użytkownika. Claude nie może go odpalić sam.
+
+**Dlaczego nie ja:** przeglądam własny kod, więc czytam to, co zamierzałem
+napisać, a nie to, co faktycznie napisałem. Wartość daje czytelnik, który
+tego nie pisał.
+
+**Dlaczego o 15:00:** wcześniej przejrzy połowę roboty i trzeba będzie
+powtarzać.
+
+**Claude ma o tym przypomnieć**, gdy zegar zbliży się do tej godziny.
