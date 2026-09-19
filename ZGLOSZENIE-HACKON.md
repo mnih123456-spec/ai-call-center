@@ -24,8 +24,8 @@ i zapisuje wynik rozmowy jako gotowy, uporządkowany rekord w CRM.
 Firmy kredytowe zbierają leady z formularzy i reklam, a potem ktoś musi do
 każdego zadzwonić, potwierdzić tożsamość, uzyskać zgodę na rozmowę i ustalić,
 o jaki produkt chodzi. Ta praca jest powtarzalna, kosztowna i bardzo źle
-znosi skalę: połowa osób nie odbiera za pierwszym razem, a oddzwaniają
-wtedy, gdy akurat nikt nie siedzi przy telefonie.
+znosi skalę: ponad osiemdziesiąt procent nie odbiera za pierwszym razem,
+a oddzwaniają wtedy, gdy akurat nikt nie siedzi przy telefonie.
 
 Zbudowaliśmy na Open Mercato moduł, który tę pracę przejmuje. Bot dzwoni,
 prowadzi rozmowę po polsku, a jej wynik trafia do systemu jako komplet pól,
@@ -109,6 +109,15 @@ rozmowę odbytą i 2 grosze za nieodebraną próbę.
 
 **Różnica to około 1370 zł miesięcznie i tydzień roboczy odzyskany.**
 
+Ale najważniejsza liczba jest inna. W tym samym okresie **12 kontaktów ze 180
+doszło do podpisanej umowy**, czyli **co piętnasty lead**. Skoro tak, to każde
+piętnaście leadów uratowanych od przepadnięcia przy trzeciej nieudanej próbie
+oznacza **jedną dodatkową umowę**.
+
+Bot nie musi być lepszy od człowieka w rozmowie. Wystarczy, że dzwoni
+w sekundę po zgłoszeniu, ponawia bez zmęczenia i odbiera, gdy klient
+oddzwoni o dwudziestej drugiej.
+
 Ale ważniejsze jest to, czego w tej tabeli nie widać: dziś lead, który nie
 odbierze trzy razy, po prostu przepada. Bot próbuje dalej i odbiera, gdy ten
 człowiek w końcu oddzwoni.
@@ -139,7 +148,7 @@ człowiek w końcu oddzwoni.
 | Blokada numerów premium i zagranicznych | działa |
 | API dla systemu klienta, uwierzytelniane kluczem | działa |
 | Uprawnienia: podgląd oddzielony od zlecania połączeń | działa |
-| Panel: sześć ekranów | działa |
+| Panel: osiem ekranów | działa |
 
 ## Stos technologiczny
 
@@ -201,8 +210,8 @@ Cały kod modułu `voicebot` w Open Mercato, czyli:
 - obsługa głosów wraz z klonowaniem z próbki i zapisem zgody,
 - blokada numerów o podwyższonej opłacie,
 - licznik kosztów rozmów,
-- sześć ekranów w panelu,
-- 44 testy w 5 zestawach.
+- osiem ekranów w panelu,
+- 160 testów w 12 zestawach.
 
 Historia commitów pokazuje daty i zakres każdej zmiany.
 
