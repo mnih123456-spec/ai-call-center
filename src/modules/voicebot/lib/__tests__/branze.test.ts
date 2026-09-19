@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals'
-import { BRANZE, slownikBranzy, ZASTRZEZENIE, znanaBranza } from '../branze'
+import { BRANZE, powitanieBranzy, scenariuszBranzy, slownikBranzy, ZASTRZEZENIE, znanaBranza } from '../branze'
 import { zlozPrompt, ZNACZNIK_BRANZY, ZNACZNIK_PYTAN } from '../scenariusz'
 
 describe('slownikBranzy', () => {
@@ -52,5 +52,72 @@ describe('słownik w scenariuszu', () => {
     const drugi = zlozPrompt(pierwszy, null, null, slownikBranzy('ogolna'))
     expect(drugi).toBe(staly)
     expect(drugi).not.toContain(ZNACZNIK_BRANZY)
+  })
+})
+
+describe('pozostałe branże', () => {
+  it.each([
+    ['fotowoltaika', ['kWp', 'Net-billing', 'Pompa ciepla']],
+    ['nieruchomosci', ['Ksiega wieczysta', 'Rynek pierwotny', 'Zdolnosc kredytowa']],
+    ['motoryzacja', ['Geometria kol', 'rozrzadu', 'Diagnostyka']],
+    ['medycyna', ['e-recepta', 'NFZ', 'higienizacja']],
+  ])('%s zna swoje pojęcia', (id, pojecia) => {
+    const slownik = slownikBranzy(id)
+    expect(slownik.length).toBeGreaterThan(300)
+    for (const p of pojecia) expect(slownik).toContain(p)
+  })
+
+  // Dane o zdrowiu to dane szczegolnej kategorii. Automat dzwoniacy w imieniu
+  // gabinetu nie moze ich zbierac ani ocieniac pilnosci przypadku.
+  it('gabinet ma ostrzejszą granicę niż pozostałe branże', () => {
+    const s = slownikBranzy('medycyna')
+    expect(s).toContain('Nie pytasz o objawy')
+    expect(s).toContain('112')
+    expect(s).toContain('szczegolnej kategorii')
+  })
+
+  it('wszystkie branże z listy dają niepusty słownik poza ogólną', () => {
+    for (const b of BRANZE) {
+      if (b.id === 'ogolna') expect(slownikBranzy(b.id)).toBe('')
+      else expect(slownikBranzy(b.id).length).toBeGreaterThan(200)
+    }
+  })
+})
+
+describe('scenariusz per branża', () => {
+  // Sedno poprawki: bot serwisu nie moze pytac o umowe kredytowa tylko
+  // dlatego, ze szablon powstal dla kancelarii.
+  it('każda branża ma własny cel rozmowy, nie kredytowy', () => {
+    const serwis = scenariuszBranzy('motoryzacja', 'Warsztat Kowalski')
+    expect(serwis).toContain('wizyte w serwisie')
+    expect(serwis).not.toContain('umowy kredytowej')
+    expect(serwis).toContain('Warsztat Kowalski')
+  })
+
+  it('powitanie niesie nazwę firmy zamiast znacznika', () => {
+    const p = powitanieBranzy('fotowoltaika', 'Solar Nowak')
+    expect(p).toContain('Solar Nowak')
+    expect(p).not.toContain('{FIRMA}')
+    expect(p).toContain('wycene instalacji')
+  })
+
+  // Reguly chroniace zgodnosc rozmowy z prawem nie moga zalezec od branzy.
+  it('reguły stałe są w scenariuszu każdej branży', () => {
+    for (const b of BRANZE) {
+      const s = scenariuszBranzy(b.id, 'Firma')
+      if (!s) continue
+      expect(s).toContain('nigdy jako czlowiek')
+      expect(s).toContain('pytasz o zgode')
+    }
+  })
+
+  it('zastrzeżenie o poradzie prawnej tylko tam, gdzie ma sens', () => {
+    expect(scenariuszBranzy('kredyty', 'Firma')).toContain(ZASTRZEZENIE)
+    expect(scenariuszBranzy('motoryzacja', 'Firma')).not.toContain(ZASTRZEZENIE)
+  })
+
+  it.each([undefined, null, '', 'ogolna', 'nieistniejaca'])('bez branży %p zostawiamy szablon', (id) => {
+    expect(scenariuszBranzy(id, 'Firma')).toBe('')
+    expect(powitanieBranzy(id, 'Firma')).toBe('')
   })
 })

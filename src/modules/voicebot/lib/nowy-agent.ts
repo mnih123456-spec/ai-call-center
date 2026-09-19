@@ -1,5 +1,5 @@
 import { createLogger } from '@open-mercato/shared/lib/logger'
-import { slownikBranzy } from './branze'
+import { powitanieBranzy, scenariuszBranzy, slownikBranzy } from './branze'
 
 const logger = createLogger('voicebot')
 
@@ -78,8 +78,14 @@ export async function zalozAgentaDlaFirmy(
       : null
     const cc = dane?.conversation_config?.agent
 
-    const slownik = slownikBranzy(branza)
-    const prompt = podmienNazwe(cc?.prompt?.prompt, nazwa)
+    // Branza z gotowym scenariuszem zastepuje tresc szablonu, a nie dokleja
+    // sie do niej. Bot serwisu samochodowego nie moze dalej pytac o umowe
+    // kredytowa tylko dlatego, ze szablon powstal dla kancelarii.
+    const wlasny = scenariuszBranzy(branza, nazwa)
+    const prompt = wlasny || `${podmienNazwe(cc?.prompt?.prompt, nazwa)}
+
+${slownikBranzy(branza)}`.trim()
+    const powitanie = powitanieBranzy(branza, nazwa) || podmienNazwe(cc?.first_message, nazwa)
 
     const zapis = await fetch(`${API}/agents/${agentId}`, {
       method: 'PATCH',
@@ -87,8 +93,8 @@ export async function zalozAgentaDlaFirmy(
       body: JSON.stringify({
         conversation_config: {
           agent: {
-            first_message: podmienNazwe(cc?.first_message, nazwa),
-            prompt: { prompt: slownik ? `${prompt}\n\n${slownik}` : prompt, llm: model },
+            first_message: powitanie,
+            prompt: { prompt, llm: model },
           },
           turn: { turn_timeout: 1.5 },
         },
