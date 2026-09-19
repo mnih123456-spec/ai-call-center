@@ -32,8 +32,16 @@ Dane z panelu raportow, 1-18 wrzesnia 2026 (18 dni):
   notatke, zamknac
 - pracownik: placa minimalna plus 1000 zl premii
 
-Po przeliczeniu na miesiac: 300 kontaktow, 548 prob, 36,5 godziny, okolo
-1480 zl. Bot: okolo 110 zl.
+Dane o kolejnych etapach, dolozone 19.09: kontakt 3 to 87, kontakt 4 to 66,
+kontakt 5 to 44, kontakt 6 to 57. Razem z pierwsza proba i etapem kontakt 2
+daje to 583 proby w osiemnascie dni.
+
+Po przeliczeniu na miesiac: 300 kontaktow, **972 proby**, 64,8 godziny, okolo
+2590 zl. Bot: okolo 118 zl.
+
+Etap 6 ma wiecej wejsc niz etap 5, bo obejmuje kontakty sprzed 1 wrzesnia.
+Dla liczenia nakladu pracy to poprawne: chcemy wiedziec, ile telefonow
+wykonano w tym okresie, a nie jak potoczyly sie losy jednej grupy zgloszen.
 
 **Do potwierdzenia przez Michala:** wysokosc placy minimalnej w 2026.
 W wyliczeniu podstawione 4666 zl, czyli stawka z 2025.

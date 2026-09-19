@@ -63,16 +63,20 @@ ten sam człowiek, zero przecieku między firmami.
 
 **Porownanie przed i po, powiedz powoli:**
 
-> Piecset czterdziesci osiem prob razy cztery minuty to **trzydziesci szesc
-> godzin miesiecznie**. Tydzien roboczy. Przy koszcie czterdziestu zlotych
-> za godzine to **tysiac czterysta osiemdziesiat zlotych**.
+> Na jedno zgloszenie przypadaja u nas **ponad trzy telefony**. Zliczylem
+> wszystkie etapy kontaktu, od pierwszego do szostego. To **dziewiecset
+> siedemdziesiat prob miesiecznie**.
 >
-> Te same rozmowy botem kosztuja **sto dziesiec zlotych**.
+> Razy cztery minuty daje to **szescdziesiat piec godzin**. Osiem dni
+> roboczych jednej osoby. Przy czterdziestu zlotych za godzine to
+> **dwa tysiace szescset zlotych miesiecznie**.
+>
+> Te same rozmowy botem kosztuja **okolo stu dwudziestu zlotych**.
 
 **Zdanie do zapamietania:**
 
-> Tysiac czterysta osiemdziesiat wobec stu dziesieciu. I tydzien pracy
-> oddany z powrotem czlowiekowi.
+> Dwa i pol tysiaca wobec stu dwudziestu. I osiem dni pracy oddanych
+> z powrotem czlowiekowi.
 
 **A potem druga liczba, mocniejsza:**
 

@@ -45,7 +45,9 @@ historii kontaktu.
 To jest **82,8 procent nieodebranych przy pierwszej próbie**.
 
 W przeliczeniu na pełny miesiąc: **300 kontaktów, 248 nieodebranych**,
-czyli co najmniej **548 prób telefonicznych miesięcznie**.
+Doliczając kolejne etapy kontaktu, od trzeciego do szóstego, wychodzi
+**972 próby telefoniczne miesięcznie**, czyli średnio 3,24 telefonu
+na jedno zgłoszenie.
 
 | Krok dzisiaj | Gdzie |
 |---|---|
@@ -69,12 +71,13 @@ Jedna próba to **4 minuty pracy**: wejść w kartę klienta, wybrać numer,
 odczekać sygnały, wpisać notatkę, zamknąć. Tyle trwa nawet wtedy, gdy nikt
 nie odbierze.
 
-548 prób razy 4 minuty to **36,5 godziny miesięcznie**, czyli tydzień roboczy.
+972 próby razy 4 minuty to **64,8 godziny miesięcznie**, czyli ponad osiem
+dni roboczych jednej osoby.
 
 Koszt osoby: płaca minimalna plus 1000 zł premii, z narzutami pracodawcy
 wychodzi około **40 zł za godzinę**.
 
-**36,5 godziny razy 40 zł daje około 1480 zł miesięcznie** wydane na samo
+**64,8 godziny razy 40 zł daje około 2590 zł miesięcznie** wydane na samo
 wykręcanie numerów, w większości bez odbioru.
 
 ## Stan docelowy
@@ -98,16 +101,17 @@ Na danych z września 2026, przeliczonych na pełny miesiąc:
 
 | | Dziś, człowiek | Z botem |
 |---|---|---|
-| Prób telefonicznych | 548 | 548 |
-| Czas pracy człowieka | **36,5 godziny** | około godziny na przegląd wyników |
-| Koszt miesięczny | **~1480 zł** | **~110 zł** |
+| Prób telefonicznych | 972 | 972 |
+| Czas pracy człowieka | **64,8 godziny** | około godziny na przegląd wyników |
+| Koszt miesięczny | **~2590 zł** | **~118 zł** |
 | Kto odbiera, gdy klient oddzwoni wieczorem | nikt | bot, i wie, w jakiej sprawie dzwoniliśmy |
 | Gdzie ląduje ustalenie z rozmowy | notatka pisana ręcznie | pola w CRM, bez przepisywania |
 
 Koszt bota policzony z rzeczywistych rachunków dostawcy: około 35 groszy za
 rozmowę odbytą i 2 grosze za nieodebraną próbę.
 
-**Różnica to około 1370 zł miesięcznie i tydzień roboczy odzyskany.**
+**Różnica to około 2470 zł miesięcznie i ponad osiem dni roboczych
+odzyskanych.**
 
 Ale najważniejsza liczba jest inna. W tym samym okresie **12 kontaktów ze 180
 doszło do podpisanej umowy**, czyli **co piętnasty lead**.
@@ -130,7 +134,7 @@ wstępna: 3 000 zł przy WIBOR, przy SKD zero.
 
 Dlatego właściwe zdanie brzmi tak: każde piętnaście leadów uratowanych od
 przepadnięcia to **jedna dodatkowa umowa warta dwadzieścia kilka tysięcy
-w perspektywie procesu**, przy koszcie bota 110 zł miesięcznie.
+w perspektywie procesu**, przy koszcie bota około 118 zł miesięcznie.
 
 Bot nie musi być lepszy od człowieka w rozmowie. Wystarczy, że dzwoni
 w sekundę po zgłoszeniu, ponawia bez zmęczenia i odbiera, gdy klient
