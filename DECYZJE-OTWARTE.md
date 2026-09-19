@@ -130,3 +130,17 @@ wlasne lacze SIP. My sprzedajemy oprogramowanie, nie minuty.
 **Do zrobienia w kodzie:** odnosnik na ekranie kampanii, widoczny zwlaszcza
 wtedy, gdy lista numerow u dostawcy jest pusta. Ekran kampanii jest teraz
 w rekach Codexa na galezi codex/noc, wiec dokladamy to po scaleniu.
+
+## 13. Role numerów na koncie, ustalone 19.09
+
+| Numer | Rola |
+|---|---|
+| `48732129033` ACTIO produkcja | **do demo i testów**, przychodzące i wychodzące |
+| `+48457112147` ACTIO test | **do demo i testów**, zapasowy |
+| `+48223783966` DATERA test | prawdopodobnie nie działa, nie używać |
+| `+48570372252` | komórkowy Michała przypisany do jednej z firm |
+| `+48503956401` | prywatny i firmowy numer Michała. **Na demie to on gra klienta**: na ten numer bot dzwoni i z tego numeru Michał oddzwania |
+
+Wniosek dla danych demo: numeru `+48503956401` nie pokazujemy na liście jako
+danych historycznych, bo to prawdziwy numer. Na scenie pojawi się wyłącznie
+jako świeża rozmowa, wykonana na żywo, i można go zasłonić przyciskiem.
