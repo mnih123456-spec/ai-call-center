@@ -3,6 +3,7 @@ import type { EntityManager } from '@mikro-orm/postgresql'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import { VoiceCall, VoiceCampaign } from '../data/entities'
 import { callJobSchema, enqueueCall, type CallJob } from './call-queue'
+import { sprawdzLimity } from './limity'
 import { startOutboundCall, type StartCallInput } from './provider'
 
 const logger = createLogger('voicebot').child({ component: 'dispatch-call' })
@@ -68,6 +69,22 @@ export async function dispatchCall(em: EntityManager, raw: CallJob): Promise<voi
       ...campaignScope, status: 'pending', deletedAt: null,
     }, { orderBy: { createdAt: 'asc', id: 'asc' } })
     if (first?.id !== call.id) return { kind: 'wait', delayMs: 1_000 }
+
+    // Limity sprawdzamy tutaj, wewnatrz blokady, a nie przy zlecaniu kampanii.
+    // Kampania moze stac w kolejce godzinami i przez ten czas firma zdazy
+    // wyczerpac minuty w innej kampanii. Liczy sie stan z chwili telefonu.
+    const werdykt = await sprawdzLimity(tx, scope)
+    if (!werdykt.wolno) {
+      if (!werdykt.trwale) return { kind: 'wait', delayMs: 30_000 }
+      const zamkniete = new Date()
+      call.status = 'failed'
+      call.failureReason = werdykt.powod
+      call.finishedAt = zamkniete
+      call.updatedAt = zamkniete
+      await tx.flush()
+      logger.warn('call blocked by tenant limit', { callId: call.id, powod: werdykt.powod })
+      return { kind: 'skip' }
+    }
 
     const last = await tx.findOne(VoiceCall, {
       ...campaignScope, startedAt: { $ne: null },

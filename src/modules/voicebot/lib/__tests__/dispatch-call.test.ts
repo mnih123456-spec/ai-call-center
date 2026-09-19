@@ -1,12 +1,16 @@
 import { beforeEach, afterEach, describe, expect, it, jest } from '@jest/globals'
 import type { EntityManager } from '@mikro-orm/postgresql'
-import { VoiceCall, VoiceCampaign } from '../../data/entities'
+import { VoiceCall, VoiceCampaign, VoiceTenantLimits } from '../../data/entities'
 import { dispatchCall } from '../dispatch-call'
 import { publishPendingCalls, type CallJob } from '../call-queue'
 import { startOutboundCall, type StartCallInput, type StartCallResult } from '../provider'
 
 jest.mock('@mikro-orm/core', () => ({ LockMode: { PESSIMISTIC_WRITE: 'write' } }))
-jest.mock('../../data/entities', () => ({ VoiceCall: class VoiceCall {}, VoiceCampaign: class VoiceCampaign {} }))
+jest.mock('../../data/entities', () => ({
+  VoiceCall: class VoiceCall {},
+  VoiceCampaign: class VoiceCampaign {},
+  VoiceTenantLimits: class VoiceTenantLimits {},
+}))
 jest.mock('../provider', () => ({ startOutboundCall: jest.fn() }))
 jest.mock('@open-mercato/shared/lib/logger', () => ({
   createLogger: () => ({ child: () => ({ info: jest.fn(), warn: jest.fn() }) }),
@@ -35,7 +39,11 @@ const jobFor = (call: VoiceCall): CallJob => ({
   campaignId: call.campaignId!, callId: call.id,
 })
 
-function fixture(count = 5) {
+function fixture(count = 5, progi?: Partial<VoiceTenantLimits>) {
+  // Pusta lista znaczy firme bez ustawionych progow, czyli stan domyslny.
+  const limits: VoiceTenantLimits[] = progi
+    ? [{ ...scope, id: 'limit', createdAt: new Date(epoch), updatedAt: new Date(epoch), ...progi } as VoiceTenantLimits]
+    : []
   const campaigns: VoiceCampaign[] = [{
     ...scope, id: campaignId, name: 'Test', status: 'running', minIntervalSecs: 10,
     agentId: 'agent', phoneNumberId: 'number', createdAt: new Date(epoch), updatedAt: new Date(epoch),
@@ -53,12 +61,20 @@ function fixture(count = 5) {
     const actual = (row as Record<string, unknown>)[key] ?? null
     if (value && typeof value === 'object' && '$ne' in value) return actual !== value.$ne
     if (value && typeof value === 'object' && '$gt' in value) return String(actual) > String(value.$gt)
+    if (value && typeof value === 'object' && '$gte' in value) {
+      return actual !== null && Number(actual) >= Number(value.$gte)
+    }
     return actual === value
   })
+  const tabela = (entity: unknown): object[] => {
+    if (entity === VoiceCampaign) return campaigns
+    if (entity === VoiceTenantLimits) return limits
+    return calls
+  }
   const find = (entity: unknown, where: Record<string, unknown>, options?: {
     orderBy?: Record<string, string>; limit?: number;
   }) => {
-    const rows = (entity === VoiceCampaign ? campaigns : calls).filter((row) => matches(row, where))
+    const rows = tabela(entity).filter((row) => matches(row, where))
     for (const [key, direction] of Object.entries(options?.orderBy ?? {}).reverse()) {
       rows.sort((a, b) => {
         const left = (a as unknown as Record<string, string | Date>)[key]
@@ -74,6 +90,7 @@ function fixture(count = 5) {
       if (entity === VoiceCampaign) locks.push(options?.lockMode)
       return find(entity, where, options)[0] ?? null
     },
+    count: async (entity: unknown, where: Record<string, unknown>) => find(entity, where).length,
     flush: async () => { if (failFlush) throw new Error('rollback') },
     nativeUpdate: async (entity: unknown, where: Record<string, unknown>, values: object) => {
       const rows = find(entity, where)
@@ -283,5 +300,39 @@ describe('kolejka polaczen', () => {
     await dispatchCall(f.em, jobFor(f.calls[1]))
     expect(f.calls[0].status).toBe('dialing')
     expect(provider).not.toHaveBeenCalled()
+  })
+})
+
+describe('limity firmy', () => {
+  // Wszystkie firmy dzwonia z jednego konta u dostawcy, wiec bez progow jedna
+  // z nich zjada minuty pozostalym i wystawia nam rachunek.
+  it('wyczerpane minuty zamykaja zlecenie zamiast odkladac je w nieskonczonosc', async () => {
+    const f = fixture(1, { minutesPerMonth: 0 })
+    await dispatchCall(f.em, jobFor(f.calls[0]))
+    expect(provider).not.toHaveBeenCalled()
+    expect(f.calls[0].status).toBe('failed')
+    expect(f.calls[0].failureReason).toContain('limit')
+    expect(f.calls[0].finishedAt).toBeInstanceOf(Date)
+  })
+
+  // Zajete linie zwolnia sie za chwile, wiec rozmowa ma wrocic do kolejki,
+  // a nie zginac jak przy wyczerpanym budzecie.
+  it('zajete linie odkladaja telefon, nie kasuja go', async () => {
+    const f = fixture(2, { maxConcurrentCalls: 1 })
+    Object.assign(f.calls[0], {
+      status: 'dialing', startedAt: new Date(epoch), conversationId: 'conversation-x', campaignId: 'inna',
+    })
+    await dispatchCall(f.em, jobFor(f.calls[1]))
+    expect(provider).not.toHaveBeenCalled()
+    expect(f.calls[1].status).toBe('pending')
+    expect(scheduled).toHaveLength(1)
+  })
+
+  // Firma bez ustawionych progow ma dzwonic, a nie stanac w dniu wdrozenia.
+  it('brak progow niczego nie blokuje', async () => {
+    const f = fixture(1)
+    await dispatchCall(f.em, jobFor(f.calls[0]))
+    expect(provider).toHaveBeenCalledTimes(1)
+    expect(f.calls[0].status).toBe('dialing')
   })
 })

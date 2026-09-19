@@ -245,6 +245,56 @@ export class VoiceCrmConnection {
 }
 
 /**
+ * Limity firmy-klienta.
+ *
+ * Wszystkie firmy dzwonią z jednego konta u dostawcy głosu, więc jego limity
+ * i jego rachunek są wspólne. Bez tych progów jedna firma, która wklei listę
+ * dziesięciu tysięcy numerów, zjada minuty pozostałym i wystawia nam rachunek,
+ * o którym dowiadujemy się na koniec miesiąca.
+ *
+ * Puste pole znaczy "bez limitu". To świadoma decyzja: firma, której nie
+ * ustawiono progu, ma działać, a nie stanąć.
+ */
+@Entity({ tableName: 'voicebot_limits' })
+@Unique({ name: 'voicebot_limits_tenant_org', properties: ['tenantId', 'organizationId'] })
+export class VoiceTenantLimits {
+  @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
+  id!: string
+
+  /** Minuty rozmów w miesiącu kalendarzowym. */
+  @Property({ name: 'minutes_per_month', type: 'integer', nullable: true })
+  minutesPerMonth?: number | null
+
+  /** Ile głosów firma może mieć u dostawcy. Slotów jest 30 na całe konto. */
+  @Property({ name: 'max_voices', type: 'integer', nullable: true })
+  maxVoices?: number | null
+
+  /**
+   * Ile rozmów firma może prowadzić naraz.
+   *
+   * Kolejka pilnuje odstępu w obrębie jednej kampanii, ale klient może założyć
+   * pięćdziesiąt kampanii i każda ruszy równolegle.
+   */
+  @Property({ name: 'max_concurrent_calls', type: 'integer', nullable: true })
+  maxConcurrentCalls?: number | null
+
+  @Property({ name: 'tenant_id', type: 'uuid', nullable: true })
+  tenantId?: string | null
+
+  @Property({ name: 'organization_id', type: 'uuid', nullable: true })
+  organizationId?: string | null
+
+  @Property({ name: 'created_at', type: Date, onCreate: () => new Date() })
+  createdAt: Date = new Date()
+
+  @Property({ name: 'updated_at', type: Date, onUpdate: () => new Date() })
+  updatedAt: Date = new Date()
+
+  @Property({ name: 'deleted_at', type: Date, nullable: true })
+  deletedAt?: Date | null
+}
+
+/**
  * Pojedyncze połączenie do leada wraz z wynikiem rozmowy.
  *
  * Wynik przychodzi webhookiem po zakończeniu rozmowy, dlatego wszystkie pola

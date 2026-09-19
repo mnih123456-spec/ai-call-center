@@ -178,3 +178,19 @@ export const postCallWebhookSchema = z.object({
 export type CampaignCreateInput = z.infer<typeof campaignCreateSchema>
 export type CallStartInput = z.infer<typeof callStartSchema>
 export type PostCallWebhook = z.infer<typeof postCallWebhookSchema>
+
+/**
+ * Progi firmy-klienta.
+ *
+ * Puste pole znaczy "bez limitu", dlatego dopuszczamy null i pusty ciąg:
+ * w formularzu wyczyszczenie pola ma zdejmować próg, a nie ustawiać zero.
+ */
+const progSchema = z.union([z.coerce.number().int().min(0).max(1_000_000), z.literal(''), z.null()])
+  .transform((v) => (v === '' || v === null ? null : v))
+  .optional()
+
+export const limitsSchema = z.object({
+  minutesPerMonth: progSchema,
+  maxVoices: progSchema,
+  maxConcurrentCalls: progSchema,
+})
