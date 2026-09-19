@@ -125,23 +125,18 @@ Czy na czas naprawy będzie Panu potrzebne auto zastępcze?
 
 ## Do zrobienia
 
-### 1. Wlasna branza z wiedza branzowa - ZACZETE, NIEDOKONCZONE
+### 1. Wlasna branza z wiedza branzowa - ZROBIONE
 
-Na liscie branz jest juz pozycja **"Inna branza, opisze ja sam"**
-(`BRANZA_WLASNA = 'wlasna'` w `branze.ts`). **Nie ma jeszcze pola**, w ktore
-klient wpisze, czym sie zajmuje i co bot ma wiedziec.
+Klient wybiera "Inna branza, opisze ja sam" i dostaje pole tekstowe (do 4000
+znakow) na obu ekranach: przy zakladaniu firmy i na ekranie pytan. Tresc siedzi
+w kolumnie `industry_knowledge` (migracja `Migration20260919164754`) i idzie do
+promptu w sekcje `ZNACZNIK_BRANZY` przez `wiedzaBranzowa(id, opis)` w
+`branze.ts`. Przy branzy z listy opis jest ignorowany i kasowany z bazy, zeby
+nie wrocil po zmianie wyboru. Tresc przechodzi przez `oczyscWiedze()`, bo
+pisze ja klient.
 
-Czego brakuje:
-
-- Kolumna `industry_knowledge` (text, nullable) w `VoiceAgentProfile`
-  (`src/modules/voicebot/data/entities.ts`). Wymaga `yarn db:generate`,
-  przejrzenia SQL i `yarn db:migrate`.
-- Pole tekstowe na ekranie pytan, widoczne tylko gdy branza = `wlasna`.
-- Przekazanie tej tresci do `zlozPrompt(...)` jako `branza` - funkcja juz
-  przyjmuje ten argument i wkleja go w sekcje `ZNACZNIK_BRANZY`. Treść musi
-  przejsc przez `oczyscWiedze()`, bo pisze ja klient i nie moze wniesc do
-  promptu wlasnych znacznikow sekcji.
-- Pola wyniku dla takiej branzy i tak biora sie z pytan, wiec tu nic nie trzeba.
+**Nie sprawdzone na zywo w przegladarce** - panel wymaga restartu po migracji
+(instancja ORM zyje w procesie i nie zna nowej kolumny do restartu).
 
 ### 2. Pelna rozmowa od poczatku do konca
 
@@ -202,7 +197,7 @@ Kopia z serwera w `strona-kopia-z-serwera/`.
 | Adres webhooka | Niezmienny. PATCH zwraca `{"status":"ok"}` i ignoruje zmiane. |
 | Webhook per agent | `platform_settings.workspace_overrides.webhooks.post_call_webhook_id` |
 | Pola do zebrania | `platform_settings.data_collection`, wszystkie jako `type:'string'` |
-| Model | `gemini-2.0-flash-lite`, `turn_timeout: 1.5`. Ciezszy model to 5,7 s ciszy zamiast 0,6 s. |
+| Model | Od 19.09 wieczor: `gemini-2.5-flash` (VOICEBOT_MODEL_DOMYSLNY, przelaczone tez na wszystkich istniejacych botach), `turn_timeout: 1.5`. Wczesniej `gemini-2.0-flash-lite`: szybszy (0,6 s vs 5,7 s zmierzone wczesniej), ale mowil "dzien dobry" dwa razy i czytal na glos "zakoncz polaczenie". Jesli cisza za dluga: `gemini-2.5-flash-lite` na ekranie pytan. |
 | Numery | `phnum_9901kz8gc1xze21s4e307f9e0490` = +48457112147 (probny), `phnum_6901m0amey85ex397p35hac3mh77` = +48732129033 |
 
 ---

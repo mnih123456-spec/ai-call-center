@@ -99,6 +99,16 @@ export class VoiceAgentProfile {
   @Property({ type: 'text', nullable: true })
   industry?: string | null
 
+  /**
+   * Opis branży napisany przez klienta, gdy jego firmy nie ma na liście.
+   *
+   * Trafia do scenariusza w to samo miejsce, w które idzie nasz słownik
+   * branżowy. Autorem jest klient, więc treść przechodzi przez czyszczenie,
+   * zanim wejdzie do promptu.
+   */
+  @Property({ name: 'industry_knowledge', type: 'text', nullable: true })
+  industryKnowledge?: string | null
+
   /** Adres strony firmy, z której bot ma czerpać wiedzę o niej. */
   @Property({ name: 'knowledge_url', type: 'text', nullable: true })
   knowledgeUrl?: string | null

@@ -11,6 +11,7 @@ type Profil = {
   direction: string
   questions: string
   industry: string
+  industryKnowledge: string
   knowledgeUrl: string
   knowledgeText: string
   knowledgeReadAt: string | null
@@ -27,6 +28,7 @@ type Edycja = {
   id: string
   questions: string
   industry: string
+  industryKnowledge: string
   knowledgeUrl: string
   odswiez: boolean
   llm: string
@@ -91,6 +93,7 @@ export default function VoicebotAgenciPage() {
           id: p.id,
           questions: p.questions,
           industry: p.industry,
+          industryKnowledge: p.industryKnowledge,
           knowledgeUrl: p.knowledgeUrl,
           odswiez: false,
           llm: p.llm ?? '',
@@ -126,6 +129,7 @@ export default function VoicebotAgenciPage() {
       id: p.id,
       questions: p.questions,
       industry: p.industry,
+      industryKnowledge: p.industryKnowledge,
       knowledgeUrl: p.knowledgeUrl,
       odswiez: false,
       llm: p.llm ?? '',
@@ -150,6 +154,7 @@ export default function VoicebotAgenciPage() {
           direction: p.direction,
           questions: edycja.questions,
           industry: edycja.industry,
+          industryKnowledge: edycja.industryKnowledge,
           knowledgeUrl: edycja.knowledgeUrl,
           odswiezWiedze: edycja.odswiez,
           ...(operator ? { llm: edycja.llm } : {}),
@@ -306,6 +311,24 @@ export default function VoicebotAgenciPage() {
                           {t('voicebot.agents.field.industryHint', 'Decyduje, jakimi słowami bot się posługuje.')}
                         </span>
                       </label>
+
+                      {edycja.industry === 'wlasna' ? (
+                        <label className="flex flex-col gap-1 text-sm">
+                          <span className="font-medium">
+                            {t('voicebot.agents.field.industryKnowledge', 'Czym zajmuje się firma i co bot ma wiedzieć?')}
+                          </span>
+                          <textarea
+                            className="min-h-32 rounded border px-2 py-1"
+                            value={edycja.industryKnowledge}
+                            maxLength={4000}
+                            onChange={(e) => setEdycja((x) => x && { ...x, industryKnowledge: e.target.value })}
+                            placeholder={t('voicebot.agents.field.industryKnowledgePlaceholder', 'Np. Prowadzimy szkołę językową dla dorosłych. Bot dzwoni do osób, które zostawiły numer na stronie, żeby umówić bezpłatną lekcję próbną. Poziomy: A1-C1, zajęcia online i stacjonarne w Krakowie.')}
+                          />
+                          <span className="text-xs text-muted-foreground">
+                            {t('voicebot.agents.field.industryKnowledgeHint', 'Własnymi słowami: po co bot dzwoni, jakich pojęć używa i czego nie wolno mu obiecywać.')}
+                          </span>
+                        </label>
+                      ) : null}
 
                       <label className="flex flex-col gap-1 text-sm">
                         <span>{t('voicebot.agents.field.knowledge', 'Adres strony firmy')}</span>

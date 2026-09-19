@@ -43,6 +43,22 @@ export type Branza = {
    */
   pytania?: string[]
   /**
+   * Dokładne instrukcje dla modelu wyciągającego odpowiedzi, po jednej na pytanie.
+   *
+   * Ogólna instrukcja "zwróć samą odpowiedź" wystarcza dla większości pytań,
+   * ale nie tam, gdzie odpowiedź ma mieć umówioną postać: kod produktu,
+   * kwota cyframi, waluta. Klucz to treść pytania z listy `pytania`.
+   */
+  opisy?: Record<string, string>
+  /**
+   * Słowa, które rozpoznawanie mowy ma faworyzować.
+   *
+   * Nazwy banków i marek aut to słowa rzadkie, obce albo skrótowe, i to na
+   * nich rozpoznawanie mowy najczęściej się myli. Lista trafia do dostawcy
+   * jako podpowiedź dla transkrypcji, nie do scenariusza.
+   */
+  slowaKluczowe?: string[]
+  /**
    * Pola, które bot zbiera w rozmowie tej branży.
    *
    * Klucz musi odpowiadać nazwie pola u dostawcy. Stałe kolumny w bazie są
@@ -62,11 +78,15 @@ export type Branza = {
 export const REGULY_STALE = `Zasady obowiązujące przez całą rozmowę:
 
 - Mówisz wyłącznie po polsku, pełnymi polskimi słowami, z polską odmianą.
-- Przedstawiasz się jako asystent głosowy, nigdy jako człowiek. Gdy rozmówca pyta wprost, czy jest botem, odpowiadasz zgodnie z prawdą.
-- Na początku pytasz o zgodę na dalszą rozmowę. Odmowa kończy rozmowę uprzejmie i bez namawiania.
+- Powitanie i przedstawienie się padło już w pierwszym zdaniu rozmowy. Nie mówisz "dzień dobry" drugi raz i nie przedstawiasz się ponownie. Każda kolejna wypowiedź zaczyna się od treści, nie od powitania.
+- Jesteś asystentem głosowym, nigdy człowiekiem. Gdy rozmówca pyta wprost, czy jest botem, odpowiadasz zgodnie z prawdą.
+- Gdy rozmówca potwierdzi, że to on, przechodzisz od razu do pierwszego pytania, bez pytania, czy może rozmawiać. Gdy odmawia rozmowy albo mówi, że to pomyłka, dziękujesz i natychmiast kończysz rozmowę, bez namawiania.
+- Za potwierdzenie tożsamości uznajesz tylko wyraźne "tak". Za zaprzeczenie uznajesz tylko wyraźne "nie", "pomyłka", "nie wypełniałem". "Mhm", "halo", cisza albo szum to nie zaprzeczenie: wtedy pytasz jeszcze raz, jeden raz, i czekasz.
 - Nie naciskasz, nie obiecujesz i nie zmyślasz. Gdy czegoś nie wiesz, mówisz, że sprawdzi to człowiek.
 - Mówisz krótko. Jedno pytanie naraz i czekasz na odpowiedź.
-- Gdy rozmówca prosi, żeby nie dzwonić ponownie, potwierdzasz to i kończysz rozmowę.`
+- Gdy rozmówca prosi, żeby nie dzwonić ponownie, potwierdzasz to i kończysz rozmowę.
+- Rozmowę kończysz wyłącznie narzędziem end_call, zaraz po zdaniu pożegnalnym. Nigdy nie mówisz na głos "zakończ połączenie", "koniec rozmowy", "end call" ani nazwy żadnego narzędzia. Rozmówca słyszy tylko pożegnanie, potem następuje rozłączenie.
+- Po ostatnim pytaniu dziękujesz jednym zdaniem, mówisz "do usłyszenia" i kończysz rozmowę narzędziem.`
 
 /**
  * Granica, której bot nie przekracza.
@@ -81,10 +101,17 @@ const KREDYTY: Branza = {
   id: 'kredyty',
   nazwa: 'Kancelaria kredytowa',
   pola: [{ klucz: 'produkt_opis', etykieta: 'Produkt' }, { klucz: 'bank', etykieta: 'Bank' }, { klucz: 'rok_umowy', etykieta: 'Rok umowy' }, { klucz: 'kwota', etykieta: 'Kwota' }, { klucz: 'prosi_o_kontakt', etykieta: 'Prosi o kontakt' }, { klucz: 'preferowany_termin_kontaktu', etykieta: 'Termin kontaktu' }],
-  pytania: ['Czy umowa kredytowa jest nadal aktywna?', 'W którym banku został zaciągnięty kredyt?', 'Z którego roku jest umowa?', 'Na jaką kwotę opiewał kredyt?', 'Czy to kredyt hipoteczny, gotówkowy czy walutowy?', 'Kiedy możemy oddzwonić z doradcą?'],
-  przyklady: ['Czy umowa jest nadal aktywna?', 'W którym banku?', 'Z którego roku?'],
+  pytania: ['Czy jest to kredyt hipoteczny w złotówkach, kredyt walutowy czy pożyczka gotówkowa?', 'Na jaką kwotę?', 'W którym roku została zawarta umowa?', 'Jaki to był bank?'],
+  slowaKluczowe: ['PKO BP', 'Pekao', 'mBank', 'Millennium', 'Santander', 'ING', 'Alior', 'BNP Paribas', 'Credit Agricole', 'Getin', 'Noble Bank', 'Raiffeisen', 'Polbank', 'Deutsche Bank', 'BPH', 'Eurobank', 'Kredyt Bank', 'Nordea', 'Fortis', 'Provident', 'Citi Handlowy', 'Velo Bank', 'WIBOR', 'frankowy', 'CHF', 'hipoteczny', 'gotówkowa', 'konsolidacyjny', 'złotówkowy'],
+  opisy: {
+    'Czy jest to kredyt hipoteczny w złotówkach, kredyt walutowy czy pożyczka gotówkowa?': 'Rodzaj produktu opisany słowami rozmówcy, np. kredyt hipoteczny złotówkowy, kredyt frankowy, pożyczka gotówkowa. Zwróć krótko sam rodzaj, bez cytowania wypowiedzi. Jeśli nie da się ustalić, zwróć: nieustalone.',
+    'Na jaką kwotę?': 'Początkowa kwota kredytu lub pożyczki. Zwróć samą wartość cyframi, np. 200000, z walutą, gdy padła inna niż PLN, np. 120000 CHF. Kwota przybliżona jest w porządku. Nie zapisuj aktualnego salda. Jeśli brak, zwróć: nieustalone.',
+    'W którym roku została zawarta umowa?': 'Rok zawarcia umowy, cyframi, np. 2008. Jeśli rozmówca podał rok przybliżony, zachowaj tę informację, np. około 2010. Jeśli brak, zwróć: nieustalone.',
+    'Jaki to był bank?': 'Nazwa banku lub instytucji, z którą zawarto umowę, w mianowniku, np. PKO BP, mBank, Millennium. Jeśli brak, zwróć: nieustalone.',
+  },
+  przyklady: ['Czy to kredyt hipoteczny, walutowy czy pożyczka gotówkowa?', 'Na jaką kwotę?', 'Jaki to był bank?'],
   powitanie: 'Dzień dobry, z tej strony wirtualna asystentka {FIRMA}. Dzwonię w sprawie formularza dotyczącego bezpłatnej analizy umowy kredytowej. Czy rozmawiam z osobą, która wypełniła formularz?',
-  cel: 'Dzwonisz do osoby, która zostawiła zgłoszenie o bezpłatną analizę umowy kredytowej.\n\nUstalasz po kolei: o który produkt chodzi, w którym banku, z którego roku jest umowa, czy kredyt jest spłacony czy spłacany, na jaką kwotę był zaciągnięty i kiedy można oddzwonić.',
+  cel: 'Krótko potwierdzasz dane z osobą, która wypełniła formularz dotyczący bezpłatnej analizy umowy kredytowej.\n\nJeżeli rozmówca potwierdzi, że wypełnił formularz, przechodzisz od razu do pytania o rodzaj umowy. Nie pytasz, czy może rozmawiać. Jeżeli mówi, że nie wypełniał formularza albo to niewłaściwa osoba, mówisz: "Przepraszam za pomyłkę. Dziękuję za rozmowę." i natychmiast kończysz rozmowę.\n\nUstalasz po kolei: rodzaj umowy, kwotę, rok zawarcia umowy i bank. Kwotę zapisujesz cyframi, nie pytasz o aktualne saldo. Tylko przy kredycie walutowym dopytujesz o walutę, przy złotówkowym zapisujesz PLN bez pytania. Nie wypowiadasz na głos kodów WIBOR, WAL ani SKD.\n\nPo zebraniu rodzaju umowy, kwoty, roku i banku mówisz: "Dziękuję. Wkrótce skontaktuje się specjalista {FIRMA}. Do usłyszenia." i natychmiast kończysz rozmowę. Jeżeli rozmówca poprosi o kontakt ze specjalistą, mówisz: "Przekażę prośbę o kontakt ze specjalistą." i kończysz rozmowę.',
   slownik: `Pojęcia, którymi posługują się rozmówcy. Rozpoznajesz je i rozumiesz, ale sam nie wykładasz prawa.
 
 - Sankcja kredytu darmowego, w skrócie SKD. Uprawnienie konsumenta z ustawy o kredycie konsumenckim. Jeżeli bank naruszył obowiązki informacyjne przy zawieraniu umowy, konsument może po złożeniu pisemnego oświadczenia spłacać kredyt bez odsetek i bez pozostałych kosztów. Dotyczy kredytów konsumenckich, czyli zwykle gotówkowych i konsolidacyjnych. Uprawnienie jest ograniczone terminem liczonym od wykonania umowy, więc data zawarcia i status spłaty mają znaczenie.
@@ -148,6 +175,7 @@ const MOTORYZACJA: Branza = {
   pola: [{ klucz: 'marka_model', etykieta: 'Marka i model' }, { klucz: 'rocznik', etykieta: 'Rocznik' }, { klucz: 'przebieg', etykieta: 'Przebieg' }, { klucz: 'objaw', etykieta: 'Co się dzieje z autem' }, { klucz: 'termin_podstawienia', etykieta: 'Kiedy podstawi auto' }, { klucz: 'auto_zastepcze', etykieta: 'Auto zastępcze' }],
   pytania: ['Jakim samochodem Pan jeździ? Proszę podać markę i model.', 'Który to rocznik i ile mniej więcej ma przebiegu?', 'Proszę powiedzieć co się dzieje z autem.', 'Czy zapaliła się jakaś kontrolka na desce rozdzielczej?', 'Kiedy najwygodniej byłoby Panu podjechać do nas?', 'Czy na czas naprawy będzie Panu potrzebne auto zastępcze?'],
   przyklady: ['Jakim samochodem Pan jeździ?', 'Co się dzieje z autem?', 'Kiedy mógłby Pan podjechać?'],
+  slowaKluczowe: ['Toyota', 'Volkswagen', 'Skoda', 'Opel', 'Ford', 'Renault', 'Peugeot', 'Citroen', 'Audi', 'BMW', 'Mercedes', 'Kia', 'Hyundai', 'Dacia', 'Fiat', 'Nissan', 'Honda', 'Mazda', 'Volvo', 'Seat', 'Suzuki', 'Mitsubishi', 'Subaru', 'Lexus', 'Tesla', 'Jeep', 'Land Rover', 'Porsche', 'Alfa Romeo', 'Lancia', 'Saab', 'Chevrolet', 'Daewoo', 'Trabant', 'Polonez', 'Syrena', 'Wartburg', 'Łada', 'Żuk', 'Nysa', 'Maluch', 'Fiat 126p', 'Octavia', 'Fabia', 'Superb', 'Golf', 'Passat', 'Polo', 'Tiguan', 'Astra', 'Corsa', 'Insignia', 'Corolla', 'Yaris', 'Avensis', 'Auris', 'Clio', 'Megane', 'Laguna', 'Focus', 'Mondeo', 'Fiesta', 'Ceed', 'Sportage', 'Tucson', 'i30', 'Duster', 'Punto', 'Panda', 'Qashqai', 'Civic', 'rozrząd', 'sprzęgło', 'turbina', 'DPF', 'klocki', 'tarcze', 'zawieszenie', 'kontrolka', 'check engine', 'przebieg', 'rocznik'],
   powitanie: 'Dzień dobry, z tej strony wirtualna asystentka {FIRMA}. Dzwonię w sprawie wizyty w serwisie. Czy rozmawiam z właścicielem samochodu?',
   cel: 'Dzwonisz, żeby umówić wizytę w serwisie samochodowym albo potwierdzić już umówioną.\n\nUstalasz po kolei: markę i model, rocznik, przebieg, co dokładnie dzieje się z autem i kiedy może je podstawić. Nie stawiasz diagnozy i nie podajesz ceny naprawy, bo to zależy od oględzin.',
   slownik: `Pojęcia, którymi posługują się rozmówcy. Rozpoznajesz je i rozumiesz, ale sam nie stawiasz diagnozy.
@@ -222,6 +250,20 @@ export function slownikBranzy(id: string | null | undefined): string {
   return `${branza.slownik}\n\n${ZASTRZEZENIE}`
 }
 
+/** Ile znaków własnego opisu branży przyjmujemy od klienta. */
+export const LIMIT_WIEDZY_BRANZOWEJ = 4000
+
+/**
+ * Treść branżowa do scenariusza: nasz słownik albo opis napisany przez klienta.
+ *
+ * Opis klienta liczy się tylko przy branży własnej. Gdy klient wybrał branżę
+ * z listy, jego stary opis nie ma prawa nadpisać naszego słownika.
+ */
+export function wiedzaBranzowa(id: string | null | undefined, wlasna: string | null | undefined): string {
+  if (id === BRANZA_WLASNA) return (wlasna ?? '').trim()
+  return slownikBranzy(id)
+}
+
 /** Czy identyfikator wskazuje na znaną branżę. */
 export function znanaBranza(id: string | null | undefined): boolean {
   return BRANZE.some((b) => b.id === id)
@@ -264,6 +306,25 @@ export function scenariuszBranzy(id: string | null | undefined, nazwaFirmy: stri
   ]
   if (branza.id === 'kredyty') czesci.push(ZASTRZEZENIE)
   return czesci.filter(Boolean).join('\n\n')
+}
+
+/**
+ * Dokładna instrukcja wyciągania odpowiedzi na pytanie, jeśli któraś branża
+ * ją ma. Szukamy po treści we wszystkich branżach, bo klient mógł zostawić
+ * pytanie z gotowca i zmienić branżę albo dopisać pytanie z innej listy.
+ */
+export function opisOdpowiedzi(pytanie: string): string | null {
+  const szukane = pytanie.replace(/\s+/g, ' ').trim()
+  for (const branza of BRANZE) {
+    const trafienie = branza.opisy?.[szukane]
+    if (trafienie) return trafienie
+  }
+  return null
+}
+
+/** Słowa faworyzowane przez rozpoznawanie mowy w tej branży. */
+export function slowaKluczoweBranzy(id: string | null | undefined): string[] {
+  return znajdzBranze(id)?.slowaKluczowe ?? []
 }
 
 /** Gotowy zestaw pytań dla branży, jako tekst do pola formularza. */

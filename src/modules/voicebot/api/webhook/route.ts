@@ -368,6 +368,13 @@ export async function POST(request: Request) {
 
   call.status = 'completed'
   call.durationSecs = data.metadata?.call_duration_secs ?? null
+  // Czas rozpoczecia bierzemy od dostawcy, gdy go nie mamy. Wiersz zalozony
+  // z kolejki ma juz swoj, ale wiersz z rozmowy testowej albo z oddzwonienia
+  // moglby zostac bez daty i tabela pokazywalaby pusta komorke.
+  const startSekundy = data.metadata?.start_time_unix_secs
+  if (!call.startedAt && typeof startSekundy === 'number' && startSekundy > 0) {
+    call.startedAt = new Date(startSekundy * 1000)
+  }
   call.summary = firstString(data.analysis?.transcript_summary)
   call.identityConfirmed = asBool(pick('tozsamosc_potwierdzona'))
   call.consentGiven = asBool(pick('zgoda_na_rozmowe'))

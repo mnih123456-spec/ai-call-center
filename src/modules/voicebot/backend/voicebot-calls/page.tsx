@@ -31,6 +31,15 @@ type CallRow = {
   summary: string | null
   collected: Record<string, unknown> | null
   createdAt: string
+  startedAt: string | null
+}
+
+/** Data i godzina rozmowy, po polsku, bez sekund. Gdy rozmowa jeszcze nie ruszyła, moment zlecenia. */
+function kiedy(row: { startedAt: string | null; createdAt: string }): string {
+  const moment = row.startedAt ?? row.createdAt
+  const data = new Date(moment)
+  if (Number.isNaN(data.getTime())) return ''
+  return data.toLocaleString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
 const PRODUKT: Record<string, string> = {
@@ -112,6 +121,11 @@ export default function VoicebotCallsPage() {
   }, [rows, zaslonione])
 
   const columns: ColumnDef<CallRow>[] = React.useMemo(() => [
+    {
+      id: 'kiedy',
+      header: t('voicebot.calls.column.when', 'Kiedy'),
+      cell: ({ row }) => <span className="whitespace-nowrap">{kiedy(row.original)}</span>,
+    },
     {
       id: 'osoba',
       header: t('voicebot.calls.column.person', 'Rozmówca'),

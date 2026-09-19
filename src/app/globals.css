@@ -822,3 +822,38 @@ body[data-demo-feedback-fab="visible"] main {
 .om-mdx-editor .cm-dropCursor {
   border-left-color: var(--foreground);
 }
+
+/* Widok klienta: w menu zostaje tylko grupa voicebota, reszta to nasza kuchnia. */
+html[data-widok="klient"] [data-sidebar-group="true"]:not(:has([data-menu-item-id*="voicebot"])) {
+  display: none;
+}
+
+/* Zasłona danych: elementy oznaczone jako wrażliwe rozmywają się jednym kliknięciem. */
+html[data-zaslona="1"] [data-wrazliwe] {
+  filter: blur(6px);
+  user-select: none;
+}
+
+/* Lewe menu ma widoczny pasek przewijania. Ukryty pasek sprawiał, że nie było
+   widać, że menu w ogóle da się przewinąć. */
+aside [data-sidebar-scroll="true"].scrollbar-hide {
+  scrollbar-width: thin;
+  -ms-overflow-style: auto;
+  padding-right: 2px;
+}
+aside [data-sidebar-scroll="true"].scrollbar-hide::-webkit-scrollbar {
+  display: block;
+  width: 8px;
+}
+aside [data-sidebar-scroll="true"].scrollbar-hide::-webkit-scrollbar-thumb {
+  background: color-mix(in oklch, var(--muted-foreground) 35%, transparent);
+  border-radius: 8px;
+}
+
+/* Widok klienta: nasze narzędzia w grupie voicebota znikają. Klient nie zakłada
+   klientów, nie ustawia sobie limitów i nie podpina CRM bez technika. */
+html[data-widok="klient"] [data-menu-item-id$="voicebot-nowa-firma"],
+html[data-widok="klient"] [data-menu-item-id$="voicebot-limity"],
+html[data-widok="klient"] [data-menu-item-id$="voicebot-crm"] {
+  display: none;
+}

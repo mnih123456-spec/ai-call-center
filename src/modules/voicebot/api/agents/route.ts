@@ -6,7 +6,7 @@ import { VoiceAgentProfile } from '../../data/entities'
 import { agentProfileSchema } from '../../data/validators'
 import { fetchProviderCatalog } from '../../lib/provider'
 import { wyslijScenariuszDoAgenta } from '../../lib/scenariusz'
-import { BRANZE, slownikBranzy, znanaBranza } from '../../lib/branze'
+import { BRANZA_WLASNA, BRANZE, opisOdpowiedzi, scenariuszBranzy, slowaKluczoweBranzy, wiedzaBranzowa, znanaBranza } from '../../lib/branze'
 import { MODELE, pobierzUstawienia, sprawdzUstawienia, wyslijPolaDoAgenta, zapiszUstawienia } from '../../lib/ustawienia-agenta'
 import { dataCollectionDlaDostawcy, polaZPytan } from '../../lib/pola-z-pytan'
 import { pobierzWiedze } from '../../lib/wiedza'
@@ -57,6 +57,7 @@ export async function GET(request: Request) {
       direction: p.direction,
       questions: p.questions ?? '',
       industry: p.industry ?? '',
+      industryKnowledge: p.industryKnowledge ?? '',
       knowledgeUrl: p.knowledgeUrl ?? '',
       knowledgeText: p.knowledgeText ?? '',
       knowledgeReadAt: p.knowledgeReadAt?.toISOString() ?? null,
@@ -119,6 +120,9 @@ export async function POST(request: Request) {
   // Nieznana branza znaczy brak slownika, a nie blad zapisu: liste branz
   // rozwijamy, a stary wybor nie moze blokowac edycji agenta.
   let branza = znanaBranza(parsed.data.industry) ? parsed.data.industry! : null
+  // Opis wlasnej branzy zapisujemy tylko przy branzy wlasnej. Przy branzy
+  // z listy stary opis nie moze zostac w bazie i wrocic po zmianie wyboru.
+  const wiedzaWlasna = branza === BRANZA_WLASNA ? (parsed.data.industryKnowledge?.trim() || null) : null
 
   const poprzedniAdres = profil?.knowledgeUrl ?? null
   const nowyAdres = parsed.data.knowledgeUrl || null
@@ -129,6 +133,7 @@ export async function POST(request: Request) {
     profil.direction = parsed.data.direction
     profil.questions = parsed.data.questions ?? null
     profil.industry = branza
+    profil.industryKnowledge = wiedzaWlasna
     profil.knowledgeUrl = parsed.data.knowledgeUrl ?? null
     profil.updatedAt = teraz
   } else {
@@ -138,6 +143,7 @@ export async function POST(request: Request) {
       direction: parsed.data.direction,
       questions: parsed.data.questions ?? null,
       industry: branza,
+      industryKnowledge: wiedzaWlasna,
       knowledgeUrl: parsed.data.knowledgeUrl ?? null,
       tenantId: auth.tenantId ?? null,
       organizationId: auth.orgId,
@@ -191,7 +197,8 @@ export async function POST(request: Request) {
     profil.agentId,
     profil.questions,
     profil.knowledgeText,
-    slownikBranzy(profil.industry),
+    wiedzaBranzowa(profil.industry, profil.industryKnowledge),
+    scenariuszBranzy(profil.industry, profil.name) || null,
   )
 
   // Model i czas ciszy ida osobnym zadaniem, bo dotycza sposobu prowadzenia
@@ -210,7 +217,11 @@ export async function POST(request: Request) {
   // bot zada pytanie, ale odpowiedz utonie w transkrypcji zamiast trafic do
   // tabeli wynikow jako kolumna.
   const pola = polaZPytan(profil.questions)
-  const wysylkaPol = await wyslijPolaDoAgenta(profil.agentId, dataCollectionDlaDostawcy(pola))
+  const wysylkaPol = await wyslijPolaDoAgenta(
+    profil.agentId,
+    dataCollectionDlaDostawcy(pola, opisOdpowiedzi),
+    slowaKluczoweBranzy(profil.industry),
+  )
 
   const czesci: string[] = []
   czesci.push(wysylka.ok ? 'Pytania przekazane do agenta.' : wysylka.blad)

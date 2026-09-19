@@ -89,6 +89,7 @@ export const agentProfileSchema = z.object({
   name: z.string().min(1).max(200),
   direction: z.enum(['outbound', 'inbound']).default('outbound'),
   industry: z.string().max(50).nullable().optional().or(z.literal('')),
+  industryKnowledge: z.string().max(4000).nullable().optional(),
   questions: z.string().max(5000).nullable().optional(),
   knowledgeUrl: z.string().url().max(500).nullable().optional().or(z.literal('')),
   /** Wymuszenie ponownego odczytu strony, gdy adres się nie zmienił. */
@@ -159,6 +160,7 @@ export const postCallWebhookSchema = z.object({
     }).passthrough().optional(),
     metadata: z.object({
       call_duration_secs: z.coerce.number().optional(),
+      start_time_unix_secs: z.coerce.number().optional(),
       termination_reason: z.string().optional(),
       /** Koszt rozmowy: w kredytach dostawcy i w dolarach. */
       cost: z.coerce.number().optional(),

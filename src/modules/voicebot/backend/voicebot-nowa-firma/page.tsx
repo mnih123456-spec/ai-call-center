@@ -32,6 +32,7 @@ export default function VoicebotNowaFirmaPage() {
   const [nazwa, setNazwa] = React.useState('')
   const [branza, setBranza] = React.useState('')
   const [strona, setStrona] = React.useState('')
+  const [opisBranzy, setOpisBranzy] = React.useState('')
   const [branze, setBranze] = React.useState<Branza[]>([])
 
   const [etap, setEtap] = React.useState<Etap | null>(null)
@@ -104,7 +105,12 @@ export default function VoicebotNowaFirmaPage() {
         method: 'POST',
         credentials: 'same-origin',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ nazwaFirmy: czysta, industry: branza, knowledgeUrl: strona }),
+        body: JSON.stringify({
+          nazwaFirmy: czysta,
+          industry: branza,
+          industryKnowledge: branza === 'wlasna' ? opisBranzy : null,
+          knowledgeUrl: strona,
+        }),
       })
       const bot = (await odpBot.json().catch(() => null)) as
         | { error?: string; nazwa?: string; uwaga?: string; kampaniaNazwa?: string; numerPrzypisany?: string | null }
@@ -136,7 +142,7 @@ export default function VoicebotNowaFirmaPage() {
     } finally {
       if (etap !== 'gotowe') setEtap((e) => (e === 'gotowe' ? e : null))
     }
-  }, [nazwa, branza, strona, przelaczNaFirme, etap, t])
+  }, [nazwa, branza, opisBranzy, strona, przelaczNaFirme, etap, t])
 
   const pracuje = etap !== null && etap !== 'gotowe'
 
@@ -193,6 +199,23 @@ export default function VoicebotNowaFirmaPage() {
                 {t('voicebot.newCompany.industryHint', 'Decyduje, po co bot dzwoni i jakich pojęć używa.')}
               </span>
             </label>
+
+            {branza === 'wlasna' ? (
+              <label className="flex flex-col gap-1 text-sm">
+                <span>{t('voicebot.newCompany.industryKnowledge', 'Czym zajmuje się firma i co bot ma wiedzieć?')}</span>
+                <textarea
+                  className="min-h-32 rounded border px-2 py-1"
+                  value={opisBranzy}
+                  maxLength={4000}
+                  onChange={(e) => setOpisBranzy(e.target.value)}
+                  placeholder={t('voicebot.newCompany.industryKnowledgePlaceholder', 'Np. Prowadzimy szkołę językową dla dorosłych. Bot dzwoni do osób, które zostawiły numer na stronie, żeby umówić bezpłatną lekcję próbną. Poziomy: A1-C1, zajęcia online i stacjonarne w Krakowie.')}
+                  disabled={pracuje}
+                />
+                <span className="text-xs text-muted-foreground">
+                  {t('voicebot.newCompany.industryKnowledgeHint', 'Własnymi słowami: po co bot dzwoni, jakich pojęć używa i czego nie wolno mu obiecywać. Można dopisać później na ekranie pytań.')}
+                </span>
+              </label>
+            ) : null}
 
             <label className="flex flex-col gap-1 text-sm">
               <span>{t('voicebot.newCompany.site', 'Adres strony firmy, opcjonalnie')}</span>

@@ -70,13 +70,27 @@ export function polaZPytan(pytania: string | null | undefined): PoleWyniku[] {
  * Wszystko jako tekst: bot ma zapisać to, co powiedział rozmówca, a nie
  * interpretować, czy „chyba tak" jest prawdą logiczną.
  */
-export function dataCollectionDlaDostawcy(pola: PoleWyniku[]): Record<string, unknown> {
+export function dataCollectionDlaDostawcy(
+  pola: PoleWyniku[],
+  opis?: (pytanie: string) => string | null,
+): Record<string, unknown> {
   const wynik: Record<string, unknown> = {}
   for (const pole of pola) {
     wynik[pole.klucz] = {
       type: 'string',
-      description: `Odpowiedź rozmówcy na pytanie: ${pole.etykieta}. Zapisz to, co powiedział. Gdy nie odpowiedział, zostaw puste.`,
+      description: opis?.(pole.etykieta) ?? opisOgolny(pole.etykieta),
     }
   }
   return wynik
+}
+
+/**
+ * Opis pola dla modelu, który po rozmowie wyciąga odpowiedzi z transkrypcji.
+ *
+ * Od tego opisu zależy jakość kolumny. "Zapisz, co powiedział" dawało
+ * w tabeli całe zdania, domysły i puste komórki. Model potrzebuje wprost:
+ * sama wartość, cyframi, w mianowniku, a gdy nie padło, jedno umówione słowo.
+ */
+export function opisOgolny(pytanie: string): string {
+  return `Pytanie zadane rozmówcy: "${pytanie}". Zwróć wyłącznie samą odpowiedź, krótko i konkretnie, bez cytowania całej wypowiedzi i bez komentarza. Liczby, kwoty i lata cyframi. Nazwy własne w mianowniku. Gdy pytanie jest typu tak/nie, zwróć: tak albo nie. Gdy rozmówca podał odpowiedź przybliżoną, zachowaj ją. Gdy rozmówca nie odpowiedział albo nie da się ustalić, zwróć: nieustalone.`
 }

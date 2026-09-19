@@ -14,6 +14,7 @@ import { SettingsButton } from '@open-mercato/ui/backend/SettingsButton'
 import { useBackendChrome } from '@open-mercato/ui/backend/BackendChromeProvider'
 import { useT } from '@open-mercato/shared/lib/i18n/context'
 import { AiAssistantShellIntegration } from '@/components/AiAssistantShellIntegration'
+import { OczkoDanych, PrzelacznikWidoku, useWidokKlienta } from '@/components/WidokKlienta'
 
 const LazyAiChatHeaderButton = dynamic(
   () => import('@open-mercato/ai-assistant/frontend').then((module) => module.AiChatHeaderButton),
@@ -161,9 +162,26 @@ export function BackendHeaderChrome({
     return items
   }, [showIntegrationsButton, isReady, showMessages, t])
 
+  // W widoku klienta nagłówek ma tylko to, co klient ma widzieć: oczko,
+  // przełącznik i własny profil. Wyszukiwarka, integracje i ustawienia to
+  // nasza kuchnia.
+  const { widok } = useWidokKlienta()
+  if (widok === 'klient') {
+    return (
+      <>
+        <AuthSessionGuard serverUserId={userId} />
+        <OczkoDanych />
+        <PrzelacznikWidoku />
+        <ProfileDropdown email={email} />
+      </>
+    )
+  }
+
   return (
     <>
       <AuthSessionGuard serverUserId={userId} />
+      <OczkoDanych />
+      <PrzelacznikWidoku />
       {isReady && showAiAssistant ? (
         <AiAssistantShellIntegration tenantId={tenantId} organizationId={organizationId}>
           <LazyAiChatHeaderButton />

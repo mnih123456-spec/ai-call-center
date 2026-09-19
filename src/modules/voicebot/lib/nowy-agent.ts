@@ -1,6 +1,7 @@
 import { createLogger } from '@open-mercato/shared/lib/logger'
-import { powitanieBranzy, pytaniaBranzy, scenariuszBranzy, slownikBranzy } from './branze'
+import { opisOdpowiedzi, powitanieBranzy, pytaniaBranzy, scenariuszBranzy, slowaKluczoweBranzy, wiedzaBranzowa } from './branze'
 import { dataCollectionDlaDostawcy, polaZPytan } from './pola-z-pytan'
+import { oczyscWiedze } from './scenariusz'
 
 const logger = createLogger('voicebot')
 
@@ -42,11 +43,12 @@ export function podmienNazwe(tekst: string | null | undefined, nazwa: string): s
 export async function zalozAgentaDlaFirmy(
   nazwaFirmy: string,
   branza: string | null,
+  wiedzaWlasna: string | null = null,
 ): Promise<WynikZalozenia> {
   const apiKey = process.env.ELEVENLABS_API_KEY
   const szablon = process.env.VOICEBOT_AGENT_SZABLON
   const webhook = process.env.VOICEBOT_WEBHOOK_ID ?? null
-  const model = process.env.VOICEBOT_MODEL_DOMYSLNY ?? 'gemini-2.0-flash-lite'
+  const model = process.env.VOICEBOT_MODEL_DOMYSLNY ?? 'gemini-2.5-flash'
 
   if (!apiKey) return { ok: false, blad: 'Brak klucza dostawcy głosu.' }
   if (!szablon) return { ok: false, blad: 'Nie wskazano szablonu bota (VOICEBOT_AGENT_SZABLON).' }
@@ -85,7 +87,7 @@ export async function zalozAgentaDlaFirmy(
     const wlasny = scenariuszBranzy(branza, nazwa)
     const prompt = wlasny || `${podmienNazwe(cc?.prompt?.prompt, nazwa)}
 
-${slownikBranzy(branza)}`.trim()
+${oczyscWiedze(wiedzaBranzowa(branza, wiedzaWlasna))}`.trim()
     const powitanie = powitanieBranzy(branza, nazwa) || podmienNazwe(cc?.first_message, nazwa)
 
     // Pola do zebrania tez trzeba podmienic, nie tylko tresc scenariusza.
@@ -95,7 +97,7 @@ ${slownikBranzy(branza)}`.trim()
     // bota, ktory owszem, pytal o samochod, ale do tabeli wynikow zwracal
     // kwote kredytu, bank i rok umowy. Zrodlem pol sa pytania, nie szablon.
     const pola = polaZPytan(pytaniaBranzy(branza))
-    const dataCollection = pola.length > 0 ? dataCollectionDlaDostawcy(pola) : null
+    const dataCollection = pola.length > 0 ? dataCollectionDlaDostawcy(pola, opisOdpowiedzi) : null
 
     const platformSettings: Record<string, unknown> = {}
     if (webhook) {
@@ -119,7 +121,11 @@ ${slownikBranzy(branza)}`.trim()
             first_message: powitanie,
             prompt: { prompt, llm: model },
           },
-          turn: { turn_timeout: 1.5 },
+          // Gdy tura konczy sie cisza, dostawca transkrybuje ja jeszcze raz
+          // dokladniejszym modelem. Bez tego to, co rozmowca powiedzial
+          // pod koniec zdania, bywa przekrecone w zapisie.
+          turn: { turn_timeout: 1.5, retranscribe_on_turn_timeout: true },
+          asr: { keywords: slowaKluczoweBranzy(branza) },
         },
         ...(Object.keys(platformSettings).length > 0 ? { platform_settings: platformSettings } : {}),
       }),

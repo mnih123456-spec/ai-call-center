@@ -16,9 +16,9 @@ const API = 'https://api.elevenlabs.io/v1/convai'
  * `gemini-2.5-flash` w 5,7 s. To nie jest różnica smaku.
  */
 export const MODELE = [
-  { id: 'gemini-2.5-flash-lite', nazwa: 'Gemini 2.5 Flash Lite (najszybszy, zalecany)' },
+  { id: 'gemini-2.5-flash-lite', nazwa: 'Gemini 2.5 Flash Lite (najszybszy)' },
   { id: 'gemini-2.0-flash-lite', nazwa: 'Gemini 2.0 Flash Lite' },
-  { id: 'gemini-2.5-flash', nazwa: 'Gemini 2.5 Flash (wolniejszy, dokładniejszy)' },
+  { id: 'gemini-2.5-flash', nazwa: 'Gemini 2.5 Flash (dokładniejszy, zalecany)' },
   { id: 'gemini-2.0-flash', nazwa: 'Gemini 2.0 Flash' },
   { id: 'gpt-4o-mini', nazwa: 'GPT-4o mini' },
   { id: 'gpt-4.1-nano', nazwa: 'GPT-4.1 nano' },
@@ -129,15 +129,21 @@ export async function zapiszUstawienia(
 export async function wyslijPolaDoAgenta(
   agentId: string,
   dataCollection: Record<string, unknown>,
+  slowaKluczowe: string[] = [],
 ): Promise<WynikZapisu> {
   const apiKey = process.env.ELEVENLABS_API_KEY
   if (!apiKey) return { ok: false, blad: 'Brak klucza dostawcy głosu.' }
 
   try {
+    // Slowa kluczowe dla rozpoznawania mowy ida razem z polami, bo oba
+    // wynikaja z branzy i oba trzeba odswiezyc, gdy klient ja zmieni.
     const res = await fetch(`${API}/agents/${agentId}`, {
       method: 'PATCH',
       headers: { 'xi-api-key': apiKey, 'content-type': 'application/json' },
-      body: JSON.stringify({ platform_settings: { data_collection: dataCollection } }),
+      body: JSON.stringify({
+        platform_settings: { data_collection: dataCollection },
+        conversation_config: { asr: { keywords: slowaKluczowe }, turn: { retranscribe_on_turn_timeout: true } },
+      }),
       signal: AbortSignal.timeout(20000),
     })
     if (!res.ok) {

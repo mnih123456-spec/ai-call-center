@@ -53,12 +53,17 @@ export function zlozPrompt(
   pytania: string | null | undefined,
   wiedza?: string | null,
   branza?: string | null,
+  stalyZastepczy?: string | null,
 ): string {
   const granice = ZNACZNIKI
     .map((z) => obecny.indexOf(z))
     .filter((i) => i >= 0)
   const ciecie = granice.length > 0 ? Math.min(...granice) : -1
-  const staly = (ciecie >= 0 ? obecny.slice(0, ciecie) : obecny).trimEnd()
+  // Stala czesc zwykle zostaje, ale gdy branza ma gotowy scenariusz, przy
+  // kazdym zapisie bierzemy jego aktualna wersje. Inaczej poprawka regul
+  // dzialalaby tylko dla botow zakladanych od tej pory, a nie dla tych, ktore
+  // klient juz ma i wlasnie poprawia.
+  const staly = (stalyZastepczy?.trim() || (ciecie >= 0 ? obecny.slice(0, ciecie) : obecny)).trimEnd()
 
   const lista = (pytania ?? '')
     .split(/\r?\n/)
@@ -91,7 +96,7 @@ export function zlozPrompt(
  * znaczników sekcji. Inaczej kolejny zapis obciąłby scenariusz w miejscu
  * wskazanym przez tę stronę, a nie przez nas.
  */
-function oczyscWiedze(wiedza: string | null | undefined): string {
+export function oczyscWiedze(wiedza: string | null | undefined): string {
   return (wiedza ?? '')
     .split(/\r?\n/)
     .filter((w) => !ZNACZNIKI.some((z) => w.includes(z)))
@@ -113,6 +118,7 @@ export async function wyslijScenariuszDoAgenta(
   pytania: string | null | undefined,
   wiedza?: string | null,
   branza?: string | null,
+  stalyZastepczy?: string | null,
 ): Promise<WynikSynchronizacji> {
   const apiKey = process.env.ELEVENLABS_API_KEY
   if (!apiKey) return { ok: false, blad: 'Brak klucza dostawcy głosu.' }
@@ -134,7 +140,7 @@ export async function wyslijScenariuszDoAgenta(
       return { ok: false, blad: 'Agent nie ma scenariusza, którego moglibyśmy uzupełnić.' }
     }
 
-    const nowy = zlozPrompt(obecny, pytania, wiedza, branza)
+    const nowy = zlozPrompt(obecny, pytania, wiedza, branza, stalyZastepczy)
 
     const zapis = await fetch(`${API}/agents/${agentId}`, {
       method: 'PATCH',

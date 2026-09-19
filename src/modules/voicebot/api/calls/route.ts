@@ -74,6 +74,7 @@ export async function GET(request: Request) {
       collected: r.collected ?? null,
       failureReason: r.failureReason ?? null,
       createdAt: r.createdAt.toISOString(),
+      startedAt: r.startedAt?.toISOString() ?? null,
     })),
     total,
     page,

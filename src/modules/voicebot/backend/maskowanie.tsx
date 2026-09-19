@@ -15,28 +15,58 @@ import { Button } from '@open-mercato/ui/primitives/button'
  * wyjątkiem, a wtedy ekran ma się wyświetlić normalnie, a nie wywalić.
  */
 const KLUCZ = 'voicebot.maskowanie'
+const ZDARZENIE = 'voicebot:maskowanie'
+
+function odczytaj(): boolean {
+  try {
+    return window.localStorage.getItem(KLUCZ) === '1'
+  } catch {
+    // Brak dostępu do pamięci przeglądarki nie może zepsuć ekranu.
+    return false
+  }
+}
+
+/**
+ * Stan wystawiamy też jako atrybut na `<html>`, żeby ekrany bez własnego
+ * maskowania mogły zasłonić pojedyncze elementy samym arkuszem stylów.
+ */
+function zastosuj(zaslonione: boolean) {
+  document.documentElement.dataset.zaslona = zaslonione ? '1' : '0'
+}
 
 export function useMaskowanie(): { zaslonione: boolean; przelacz: () => void } {
   const [zaslonione, setZaslonione] = React.useState(false)
 
+  // Przełącznik jest w nagłówku i w tabelach naraz, więc każdy egzemplarz
+  // nasłuchuje zmian od pozostałych. Inaczej oczko w nagłówku zasłoniłoby
+  // jedno, a tabela dalej pokazywałaby numery.
   React.useEffect(() => {
-    try {
-      setZaslonione(window.localStorage.getItem(KLUCZ) === '1')
-    } catch {
-      // Brak dostępu do pamięci przeglądarki nie może zepsuć ekranu.
+    const start = odczytaj()
+    setZaslonione(start)
+    zastosuj(start)
+    const nasluch = () => {
+      const nowe = odczytaj()
+      setZaslonione(nowe)
+      zastosuj(nowe)
+    }
+    window.addEventListener(ZDARZENIE, nasluch)
+    window.addEventListener('storage', nasluch)
+    return () => {
+      window.removeEventListener(ZDARZENIE, nasluch)
+      window.removeEventListener('storage', nasluch)
     }
   }, [])
 
   const przelacz = React.useCallback(() => {
-    setZaslonione((poprzednie) => {
-      const nowe = !poprzednie
-      try {
-        window.localStorage.setItem(KLUCZ, nowe ? '1' : '0')
-      } catch {
-        // Zmiana zadziała do końca sesji, tylko się nie zapamięta.
-      }
-      return nowe
-    })
+    const nowe = !odczytaj()
+    try {
+      window.localStorage.setItem(KLUCZ, nowe ? '1' : '0')
+    } catch {
+      // Zmiana zadziała do końca sesji, tylko się nie zapamięta.
+    }
+    setZaslonione(nowe)
+    zastosuj(nowe)
+    window.dispatchEvent(new Event(ZDARZENIE))
   }, [])
 
   return { zaslonione, przelacz }

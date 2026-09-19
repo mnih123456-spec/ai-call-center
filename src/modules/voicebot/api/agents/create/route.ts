@@ -4,7 +4,7 @@ import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import { VoiceCampaign, VoiceAgentProfile, VoiceTenantLimits } from '../../../data/entities'
-import { pytaniaBranzy, znanaBranza } from '../../../lib/branze'
+import { BRANZA_WLASNA, LIMIT_WIEDZY_BRANZOWEJ, pytaniaBranzy, znanaBranza } from '../../../lib/branze'
 import { zalozAgentaDlaFirmy } from '../../../lib/nowy-agent'
 import { filtrujNumery } from '../../../lib/limity'
 import { fetchProviderCatalog } from '../../../lib/provider'
@@ -19,6 +19,7 @@ export const metadata = {
 const schema = z.object({
   nazwaFirmy: z.string().min(2).max(120),
   industry: z.string().max(50).nullable().optional().or(z.literal('')),
+  industryKnowledge: z.string().max(LIMIT_WIEDZY_BRANZOWEJ).nullable().optional(),
   knowledgeUrl: z.string().url().max(500).nullable().optional().or(z.literal('')),
 })
 
@@ -52,6 +53,9 @@ export async function POST(request: Request) {
   }
 
   const branza = znanaBranza(parsed.data.industry) ? parsed.data.industry! : null
+  // Opis wlasnej branzy ma sens tylko wtedy, gdy klient wybral "inna branza".
+  // Przy branzy z listy nasz slownik jest zrodlem, a opis nie ma gdzie trafic.
+  const wiedzaWlasna = branza === BRANZA_WLASNA ? (parsed.data.industryKnowledge?.trim() || null) : null
 
   // Strone czytamy przed zalozeniem bota: jesli model rozpozna branze, bot
   // dostanie wlasciwy slownik od razu, a nie przy nastepnym zapisie.
@@ -68,7 +72,7 @@ export async function POST(request: Request) {
     }
   }
 
-  const wynik = await zalozAgentaDlaFirmy(parsed.data.nazwaFirmy, branzaKoncowa)
+  const wynik = await zalozAgentaDlaFirmy(parsed.data.nazwaFirmy, branzaKoncowa, wiedzaWlasna)
   if (!wynik.ok) return json({ error: wynik.blad }, 502)
 
   const { resolve } = await createRequestContainer()
@@ -83,6 +87,7 @@ export async function POST(request: Request) {
     // Puste pole na starcie zostawia klienta przed pytaniem, od czego zaczac.
     questions: pytaniaBranzy(branzaKoncowa) || null,
     industry: branzaKoncowa,
+    industryKnowledge: wiedzaWlasna,
     knowledgeUrl: parsed.data.knowledgeUrl || null,
     knowledgeText: wiedza,
     knowledgeReadAt: wiedza ? teraz : null,
