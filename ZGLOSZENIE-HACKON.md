@@ -9,9 +9,10 @@ Miejsca oznaczone `[DO UZUPEŁNIENIA]` wymagają liczb, które zna tylko Michał
 
 ## Nazwa
 
-`[DO UZUPEŁNIENIA - nazwa nieustalona]`
+**AI call center** (nazwa robocza)
 
-W grze: Oddzwoni, Odbiera, Telefonistka, Dyżurka, Linia, Pierwszy Kontakt.
+Docelowa nieustalona. W grze: Oddzwoni, Odbiera, Telefonistka, Dyżurka,
+Linia, Pierwszy Kontakt.
 
 ## Jedno zdanie
 
@@ -90,9 +91,19 @@ kilkanaście groszy za typową rozmowę kwalifikacyjną.
 | Sklejanie oddzwonienia z wcześniejszą, nieodebraną próbą | działa |
 | Rozpoznanie firmy po numerze, na który zadzwoniono | działa |
 | Odporność na powtórzony webhook | działa |
-| Licznik kosztów rozmów | działa |
+| Licznik kosztów rozmów, w złotówkach | działa |
+| Kolejka połączeń z odstępem, jedno naraz na kampanię | działa |
+| Wczytywanie wklejonej listy kontaktów, dla firm bez CRM | działa |
+| Zapis wyniku do Bitrix24: kontakt, szansa, wpis na osi czasu | działa, sprawdzone na żywo |
+| Zapis wyniku do wbudowanego CRM Open Mercato | działa, sprawdzone na żywo |
+| Wybór lejka i etapu w CRM klienta, z list pobranych z jego systemu | działa |
+| Wybór głosu z katalogu, z odsłuchem | działa, 21 głosów |
+| Własny głos firmy z nagranej próbki, ze zgodą zapisaną u nas | działa |
+| Szyfrowanie żetonu dostępowego do CRM klienta | działa, sprawdzone na bazie |
+| Blokada numerów premium i zagranicznych | działa |
+| API dla systemu klienta, uwierzytelniane kluczem | działa |
 | Uprawnienia: podgląd oddzielony od zlecania połączeń | działa |
-| Panel: kampanie oraz połączenia z wynikami | działa |
+| Panel: sześć ekranów | działa |
 
 ## Stos technologiczny
 
@@ -114,8 +125,12 @@ kilkanaście groszy za typową rozmowę kwalifikacyjną.
 - Komponenty panelu: `Page`, `DataTable`, przyciski, warstwa tłumaczeń
 - System migracji i snapshotów schematu
 - Rejestr modułów i tras API z metadanymi uprawnień
-
-Planowane: `customers` do powiązania rozmów z kartami klientów.
+- `customers` - rozmowy zapisują się na kartach klientów przez komendy
+  domenowe modułu, nie przez bezpośredni zapis encji
+- `api_keys` - klucze, którymi system klienta zleca połączenia
+- Kolejki i workery frameworka - odstęp między rozmowami
+- Szyfrowanie danych wrażliwych tenanta - żeton dostępowy do CRM klienta
+- Komendy domenowe i dziennik zmian
 
 ---
 
@@ -139,14 +154,19 @@ Te elementy **nie powstały w trakcie wydarzenia**:
 
 Cały kod modułu `voicebot` w Open Mercato, czyli:
 
-- model danych, migracje i walidatory,
-- cztery trasy API wraz z uprawnieniami,
+- model danych, migracje, walidatory i mapa szyfrowania,
+- trasy API wraz z uprawnieniami i kluczami dla systemów klienta,
 - adapter dostawcy głosu z trybem symulacji,
 - obsługa rozmów przychodzących i sklejanie oddzwonień,
 - rozpoznawanie firmy po numerze, na który zadzwoniono,
 - sprawdzanie podpisu webhooka wraz z ochroną przed odtworzeniem,
+- kolejka połączeń z odstępem, oparta o kolejki frameworka,
+- dwa złącza CRM za wspólnym interfejsem: Bitrix24 i wbudowany Open Mercato,
+- obsługa głosów wraz z klonowaniem z próbki i zapisem zgody,
+- blokada numerów o podwyższonej opłacie,
 - licznik kosztów rozmów,
-- dwa ekrany w panelu.
+- sześć ekranów w panelu,
+- 44 testy w 5 zestawach.
 
 Historia commitów pokazuje daty i zakres każdej zmiany.
 
@@ -169,8 +189,8 @@ klientów nie są używane.
 
 ## Do zrobienia przed demo
 
-- [ ] Wybrać nazwę
+- [x] Nazwa robocza: AI call center. Docelowa nadal otwarta.
 - [ ] Uzupełnić trzy liczby i policzyć porównanie przed i po
-- [ ] Przygotować zestaw danych demo
+- [x] Przygotować zestaw danych demo (scripts/dane-demo.mjs, 13 rozmów)
 - [ ] Nagrać wideo zapasowe
-- [ ] Napisać scenariusz wystąpienia, osobno dla ścieżki 03 i 01
+- [x] Napisać scenariusz wystąpienia (SCENARIUSZ-DEMO.md)

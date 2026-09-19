@@ -33,7 +33,7 @@ dostępne dla systemów klienta przez klucz.
 
 Dobrane tak, żeby były samodzielne i dało się je sprawdzić bez pytania o zdanie.
 
-## C1. Kolejka połączeń z odstępem
+## C1. ZROBIONE: kolejka połączeń z odstępem
 
 **Problem:** `minIntervalSecs` w kampanii jest zapisywane, ale nic go nie
 pilnuje. Dziś można wystrzelić sto połączeń naraz, co jest kosztowne i wygląda
@@ -53,7 +53,7 @@ faktycznie zacząć używać statusu `pending`, dziś nieużywanego.
 **Pliki:** nowy katalog `src/modules/voicebot/jobs/` albo `subscribers/`,
 plus `api/calls/route.ts` w miejscu nadawania statusu.
 
-## C2. Wklejanie listy numerów do kampanii
+## C2. ZROBIONE: wklejanie listy numerów do kampanii
 
 **Problem:** nie każdy klient ma CRM. Dziś połączenie da się zlecić tylko
 pojedynczo i tylko przez API. Klient bez CRM-u nie ma jak ruszyć kampanii.
@@ -72,7 +72,7 @@ Walidator wymaga E.164 z plusem.
 **Pliki:** `api/calls/route.ts` (nowa trasa zbiorcza albo tryb wsadowy),
 `backend/page.tsx`.
 
-## C3. Ekran przeglądu
+## C3. ZROBIONE: ekran przeglądu
 
 **Problem:** panel ma listy, nie ma widoku zbiorczego. Konkurencja ma "Przegląd"
 jako pierwszą pozycję menu, a w ścieżce Showcase wygląd waży 30 procent.
@@ -90,7 +90,7 @@ koliduje z innymi modułami. To samo wyszło wcześniej przy `voicebot-calls`.
 
 **Pliki:** nowy katalog w `backend/`, ewentualnie nowa trasa w `api/`.
 
-## C4. Wybór agenta i numeru przy edycji kampanii
+## C4. ZROBIONE: edycja kampanii
 
 **Problem:** kampanię da się założyć, ale nie da się jej zmienić. Przy pomyłce
 w numerze trzeba zakładać nową. Tak właśnie 16.09 telefon poszedł ze starego
@@ -118,13 +118,13 @@ Zostają u mnie, bo dotykają rzeczy, które już mam w głowie.
 Działa w całości, sprawdzone na żywo na koncie Michała: kontakt, deal
 na wskazanym etapie i komentarz z wynikiem rozmowy na osi czasu.
 
-## K2. Powiązanie rozmów z kartami klientów z modułu `customers`
+## K2. ZROBIONE: wbudowany CRM Open Mercato jako odbiorca rozmów
 
 To jest punktowane w kryterium "wykorzystanie Open Mercato", warte 20 procent
 w ścieżce 03. Wymaga przeczytania faktów modułu `customers` i użycia
 identyfikatorów, nie relacji ORM między modułami.
 
-## K3. Szyfrowanie adresu webhooka Bitriksa
+## K3. ZROBIONE: szyfrowanie żetonu do CRM
 
 Pole `webhook_url` zawiera żeton, czyli hasło. Przed wpisaniem tam czegokolwiek
 prawdziwego trzeba objąć kolumnę mapą szyfrowania modułu.
