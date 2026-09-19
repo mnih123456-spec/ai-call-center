@@ -210,8 +210,8 @@ export default function VoicebotAgenciPage() {
   return (
     <Page>
       <PageHeader
-        title={t('voicebot.agents.title', 'Agenci i scenariusz')}
-        description={t('voicebot.agents.subtitle', 'Dodaj pytania, które bot ma zadać. Reszta scenariusza jest nasza i sprawdzona.')}
+        title={t('voicebot.agents.title', 'Boty telefoniczne')}
+        description={t('voicebot.agents.subtitle', 'Załóż bota dla firmy, wybierz jej branżę i ustaw pytania, które ma zadawać w rozmowie.')}
         actions={<Button variant="outline" onClick={() => void wczytaj()}>{t('voicebot.agents.refresh', 'Odśwież')}</Button>}
       />
       <PageBody>
@@ -235,7 +235,7 @@ export default function VoicebotAgenciPage() {
               <p className="text-xs text-muted-foreground">
                 {t(
                   'voicebot.agents.new.hint',
-                  'Zakładamy bota od zera, na naszym sprawdzonym scenariuszu. Przedstawi się nazwą Twojej firmy, dostanie słownik pojęć z jej branży, a z podanego adresu przeczytamy, czym firma się zajmuje.',
+                  'Bot przedstawi się nazwą firmy i będzie mówił językiem jej branży. Jeśli podasz adres strony, przeczytamy ją i dołożymy to, czym firma się zajmuje. Pytania dostaniesz gotowe i zmienisz je, kiedy chcesz.',
                 )}
               </p>
 
@@ -532,7 +532,7 @@ export default function VoicebotAgenciPage() {
               <p className="text-xs text-muted-foreground">
                 {t(
                   'voicebot.agents.hint',
-                  'Nie podajesz treści całej rozmowy. Powitanie, potwierdzenie tożsamości i pytanie o zgodę są stałe i tego nie zmieniamy, bo od tego zależy zgodność rozmowy z prawem.',
+                  'Bot zawsze przedstawia się jako automat i pyta o zgodę na rozmowę. Tego nie da się wyłączyć, bo od tego zależy zgodność rozmowy z prawem.',
                 )}
               </p>
 

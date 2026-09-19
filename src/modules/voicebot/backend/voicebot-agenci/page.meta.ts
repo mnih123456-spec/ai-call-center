@@ -1,7 +1,7 @@
 export const metadata = {
   requireAuth: true,
   requireFeatures: ['voicebot.campaigns.view'],
-  pageTitle: 'Agenci i scenariusz',
+  pageTitle: 'Boty telefoniczne',
   pageTitleKey: 'voicebot.agents.title',
   pageGroup: 'Voicebot',
   pageGroupKey: 'voicebot.nav.group',
