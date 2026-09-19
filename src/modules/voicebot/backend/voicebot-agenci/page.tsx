@@ -253,6 +253,28 @@ export default function VoicebotAgenciPage() {
             {komunikat ? <div className="text-sm text-muted-foreground">{komunikat}</div> : null}
             {blad ? <div className="text-sm text-destructive">{blad}</div> : null}
 
+            {/* Potwierdzenie stoi nad listą, a nie w sekcji zakładania.
+                Tamta znika po założeniu pierwszego bota, więc zabierała ze sobą
+                potwierdzenie i odnośnik do rozmowy testowej dokładnie temu,
+                kto ich najbardziej potrzebował. */}
+            {gotowe ? (
+              <div className="rounded border p-4 text-sm">
+                <div className="font-medium">
+                  {t('voicebot.agents.new.readyTitle', 'Gotowe: ')}{gotowe.nazwa}
+                </div>
+                <div className="mt-1 text-muted-foreground">
+                  {t('voicebot.agents.new.readyBody', 'Bot ma przygotowane pytania i wie, o czym rozmawiać.')}
+                  {gotowe.numer
+                    ? t('voicebot.agents.new.readyNumber', ' Będzie dzwonił z numeru ') + gotowe.numer + '.'
+                    : t('voicebot.agents.new.readyNoNumber', ' Zostało przypisać mu numer telefonu.')}
+                </div>
+                {gotowe.uwaga ? <div className="mt-1 text-muted-foreground">{gotowe.uwaga}</div> : null}
+                <a className="mt-2 inline-block underline" href="/backend/voicebot">
+                  {t('voicebot.agents.new.readyCta', 'Posłuchaj, jak brzmi')}
+                </a>
+              </div>
+            ) : null}
+
             {/* Boty firmy. Konfiguracja siedzi w karcie bota, którego dotyczy,
                 a nie w osobnym formularzu pod spodem. */}
             {profile.map((p) => {
@@ -481,25 +503,6 @@ export default function VoicebotAgenciPage() {
                 ) : null}
               </div>
 
-              {gotowe ? (
-                <div className="rounded border p-3 text-sm">
-                  <div className="font-medium">
-                    {t('voicebot.agents.new.readyTitle', 'Gotowe: ')}{gotowe.nazwa}
-                  </div>
-                  <div className="mt-1 text-muted-foreground">
-                    {t('voicebot.agents.new.readyCampaign', 'Bot ma już kampanię ')}
-                    <span className="font-medium">{gotowe.kampania}</span>
-                    {gotowe.numer
-                      ? t('voicebot.agents.new.readyNumber', ' i numer ') + gotowe.numer
-                      : t('voicebot.agents.new.readyNoNumber', ', ale bez numeru')}
-                    {t('voicebot.agents.new.readyTail', '. Pytania dostał gotowe, zmienisz je przyciskiem Konfiguruj powyżej.')}
-                  </div>
-                  {gotowe.uwaga ? <div className="mt-1 text-muted-foreground">{gotowe.uwaga}</div> : null}
-                  <a className="mt-2 inline-block underline" href="/backend/voicebot">
-                    {t('voicebot.agents.new.readyCta', 'Przejdź do kampanii i zadzwoń testowo')}
-                  </a>
-                </div>
-              ) : null}
             </section>
             ) : null}
           </div>
