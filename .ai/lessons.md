@@ -1,6 +1,6 @@
 # Lessons
 
-This catalog indexes 0 focused lessons without loading their full text. Route the task first, then read only records whose **modules**, standalone-harness **areas**, or **topics** match the work.
+This catalog indexes 1 focused lesson without loading its full text. Route the task first, then read only records whose **modules**, standalone-harness **areas**, or **topics** match the work.
 
 ## How to use this catalog
 
@@ -25,3 +25,7 @@ rg -l '"<area>"|"<module>"|"<topic>"' .ai/lessons/*.md
 - Run `node scripts/check-lessons.mjs` before committing.
 
 ## Catalog
+
+| Primary area | Lesson | Modules | Topics |
+| --- | --- | --- | --- |
+| backend-ui | [Static legal drafts retain explicit unknowns](lessons/static-legal-drafts.md) | platform | static-html, legal-drafts |

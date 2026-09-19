@@ -20,39 +20,80 @@ const API = 'https://api.elevenlabs.io/v1/convai'
 export const ZNACZNIK_PYTAN = '=== PYTANIA OD KLIENTA (sekcja zarzadzana automatycznie, nie edytowac recznie) ==='
 
 /**
- * Składa nowy prompt: stała część plus pytania klienta.
+ * Znacznik drugiej sekcji zarządzanej: wiedzy wczytanej ze strony firmy.
+ *
+ * Osobny od pytań, bo obie sekcje zmieniają się niezależnie. Pytania klient
+ * pisze ręcznie, wiedza bierze się z odczytu strony i bywa odświeżana sama.
+ */
+export const ZNACZNIK_WIEDZY = '=== WIEDZA O FIRMIE (sekcja zarzadzana automatycznie, nie edytowac recznie) ==='
+
+/**
+ * Składa nowy prompt: stała część, pytania klienta i wiedza o firmie.
  *
  * Funkcja jest czysta, żeby dało się ją sprawdzić testem bez dotykania konta
  * u dostawcy. Zmiana promptu na produkcji jest nieodwracalna w tym sensie,
  * że nie ma tam historii wersji.
+ *
+ * Cięcie idzie od pierwszego napotkanego znacznika, więc obie sekcje są
+ * przepisywane od nowa przy każdym zapisie i nie narastają.
  */
-export function zlozPrompt(obecny: string, pytania: string | null | undefined): string {
-  const indeks = obecny.indexOf(ZNACZNIK_PYTAN)
-  const staly = (indeks >= 0 ? obecny.slice(0, indeks) : obecny).trimEnd()
+export function zlozPrompt(
+  obecny: string,
+  pytania: string | null | undefined,
+  wiedza?: string | null,
+): string {
+  const granice = [ZNACZNIK_PYTAN, ZNACZNIK_WIEDZY]
+    .map((z) => obecny.indexOf(z))
+    .filter((i) => i >= 0)
+  const ciecie = granice.length > 0 ? Math.min(...granice) : -1
+  const staly = (ciecie >= 0 ? obecny.slice(0, ciecie) : obecny).trimEnd()
 
   const lista = (pytania ?? '')
     .split(/\r?\n/)
     .map((w) => w.trim())
     .filter(Boolean)
 
-  if (lista.length === 0) return staly
+  const czysta = oczyscWiedze(wiedza)
 
-  const punkty = lista.map((p) => `- ${p}`).join('\n')
-  return `${staly}\n\n${ZNACZNIK_PYTAN}\n\nDodatkowo, o ile rozmowa na to pozwoli, ustal:\n\n${punkty}`
+  let wynik = staly
+  if (lista.length > 0) {
+    const punkty = lista.map((p) => `- ${p}`).join('\n')
+    wynik += `\n\n${ZNACZNIK_PYTAN}\n\nDodatkowo, o ile rozmowa na to pozwoli, ustal:\n\n${punkty}`
+  }
+  if (czysta) {
+    wynik += `\n\n${ZNACZNIK_WIEDZY}\n\nTak o sobie pisze firma, w imieniu ktorej dzwonisz. Korzystaj z tego, gdy rozmowca pyta o firme lub jej uslugi. Jezeli odpowiedzi tu nie ma, mowisz, ze sprawdzi to czlowiek, i nie zmyslasz.\n\n${czysta}`
+  }
+  return wynik
+}
+
+/**
+ * Przygotowuje wiedzę do wklejenia w scenariusz.
+ *
+ * Treść pochodzi z cudzej strony, więc nie może wnieść do promptu własnych
+ * znaczników sekcji. Inaczej kolejny zapis obciąłby scenariusz w miejscu
+ * wskazanym przez tę stronę, a nie przez nas.
+ */
+function oczyscWiedze(wiedza: string | null | undefined): string {
+  return (wiedza ?? '')
+    .split(/\r?\n/)
+    .filter((w) => !w.includes(ZNACZNIK_PYTAN) && !w.includes(ZNACZNIK_WIEDZY))
+    .join('\n')
+    .trim()
 }
 
 export type WynikSynchronizacji = { ok: true; dlugosc: number } | { ok: false; blad: string }
 
 /**
- * Wysyła pytania klienta do agenta u dostawcy.
+ * Wysyła pytania klienta i wiedzę o jego firmie do agenta u dostawcy.
  *
  * Najpierw czytamy obecny prompt, bo doklejamy do niego, a nie zastępujemy.
  * Wysyłamy wyłącznie tę jedną gałąź konfiguracji, żeby nie ruszyć głosu ani
  * ustawień rozmowy.
  */
-export async function wyslijPytaniaDoAgenta(
+export async function wyslijScenariuszDoAgenta(
   agentId: string,
   pytania: string | null | undefined,
+  wiedza?: string | null,
 ): Promise<WynikSynchronizacji> {
   const apiKey = process.env.ELEVENLABS_API_KEY
   if (!apiKey) return { ok: false, blad: 'Brak klucza dostawcy głosu.' }
@@ -74,7 +115,7 @@ export async function wyslijPytaniaDoAgenta(
       return { ok: false, blad: 'Agent nie ma scenariusza, którego moglibyśmy uzupełnić.' }
     }
 
-    const nowy = zlozPrompt(obecny, pytania)
+    const nowy = zlozPrompt(obecny, pytania, wiedza)
 
     const zapis = await fetch(`${API}/agents/${agentId}`, {
       method: 'PATCH',

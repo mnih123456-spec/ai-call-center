@@ -93,6 +93,20 @@ export class VoiceAgentProfile {
   @Property({ name: 'knowledge_url', type: 'text', nullable: true })
   knowledgeUrl?: string | null
 
+  /**
+   * Notatka o firmie, wyciągnięta z jej strony.
+   *
+   * Trzymamy ją u siebie z dwóch powodów: klient musi zobaczyć, czego bot się
+   * o nim nauczył, zanim ten zadzwoni do jego klientów, a przy każdym zapisie
+   * pytań nie chcemy ponownie czytać cudzej strony i płacić za model.
+   */
+  @Property({ name: 'knowledge_text', type: 'text', nullable: true })
+  knowledgeText?: string | null
+
+  /** Kiedy ostatnio przeczytaliśmy stronę firmy. */
+  @Property({ name: 'knowledge_read_at', type: Date, nullable: true })
+  knowledgeReadAt?: Date | null
+
   /** Kiedy ostatnio wysłaliśmy pytania do dostawcy. */
   @Property({ name: 'synced_at', type: Date, nullable: true })
   syncedAt?: Date | null

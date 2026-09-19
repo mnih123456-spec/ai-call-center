@@ -11,6 +11,8 @@ type Profil = {
   direction: string
   questions: string
   knowledgeUrl: string
+  knowledgeText: string
+  knowledgeReadAt: string | null
   syncedAt: string | null
   syncResult: string | null
 }
@@ -24,6 +26,7 @@ const PUSTY_FORMULARZ = {
   direction: 'outbound',
   questions: '',
   knowledgeUrl: '',
+  odswiez: false,
 }
 
 export default function VoicebotAgenciPage() {
@@ -77,6 +80,7 @@ export default function VoicebotAgenciPage() {
           direction: formularz.direction,
           questions: formularz.questions,
           knowledgeUrl: formularz.knowledgeUrl,
+          odswiezWiedze: formularz.odswiez,
         }),
       })
       const body = (await res.json().catch(() => null)) as
@@ -91,8 +95,8 @@ export default function VoicebotAgenciPage() {
       // Gdy druga zawiedzie, klient musi to wiedzieć, bo bot dalej mówi
       // po staremu, a panel pokazuje nowe pytania.
       setKomunikat(body?.wyslane === false
-        ? t('voicebot.agents.savedNotSynced', 'Zapisano u nas, ale nie udało się przekazać pytań do agenta: ') + (body?.syncResult ?? '')
-        : t('voicebot.agents.saved', 'Zapisano i przekazano do agenta.'))
+        ? t('voicebot.agents.savedNotSynced', 'Zapisano u nas, ale nie wszystko się udało: ') + (body?.syncResult ?? '')
+        : body?.syncResult ?? t('voicebot.agents.saved', 'Zapisano i przekazano do agenta.'))
       await wczytaj()
     } catch {
       setBlad(t('voicebot.agents.saveError', 'Nie udało się zapisać.'))
@@ -109,6 +113,7 @@ export default function VoicebotAgenciPage() {
       direction: p.direction,
       questions: p.questions,
       knowledgeUrl: p.knowledgeUrl,
+      odswiez: false,
     })
     setKomunikat(null)
     setBlad(null)
@@ -153,6 +158,21 @@ export default function VoicebotAgenciPage() {
                       ) : null}
                       {p.syncResult ? (
                         <div className="text-xs text-muted-foreground">{p.syncResult}</div>
+                      ) : null}
+                      {/* Notatkę pokazujemy w całości, bo klient musi wiedzieć,
+                          co bot powie o jego firmie, zanim ten zadzwoni. */}
+                      {p.knowledgeText ? (
+                        <details className="mt-2">
+                          <summary className="cursor-pointer text-xs text-muted-foreground">
+                            {t('voicebot.agents.knowledgeShow', 'Co bot wie o firmie')}
+                            {p.knowledgeReadAt
+                              ? ` (${new Date(p.knowledgeReadAt).toLocaleString('pl-PL')})`
+                              : ''}
+                          </summary>
+                          <pre className="mt-2 max-w-xl whitespace-pre-wrap rounded bg-muted p-2 text-xs">
+                            {p.knowledgeText}
+                          </pre>
+                        </details>
                       ) : null}
                     </div>
                     <Button variant="outline" onClick={() => edytuj(p)}>
@@ -238,7 +258,26 @@ export default function VoicebotAgenciPage() {
                   onChange={(e) => setFormularz((f) => ({ ...f, knowledgeUrl: e.target.value }))}
                   placeholder="https://twojafirma.pl"
                 />
+                <span className="text-xs text-muted-foreground">
+                  {t(
+                    'voicebot.agents.field.knowledgeHint',
+                    'Przeczytamy tę stronę i zrobimy z niej krótką notatkę, z której bot korzysta, gdy rozmówca pyta o firmę. Notatkę zobaczysz na liście powyżej.',
+                  )}
+                </span>
               </label>
+
+              {formularz.knowledgeUrl ? (
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={formularz.odswiez}
+                    onChange={(e) => setFormularz((f) => ({ ...f, odswiez: e.target.checked }))}
+                  />
+                  <span>
+                    {t('voicebot.agents.field.refresh', 'Przeczytaj stronę jeszcze raz, mimo że adres się nie zmienił')}
+                  </span>
+                </label>
+              ) : null}
 
               <p className="text-xs text-muted-foreground">
                 {t(
@@ -249,7 +288,11 @@ export default function VoicebotAgenciPage() {
 
               <div className="flex items-center gap-3">
                 <Button onClick={() => void zapisz()} disabled={zapis || !formularz.agentId || !formularz.name.trim()}>
-                  {zapis ? t('voicebot.agents.saving', 'Zapisuję...') : t('voicebot.agents.save', 'Zapisz')}
+                  {zapis
+                    ? (formularz.knowledgeUrl
+                      ? t('voicebot.agents.savingReading', 'Zapisuję i czytam stronę...')
+                      : t('voicebot.agents.saving', 'Zapisuję...'))
+                    : t('voicebot.agents.save', 'Zapisz')}
                 </Button>
                 {formularz.id ? (
                   <Button variant="outline" onClick={() => setFormularz({ ...PUSTY_FORMULARZ })} disabled={zapis}>

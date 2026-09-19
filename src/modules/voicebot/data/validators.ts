@@ -90,6 +90,8 @@ export const agentProfileSchema = z.object({
   direction: z.enum(['outbound', 'inbound']).default('outbound'),
   questions: z.string().max(5000).nullable().optional(),
   knowledgeUrl: z.string().url().max(500).nullable().optional().or(z.literal('')),
+  /** Wymuszenie ponownego odczytu strony, gdy adres się nie zmienił. */
+  odswiezWiedze: z.boolean().optional(),
 })
 
 export const callListSchema = z.object({

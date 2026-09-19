@@ -5,7 +5,8 @@ import { createLogger } from '@open-mercato/shared/lib/logger'
 import { VoiceAgentProfile } from '../../data/entities'
 import { agentProfileSchema } from '../../data/validators'
 import { fetchProviderCatalog } from '../../lib/provider'
-import { wyslijPytaniaDoAgenta } from '../../lib/scenariusz'
+import { wyslijScenariuszDoAgenta } from '../../lib/scenariusz'
+import { pobierzWiedze } from '../../lib/wiedza'
 
 const logger = createLogger('voicebot')
 
@@ -42,6 +43,8 @@ export async function GET(request: Request) {
       direction: p.direction,
       questions: p.questions ?? '',
       knowledgeUrl: p.knowledgeUrl ?? '',
+      knowledgeText: p.knowledgeText ?? '',
+      knowledgeReadAt: p.knowledgeReadAt?.toISOString() ?? null,
       syncedAt: p.syncedAt?.toISOString() ?? null,
       syncResult: p.syncResult ?? null,
     })),
@@ -95,6 +98,9 @@ export async function POST(request: Request) {
         deletedAt: null,
       })
 
+  const poprzedniAdres = profil?.knowledgeUrl ?? null
+  const nowyAdres = parsed.data.knowledgeUrl || null
+
   if (profil) {
     profil.agentId = parsed.data.agentId
     profil.name = parsed.data.name
@@ -119,23 +125,59 @@ export async function POST(request: Request) {
   em.persist(profil)
   await em.flush()
 
-  // Dopiero po zapisie u nas wysylamy pytania do dostawcy. Gdyby wysylka
+  // Strone czytamy tylko wtedy, gdy adres sie zmienil, gdy klient poprosil
+  // o odswiezenie albo gdy notatki jeszcze nie ma. Kazdy odczyt to zapytanie
+  // do cudzego serwera i platne wywolanie modelu, a tresc strony firmy
+  // zmienia sie rzadziej niz jej pytania do bota.
+  const trzebaCzytac = Boolean(nowyAdres) && (
+    parsed.data.odswiezWiedze === true
+    || nowyAdres !== poprzedniAdres
+    || !profil.knowledgeText
+  )
+
+  let bladWiedzy: string | null = null
+  if (!nowyAdres) {
+    profil.knowledgeText = null
+    profil.knowledgeReadAt = null
+  } else if (trzebaCzytac) {
+    const odczyt = await pobierzWiedze(nowyAdres)
+    if (odczyt.ok) {
+      profil.knowledgeText = odczyt.wiedza
+      profil.knowledgeReadAt = new Date()
+    } else {
+      // Nieudany odczyt nie kasuje poprzedniej notatki: lepiej, zeby bot
+      // wiedzial to, co wiedzial wczoraj, niz zeby nagle przestal wiedziec.
+      bladWiedzy = odczyt.blad
+    }
+  }
+
+  // Dopiero po zapisie u nas wysylamy scenariusz do dostawcy. Gdyby wysylka
   // szla pierwsza i sie udala, a zapis padl, klient mialby bota mowiacego
   // rzeczy, ktorych nie widzi w panelu.
-  const wysylka = await wyslijPytaniaDoAgenta(profil.agentId, profil.questions)
+  const wysylka = await wyslijScenariuszDoAgenta(profil.agentId, profil.questions, profil.knowledgeText)
+
+  const czesci: string[] = []
+  czesci.push(wysylka.ok ? 'Pytania przekazane do agenta.' : wysylka.blad)
+  if (bladWiedzy) czesci.push(`Strony nie udalo sie przeczytac: ${bladWiedzy}`)
+  else if (profil.knowledgeText) czesci.push(`Wiedza ze strony wczytana, ${profil.knowledgeText.length} znakow.`)
+
   profil.syncedAt = new Date()
-  profil.syncResult = wysylka.ok
-    ? 'Pytania przekazane do agenta.'
-    : wysylka.blad
+  profil.syncResult = czesci.join(' ')
   em.persist(profil)
   await em.flush()
 
-  logger.info('agent profile saved', { id: profil.id, direction: profil.direction, wyslane: wysylka.ok })
+  logger.info('agent profile saved', {
+    id: profil.id,
+    direction: profil.direction,
+    wyslane: wysylka.ok,
+    wiedza: Boolean(profil.knowledgeText),
+  })
 
   return json({
     id: profil.id,
     agentId: profil.agentId,
-    wyslane: wysylka.ok,
+    wyslane: wysylka.ok && !bladWiedzy,
     syncResult: profil.syncResult,
+    knowledgeText: profil.knowledgeText ?? '',
   }, 201)
 }
