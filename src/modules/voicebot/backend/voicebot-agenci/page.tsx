@@ -21,7 +21,7 @@ type Profil = {
 }
 
 type AgentDostawcy = { agentId: string; name: string }
-type Branza = { id: string; nazwa: string }
+type Branza = { id: string; nazwa: string; przyklady?: string[] }
 type Model = { id: string; nazwa: string }
 
 const PUSTY_FORMULARZ = {
@@ -174,6 +174,16 @@ export default function VoicebotAgenciPage() {
       setZakladanie(false)
     }
   }, [nowa, wczytaj, t])
+
+  // Podpowiedz kredytowa przy serwisie samochodowym mowi klientowi, ze
+  // pomylil sie w wyborze, nawet gdy wybral dobrze.
+  const podpowiedzPytan = React.useMemo(() => {
+    const wybrana = branze.find((b) => b.id === formularz.industry)
+    const lista = wybrana?.przyklady ?? []
+    return lista.length > 0
+      ? lista.join('\n')
+      : t('voicebot.agents.field.questionsFallback', 'O co bot ma dopytać w rozmowie?')
+  }, [branze, formularz.industry, t])
 
   const edytuj = React.useCallback((p: Profil) => {
     setFormularz({
@@ -461,10 +471,7 @@ export default function VoicebotAgenciPage() {
                   className="min-h-32 rounded border px-2 py-1"
                   value={formularz.questions}
                   onChange={(e) => setFormularz((f) => ({ ...f, questions: e.target.value }))}
-                  placeholder={t(
-                    'voicebot.agents.field.questionsPlaceholder',
-                    'Czy umowa jest nadal aktywna?\nW którym banku?\nZ którego roku?',
-                  )}
+                  placeholder={podpowiedzPytan}
                 />
               </label>
 

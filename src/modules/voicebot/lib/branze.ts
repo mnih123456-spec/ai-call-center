@@ -25,6 +25,13 @@ export type Branza = {
    */
   powitanie?: string
   cel?: string
+  /**
+   * Przykladowe pytania pokazywane klientowi jako podpowiedz w formularzu.
+   *
+   * Podpowiedz kredytowa przy serwisie samochodowym mowi klientowi, ze
+   * pomylil sie w wyborze, nawet gdy wybral dobrze.
+   */
+  przyklady?: string[]
 }
 
 /**
@@ -53,6 +60,7 @@ export const ZASTRZEZENIE = `Nie udzielasz porady prawnej i nie oceniasz szans w
 const KREDYTY: Branza = {
   id: 'kredyty',
   nazwa: 'Kancelaria kredytowa',
+  przyklady: ["Czy umowa jest nadal aktywna?","W którym banku?","Z którego roku?"],
   powitanie: "Dzien dobry, z tej strony wirtualna asystentka {FIRMA}. Dzwonie w sprawie formularza dotyczacego bezplatnej analizy umowy kredytowej. Czy rozmawiam z osoba, ktora wypelnila formularz?",
   cel: "Dzwonisz do osoby, ktora zostawila zgloszenie o bezplatna analize umowy kredytowej.\n\nUstalasz po kolei: o ktory produkt chodzi, w ktorym banku, z ktorego roku jest umowa, czy kredyt jest splacony czy splacany, na jaka kwote byl zaciagniety i kiedy mozna oddzwonic.",
   slownik: `Pojecia, ktorymi posluguja sie rozmowcy. Rozpoznajesz je i rozumiesz, ale sam nie wykladasz prawa.
@@ -72,6 +80,7 @@ Czego potrzebujesz od rozmowcy: o ktory produkt chodzi, w ktorym banku, z ktoreg
 const FOTOWOLTAIKA: Branza = {
   id: 'fotowoltaika',
   nazwa: 'Fotowoltaika i pompy ciepła',
+  przyklady: ["Jaki jest roczny rachunek za prąd?","Czym ogrzewa Pan dom?","Czy budynek jest Pana własnością?"],
   powitanie: "Dzien dobry, z tej strony wirtualna asystentka {FIRMA}. Dzwonie w sprawie zgloszenia o wycene instalacji. Czy rozmawiam z osoba, ktora je zostawila?",
   cel: "Dzwonisz do osoby, ktora zostawila zgloszenie o wycene instalacji fotowoltaicznej lub pompy ciepla.\n\nUstalasz po kolei: czy ma juz instalacje czy dopiero planuje, czym ogrzewa dom dzisiaj, jaki ma roczny rachunek za prad, czy budynek jest jego wlasnoscia i kiedy technik moze zadzwonic po szczegoly.",
   slownik: `Pojecia, ktorymi posluguja sie rozmowcy. Rozpoznajesz je i rozumiesz, ale sam nie projektujesz instalacji.
@@ -91,6 +100,7 @@ Czego potrzebujesz od rozmowcy: czy ma juz instalacje czy dopiero planuje, jaki 
 const NIERUCHOMOSCI: Branza = {
   id: 'nieruchomosci',
   nazwa: 'Biuro nieruchomości',
+  przyklady: ["W jakiej dzielnicy szuka Pan mieszkania?","Jaki metraż?","Czy ma Pan załatwiony kredyt?"],
   powitanie: "Dzien dobry, z tej strony wirtualna asystentka {FIRMA}. Dzwonie w sprawie zapytania o nieruchomosc. Czy rozmawiam z osoba, ktora je zostawila?",
   cel: "Dzwonisz do osoby, ktora zostawila zapytanie w biurze nieruchomosci.\n\nUstalasz po kolei: czy kupuje czy sprzedaje, jaka lokalizacja ja interesuje, jaki metraz, w jakim budzecie, czy ma zalatwiony kredyt i kiedy agent moze oddzwonic.",
   slownik: `Pojecia, ktorymi posluguja sie rozmowcy. Rozpoznajesz je i rozumiesz, ale sam nie wyceniasz nieruchomosci.
@@ -109,6 +119,7 @@ Czego potrzebujesz od rozmowcy: czy kupuje czy sprzedaje, jaka lokalizacja go in
 const MOTORYZACJA: Branza = {
   id: 'motoryzacja',
   nazwa: 'Serwis samochodowy',
+  przyklady: ["Jaka marka i rocznik?","Jaki przebieg?","Kiedy może Pan podstawić auto?"],
   powitanie: "Dzien dobry, z tej strony wirtualna asystentka {FIRMA}. Dzwonie w sprawie wizyty w serwisie. Czy rozmawiam z wlascicielem samochodu?",
   cel: "Dzwonisz, zeby umowic wizyte w serwisie samochodowym albo potwierdzic juz umowiona.\n\nUstalasz po kolei: marke i model, rocznik, przebieg, co dokladnie dzieje sie z autem i kiedy moze je podstawic. Nie stawiasz diagnozy i nie podajesz ceny naprawy, bo to zalezy od ogledzin.",
   slownik: `Pojecia, ktorymi posluguja sie rozmowcy. Rozpoznajesz je i rozumiesz, ale sam nie stawiasz diagnozy.
@@ -127,6 +138,7 @@ Czego potrzebujesz od rozmowcy: marka i model, rocznik, przebieg, co dokladnie s
 const MEDYCYNA: Branza = {
   id: 'medycyna',
   nazwa: 'Gabinet lekarski lub stomatologiczny',
+  przyklady: ["U którego specjalisty?","Wizyta prywatna czy na NFZ?","Jaki termin Panu pasuje?"],
   powitanie: "Dzien dobry, z tej strony wirtualna asystentka {FIRMA}. Dzwonie w sprawie terminu wizyty. Czy rozmawiam z osoba, ktora sie zapisywala?",
   cel: "Dzwonisz wylacznie po to, zeby umowic albo potwierdzic termin wizyty.\n\nUstalasz: czy to wizyta pierwsza czy kolejna, u ktorego specjalisty, prywatnie czy na NFZ, i jaki termin pasuje. Nie pytasz o nic wiecej.",
   slownik: `Pojecia, ktorymi posluguja sie rozmowcy. Rozpoznajesz je i rozumiesz.
