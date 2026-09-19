@@ -104,7 +104,7 @@ Zaznacz **"Ten projekt korzysta z istniejącego kodu"** i wpisz:
     złącze do Bitrix24 konfigurowane na koncie klienta, licznik kosztów,
     limity na firmę, zawężenie numerów i agentów per firma, czytanie strony
     firmy przez Claude API, scenariusze i słowniki pojęć dla pięciu branż,
-    zakładanie bota dla nowej firmy jednym krokiem oraz osiem ekranów panelu.
+    zakładanie bota dla nowej firmy jednym krokiem oraz jedenaście ekranów panelu.
 
     Moduł jest nakładką: rdzeń Open Mercato nie był modyfikowany, całość
     siedzi w src/modules/voicebot.

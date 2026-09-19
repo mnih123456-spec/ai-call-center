@@ -157,17 +157,20 @@ Wnioski z dzisiejszych rozmow, zeby nie powtarzac bledow:
 `termination_reason` od dostawcy nie jest mapowany na `no_answer` / `busy`.
 Te statusy nie powstaja nigdy, mimo ze tabela je przewiduje.
 
-### 4. Kafelek statystyk
+### 4. Kafelek statystyk - ZROBIONE 19.09 noc
 
-Pokazuje 60% tam, gdzie z danych wychodzi 83%. Liczniki sumuja tylko pierwsze
-100 wierszy.
+Matematyka byla poprawna: 60% to 6 z 10 wychodzacych zakonczonych rozmowa
+w danych demo (2 nieodebrane, 1 zajety, 1 nieudany). Prawdziwy blad: statystyki
+liczyly rozmowy probne, wiec trzy nieudane proby z zablokowanego numeru
+zanizaly skutecznosc firmy. Teraz `/api/voicebot/stats` pomija `isTest`.
+Licznik "Rozmow" na liscie polaczen bierze sume z API zamiast dlugosci
+pierwszej strony.
 
-### 5. Liczby w dokumentach
+### 5. Liczby w dokumentach - ZROBIONE 19.09 noc
 
-README mowi "160 testow" i "osiem ekranow". Realnie 289 testow i 10 ekranow.
-README ma tez zdanie o zakresie tenanta, ktoremu przeczy
-`voicebot-nowa-firma/page.tsx` ustawiajacy `om_selected_tenant` przez
-`document.cookie`.
+Liczby byly w ZGLOSZENIE-HACKON.md i ZGLOSZENIE-TRESC.md, nie w README:
+poprawione na 294 testy w 18 zestawach i 11 ekranow. Zdanie w README o zakresie
+tenanta przepisane: ciasteczko wyboru firmy to prosba, serwer sprawdza prawo.
 
 ### 6. Ekran CRM
 

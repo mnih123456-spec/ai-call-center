@@ -28,7 +28,9 @@ z ciekawości.
 **Wielotenantowość, której nie trzeba budować.** To jest najmocniejsza rzecz
 w tym frameworku i zorientowaliśmy się w tym dopiero, gdy zobaczyliśmy, ile
 kodu jej nie napisaliśmy. Zakres tenanta i organizacji jest w sesji, a nie
-w treści żądania, więc nie da się go podmienić z przeglądarki. Przełącznik
+w treści żądania. Przeglądarka może najwyżej poprosić o przełączenie na inną
+firmę ciasteczkiem wyboru, ale to serwer sprawdza, czy zalogowany ma do niej
+prawo, i tylko operator platformy ma je do wszystkich. Przełącznik
 organizacji dostaliśmy gotowy. Na scenie pokazujemy przełączenie firmy i pustą
 listę drugiego klienta, i to jest prawdziwy dowód izolacji, a nie slajd o niej.
 

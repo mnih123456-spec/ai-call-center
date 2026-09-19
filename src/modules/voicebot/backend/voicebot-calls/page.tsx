@@ -74,6 +74,7 @@ export default function VoicebotCallsPage() {
   const t = useT()
   const { zaslonione, przelacz } = useMaskowanie()
   const [rows, setRows] = React.useState<CallRow[]>([])
+  const [total, setTotal] = React.useState(0)
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
   const [wybrana, setWybrana] = React.useState<string | null>(null)
@@ -82,10 +83,15 @@ export default function VoicebotCallsPage() {
     setLoading(true)
     setError(null)
     try {
+      // API oddaje najwyzej 100 wierszy na strone. Licznik "Rozmow" bierze
+      // sume z API, zeby nie klamal powyzej tego limitu; pozostale liczniki
+      // licza z ostatnich 100 rozmow i tak sa podpisane.
       const res = await fetch('/api/voicebot/calls?pageSize=100', { credentials: 'same-origin' })
       if (!res.ok) throw new Error(String(res.status))
-      const body = (await res.json()) as { items?: CallRow[] }
-      setRows(Array.isArray(body.items) ? body.items : [])
+      const body = (await res.json()) as { items?: CallRow[]; total?: number }
+      const lista = Array.isArray(body.items) ? body.items : []
+      setRows(lista)
+      setTotal(typeof body.total === 'number' ? body.total : lista.length)
     } catch {
       setError(t('voicebot.calls.loadError', 'Nie udało się pobrać listy połączeń.'))
     } finally {
@@ -208,7 +214,7 @@ export default function VoicebotCallsPage() {
         <div className="mb-4 flex flex-wrap gap-6 text-sm">
           <div>
             <div className="text-muted-foreground">{t('voicebot.calls.stat.total', 'Rozmów')}</div>
-            <div className="text-2xl font-semibold">{rows.length}</div>
+            <div className="text-2xl font-semibold">{total}</div>
           </div>
           <div>
             <div className="text-muted-foreground">{t('voicebot.calls.stat.qualified', 'Z ustalonym produktem')}</div>

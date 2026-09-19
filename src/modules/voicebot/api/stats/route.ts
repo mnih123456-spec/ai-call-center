@@ -19,8 +19,11 @@ export async function GET(request: Request) {
   const { resolve } = await createRequestContainer()
   const em = resolve<EntityManager>('em')
   // Projekcja pomija numery, transkrypcje i dane rozmówców; statystyki nie mają limitu listy.
+  // Rozmowy probne nie sa czescia statystyk: firma robi je, zeby uslyszec
+  // bota, a nie zeby dodzwonic sie do klienta. Trzy nieudane proby z
+  // zablokowanego numeru zanizaly skutecznosc, ktorej nikt nie mierzyl.
   const rows = await em.find(VoiceCall, {
-    tenantId: auth.tenantId, organizationId: auth.orgId, deletedAt: null,
+    tenantId: auth.tenantId, organizationId: auth.orgId, deletedAt: null, isTest: false,
   }, {
     fields: ['createdAt', 'direction', 'status', 'relatedCallId', 'productCode', 'costUsd'],
   })

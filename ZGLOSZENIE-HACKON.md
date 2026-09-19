@@ -170,7 +170,7 @@ człowiek w końcu oddzwoni.
 | Blokada numerów premium i zagranicznych | działa |
 | API dla systemu klienta, uwierzytelniane kluczem | działa |
 | Uprawnienia: podgląd oddzielony od zlecania połączeń | działa |
-| Panel: osiem ekranów | działa |
+| Panel: jedenaście ekranów | działa |
 
 ## Stos technologiczny
 
@@ -232,8 +232,8 @@ Cały kod modułu `voicebot` w Open Mercato, czyli:
 - obsługa głosów wraz z klonowaniem z próbki i zapisem zgody,
 - blokada numerów o podwyższonej opłacie,
 - licznik kosztów rozmów,
-- osiem ekranów w panelu,
-- 160 testów w 12 zestawach.
+- jedenaście ekranów w panelu,
+- 294 testy w 18 zestawach.
 
 Historia commitów pokazuje daty i zakres każdej zmiany.
 
