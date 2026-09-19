@@ -144,3 +144,25 @@ w rekach Codexa na galezi codex/noc, wiec dokladamy to po scaleniu.
 Wniosek dla danych demo: numeru `+48503956401` nie pokazujemy na liście jako
 danych historycznych, bo to prawdziwy numer. Na scenie pojawi się wyłącznie
 jako świeża rozmowa, wykonana na żywo, i można go zasłonić przyciskiem.
+
+## 14. ACTIO: co mają i o czym trzeba wiedzieć
+
+Sprawdzone na ich stronie 19.09.
+
+**Przydatne dla nas:**
+
+- **SMS API**: REST z webhookami, od 0,075 zł za SMS. Czyli SMS po rozmowie
+  da się zrobić u tego samego operatora co telefonię.
+- **Wirtualny numer komórkowy bez karty SIM**, od 25 zł netto miesięcznie.
+  To rozwiązuje problem firmy, która chce numer komórkowy, a nie stacjonarny.
+- **Zarejestrowany operator w UKE z prawem przenoszenia numerów (MNP)**,
+  więc model z prowizją i umową klienta bezpośrednio z nimi jest wykonalny.
+
+**Ostrzeżenie strategiczne:** ACTIO ma w ofercie **własnego AI Voicebota**,
+oznaczonego jako nowość. Nasz dostawca łącza wchodzi w tę samą branżę.
+
+To nie przekreśla współpracy, ale zmienia charakter rozmowy: negocjujemy
+z kimś, kto jest jednocześnie partnerem i konkurentem.
+
+**Do decyzji:** czy przy rozmowie o prowizji pokazujemy im produkt, czy tylko
+pytamy o warunki na numery i SMS.
