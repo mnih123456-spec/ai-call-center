@@ -19,8 +19,9 @@ słowami. Kursywą to, co ma być w tym momencie na ekranie.
 > nie odebrało za pierwszym razem. W skali miesiąca to prawie tysiąc prób
 > i sześćdziesiąt pięć godzin jednej osoby.
 >
-> A jak klient oddzwoni na nieodebrane, odbiera u nas ktoś, kto nie wie,
-> że do niego dzwoniliśmy ani po co. Klient tłumaczy wszystko od zera.
+> A jak klient oddzwoni na nieodebrane, dzwoni na numer pracownika, który
+> akurat rozmawia z kimś innym albo jest po godzinach. Nikt nie odbiera. Klient
+> próbuje raz i odpuszcza.
 
 ## 2. Nowy klient (0:30 do 1:00)
 
@@ -78,9 +79,9 @@ w trakcie.*
 
 *Jeśli masz w tabeli parę wierszy z oddzwonieniem, pokaż ją tutaj.*
 
-> I to jest odpowiedź na to oddzwanianie: klient oddzwania, bot odbiera,
-> poznaje numer i dokleja rozmowę do naszej próby sprzed godziny. Nic nie
-> trzeba tłumaczyć od zera.
+> I to jest odpowiedź na oddzwanianie: klient oddzwania, bot odbiera zawsze,
+> także po godzinach, poznaje numer i dokleja rozmowę do naszej próby sprzed
+> godziny. Żadne zgłoszenie nie przepada.
 
 *Ekran Przegląd, kafelek kosztu.*
 

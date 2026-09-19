@@ -30,8 +30,9 @@ Mówisz od siebie, bez slajdu z definicją.
 
 **Kluczowe zdanie, powiedz je wolno:**
 
-> Najgorsze jest to, co się dzieje, gdy ktoś oddzwoni. Trafia na przypadkową
-> osobę, która nie wie, w jakiej sprawie dzwoniliśmy.
+> Najgorsze jest to, co się dzieje, gdy klient oddzwoni na nieodebrane. Dzwoni
+> na numer pracownika, który akurat rozmawia z kimś innym albo jest po godzinach.
+> Nikt nie odbiera. Klient próbuje raz i odpuszcza.
 
 ## Minuta 0:45-3:45, demo na żywo
 

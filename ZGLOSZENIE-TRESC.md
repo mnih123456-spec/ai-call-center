@@ -56,8 +56,10 @@ Zmień domyślne "mich's Project". To samo w obu ścieżkach.
     Razem 65 godzin miesięcznie, czyli osiem dni roboczych jednej osoby,
     około 2590 zł.
 
-    Najgorsze jest to, co dzieje się, gdy ktoś oddzwoni. Trafia na przypadkową
-    osobę, która nie wie, w jakiej sprawie dzwoniliśmy.
+    Najgorsze jest to, co dzieje się, gdy klient oddzwoni na nieodebrane. Dzwoni
+    na numer pracownika, który akurat prowadzi inną rozmowę albo jest po godzinach.
+    Nikt nie odbiera, klient próbuje raz i odpuszcza. Zgłoszenie, za które
+    zapłaciliśmy w reklamie, przepada.
 
 ## ROZWIĄZANIE
 
