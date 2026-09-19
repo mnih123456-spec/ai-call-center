@@ -93,6 +93,23 @@
           "enumItems": [],
           "mappedType": "uuid"
         },
+        "industry": {
+          "name": "industry",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
         "knowledge_read_at": {
           "name": "knowledge_read_at",
           "type": "timestamptz(6)",

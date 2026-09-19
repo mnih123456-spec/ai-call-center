@@ -89,6 +89,16 @@ export class VoiceAgentProfile {
   @Property({ type: 'text', nullable: true })
   questions?: string | null
 
+  /**
+   * Branża firmy, wybrana z listy.
+   *
+   * Decyduje o słowniku pojęć doklejanym do scenariusza. Bot dzwoniący
+   * w imieniu kancelarii kredytowej musi rozumieć pytanie o sankcję kredytu
+   * darmowego, zanim ktoś je zada.
+   */
+  @Property({ type: 'text', nullable: true })
+  industry?: string | null
+
   /** Adres strony firmy, z której bot ma czerpać wiedzę o niej. */
   @Property({ name: 'knowledge_url', type: 'text', nullable: true })
   knowledgeUrl?: string | null
@@ -188,9 +198,8 @@ export class VoiceProfile {
  * połączenie z danym dostawcą.
  *
  * UWAGA: `webhookUrl` zawiera w sobie żeton dostępowy, czyli jest hasłem.
- * Zanim trafią tu dane prawdziwego klienta, kolumna musi zostać objęta mapą
- * szyfrowania modułu. Na czas hackatonu pole jest jawne i wpisujemy do niego
- * wyłącznie adres testowy.
+ * Kolumna jest objęta mapą szyfrowania modułu (`encryption.ts`), więc odczyt
+ * wymaga zakresu deszyfrującego.
  */
 @Entity({ tableName: 'voicebot_crm_connections' })
 @Unique({ name: 'voicebot_crm_conn_tenant_provider', properties: ['tenantId', 'provider'] })

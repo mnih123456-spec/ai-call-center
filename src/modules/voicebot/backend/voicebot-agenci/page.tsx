@@ -10,6 +10,7 @@ type Profil = {
   name: string
   direction: string
   questions: string
+  industry: string
   knowledgeUrl: string
   knowledgeText: string
   knowledgeReadAt: string | null
@@ -18,6 +19,7 @@ type Profil = {
 }
 
 type AgentDostawcy = { agentId: string; name: string }
+type Branza = { id: string; nazwa: string }
 
 const PUSTY_FORMULARZ = {
   id: '' as string,
@@ -25,6 +27,7 @@ const PUSTY_FORMULARZ = {
   name: '',
   direction: 'outbound',
   questions: '',
+  industry: '',
   knowledgeUrl: '',
   odswiez: false,
 }
@@ -33,6 +36,7 @@ export default function VoicebotAgenciPage() {
   const t = useT()
   const [profile, setProfile] = React.useState<Profil[]>([])
   const [agenci, setAgenci] = React.useState<AgentDostawcy[]>([])
+  const [branze, setBranze] = React.useState<Branza[]>([])
   const [katalogDziala, setKatalogDziala] = React.useState(true)
   const [formularz, setFormularz] = React.useState(PUSTY_FORMULARZ)
   const [ladowanie, setLadowanie] = React.useState(true)
@@ -49,10 +53,12 @@ export default function VoicebotAgenciPage() {
       const body = (await res.json()) as {
         profile?: Profil[]
         agenci?: AgentDostawcy[]
+        branze?: Branza[]
         katalogDziala?: boolean
       }
       setProfile(Array.isArray(body.profile) ? body.profile : [])
       setAgenci(Array.isArray(body.agenci) ? body.agenci : [])
+      setBranze(Array.isArray(body.branze) ? body.branze : [])
       setKatalogDziala(body.katalogDziala !== false)
     } catch {
       setBlad(t('voicebot.agents.loadError', 'Nie udało się pobrać agentów.'))
@@ -79,6 +85,7 @@ export default function VoicebotAgenciPage() {
           name: formularz.name.trim(),
           direction: formularz.direction,
           questions: formularz.questions,
+          industry: formularz.industry,
           knowledgeUrl: formularz.knowledgeUrl,
           odswiezWiedze: formularz.odswiez,
         }),
@@ -112,6 +119,7 @@ export default function VoicebotAgenciPage() {
       name: p.name,
       direction: p.direction,
       questions: p.questions,
+      industry: p.industry,
       knowledgeUrl: p.knowledgeUrl,
       odswiez: false,
     })
@@ -235,6 +243,23 @@ export default function VoicebotAgenciPage() {
                   <option value="outbound">{t('voicebot.agents.outbound', 'wychodzące')}</option>
                   <option value="inbound">{t('voicebot.agents.inbound', 'przychodzące')}</option>
                 </select>
+              </label>
+
+              <label className="flex flex-col gap-1 text-sm">
+                <span>{t('voicebot.agents.field.industry', 'Branża firmy')}</span>
+                <select
+                  className="rounded border px-2 py-1"
+                  value={formularz.industry}
+                  onChange={(e) => setFormularz((f) => ({ ...f, industry: e.target.value }))}
+                >
+                  {branze.map((b) => <option key={b.id} value={b.id}>{b.nazwa}</option>)}
+                </select>
+                <span className="text-xs text-muted-foreground">
+                  {t(
+                    'voicebot.agents.field.industryHint',
+                    'Doklejamy słownik pojęć z tej branży, żeby bot rozumiał, o czym mówi rozmówca. Ten słownik jest nasz i sprawdzony, w odróżnieniu od wiedzy ze strony.',
+                  )}
+                </span>
               </label>
 
               <label className="flex flex-col gap-1 text-sm">

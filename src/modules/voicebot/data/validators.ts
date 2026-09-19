@@ -88,6 +88,7 @@ export const agentProfileSchema = z.object({
   agentId: z.string().min(1).max(200),
   name: z.string().min(1).max(200),
   direction: z.enum(['outbound', 'inbound']).default('outbound'),
+  industry: z.string().max(50).nullable().optional().or(z.literal('')),
   questions: z.string().max(5000).nullable().optional(),
   knowledgeUrl: z.string().url().max(500).nullable().optional().or(z.literal('')),
   /** Wymuszenie ponownego odczytu strony, gdy adres się nie zmienił. */

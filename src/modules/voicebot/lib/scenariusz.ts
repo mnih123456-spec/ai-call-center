@@ -28,21 +28,33 @@ export const ZNACZNIK_PYTAN = '=== PYTANIA OD KLIENTA (sekcja zarzadzana automat
 export const ZNACZNIK_WIEDZY = '=== WIEDZA O FIRMIE (sekcja zarzadzana automatycznie, nie edytowac recznie) ==='
 
 /**
- * Składa nowy prompt: stała część, pytania klienta i wiedza o firmie.
+ * Znacznik trzeciej sekcji: słownika branżowego.
+ *
+ * Osobny od wiedzy ze strony, bo to dwa różne źródła. Tamtą pisze klient na
+ * swojej stronie, tę piszemy my i za nią odpowiadamy.
+ */
+export const ZNACZNIK_BRANZY = '=== SLOWNIK BRANZOWY (sekcja zarzadzana automatycznie, nie edytowac recznie) ==='
+
+const ZNACZNIKI = [ZNACZNIK_PYTAN, ZNACZNIK_WIEDZY, ZNACZNIK_BRANZY]
+
+/**
+ * Składa nowy prompt: stała część, słownik branżowy, pytania klienta
+ * i wiedza o firmie.
  *
  * Funkcja jest czysta, żeby dało się ją sprawdzić testem bez dotykania konta
  * u dostawcy. Zmiana promptu na produkcji jest nieodwracalna w tym sensie,
  * że nie ma tam historii wersji.
  *
- * Cięcie idzie od pierwszego napotkanego znacznika, więc obie sekcje są
- * przepisywane od nowa przy każdym zapisie i nie narastają.
+ * Cięcie idzie od pierwszego napotkanego znacznika, więc wszystkie trzy
+ * sekcje są przepisywane od nowa przy każdym zapisie i nie narastają.
  */
 export function zlozPrompt(
   obecny: string,
   pytania: string | null | undefined,
   wiedza?: string | null,
+  branza?: string | null,
 ): string {
-  const granice = [ZNACZNIK_PYTAN, ZNACZNIK_WIEDZY]
+  const granice = ZNACZNIKI
     .map((z) => obecny.indexOf(z))
     .filter((i) => i >= 0)
   const ciecie = granice.length > 0 ? Math.min(...granice) : -1
@@ -54,8 +66,14 @@ export function zlozPrompt(
     .filter(Boolean)
 
   const czysta = oczyscWiedze(wiedza)
+  const slownik = oczyscWiedze(branza)
 
   let wynik = staly
+  // Slownik branzowy idzie przed pytaniami: bot ma najpierw rozumiec, czym
+  // jest sankcja kredytu darmowego, a dopiero potem o nia pytac.
+  if (slownik) {
+    wynik += `\n\n${ZNACZNIK_BRANZY}\n\n${slownik}`
+  }
   if (lista.length > 0) {
     const punkty = lista.map((p) => `- ${p}`).join('\n')
     wynik += `\n\n${ZNACZNIK_PYTAN}\n\nDodatkowo, o ile rozmowa na to pozwoli, ustal:\n\n${punkty}`
@@ -67,16 +85,16 @@ export function zlozPrompt(
 }
 
 /**
- * Przygotowuje wiedzę do wklejenia w scenariusz.
+ * Przygotowuje doklejaną treść do wstawienia w scenariusz.
  *
- * Treść pochodzi z cudzej strony, więc nie może wnieść do promptu własnych
+ * Treść potrafi pochodzić z cudzej strony, więc nie może wnieść do promptu własnych
  * znaczników sekcji. Inaczej kolejny zapis obciąłby scenariusz w miejscu
  * wskazanym przez tę stronę, a nie przez nas.
  */
 function oczyscWiedze(wiedza: string | null | undefined): string {
   return (wiedza ?? '')
     .split(/\r?\n/)
-    .filter((w) => !w.includes(ZNACZNIK_PYTAN) && !w.includes(ZNACZNIK_WIEDZY))
+    .filter((w) => !ZNACZNIKI.some((z) => w.includes(z)))
     .join('\n')
     .trim()
 }
@@ -94,6 +112,7 @@ export async function wyslijScenariuszDoAgenta(
   agentId: string,
   pytania: string | null | undefined,
   wiedza?: string | null,
+  branza?: string | null,
 ): Promise<WynikSynchronizacji> {
   const apiKey = process.env.ELEVENLABS_API_KEY
   if (!apiKey) return { ok: false, blad: 'Brak klucza dostawcy głosu.' }
@@ -115,7 +134,7 @@ export async function wyslijScenariuszDoAgenta(
       return { ok: false, blad: 'Agent nie ma scenariusza, którego moglibyśmy uzupełnić.' }
     }
 
-    const nowy = zlozPrompt(obecny, pytania, wiedza)
+    const nowy = zlozPrompt(obecny, pytania, wiedza, branza)
 
     const zapis = await fetch(`${API}/agents/${agentId}`, {
       method: 'PATCH',

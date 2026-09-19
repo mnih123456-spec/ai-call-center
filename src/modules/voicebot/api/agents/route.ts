@@ -6,6 +6,7 @@ import { VoiceAgentProfile } from '../../data/entities'
 import { agentProfileSchema } from '../../data/validators'
 import { fetchProviderCatalog } from '../../lib/provider'
 import { wyslijScenariuszDoAgenta } from '../../lib/scenariusz'
+import { BRANZE, slownikBranzy, znanaBranza } from '../../lib/branze'
 import { pobierzWiedze } from '../../lib/wiedza'
 
 const logger = createLogger('voicebot')
@@ -42,6 +43,7 @@ export async function GET(request: Request) {
       name: p.name,
       direction: p.direction,
       questions: p.questions ?? '',
+      industry: p.industry ?? '',
       knowledgeUrl: p.knowledgeUrl ?? '',
       knowledgeText: p.knowledgeText ?? '',
       knowledgeReadAt: p.knowledgeReadAt?.toISOString() ?? null,
@@ -51,6 +53,7 @@ export async function GET(request: Request) {
     // Lista agentów u dostawcy, żeby przypisanie szło z wyboru, a nie
     // z przepisywania identyfikatora. Ta sama zasada co przy numerach.
     agenci: katalog.agents,
+    branze: BRANZE.map((b) => ({ id: b.id, nazwa: b.nazwa })),
     katalogDziala: katalog.configured,
   })
 }
@@ -98,6 +101,10 @@ export async function POST(request: Request) {
         deletedAt: null,
       })
 
+  // Nieznana branza znaczy brak slownika, a nie blad zapisu: liste branz
+  // rozwijamy, a stary wybor nie moze blokowac edycji agenta.
+  const branza = znanaBranza(parsed.data.industry) ? parsed.data.industry! : null
+
   const poprzedniAdres = profil?.knowledgeUrl ?? null
   const nowyAdres = parsed.data.knowledgeUrl || null
 
@@ -106,6 +113,7 @@ export async function POST(request: Request) {
     profil.name = parsed.data.name
     profil.direction = parsed.data.direction
     profil.questions = parsed.data.questions ?? null
+    profil.industry = branza
     profil.knowledgeUrl = parsed.data.knowledgeUrl ?? null
     profil.updatedAt = teraz
   } else {
@@ -114,6 +122,7 @@ export async function POST(request: Request) {
       name: parsed.data.name,
       direction: parsed.data.direction,
       questions: parsed.data.questions ?? null,
+      industry: branza,
       knowledgeUrl: parsed.data.knowledgeUrl ?? null,
       tenantId: auth.tenantId ?? null,
       organizationId: auth.orgId,
@@ -154,7 +163,12 @@ export async function POST(request: Request) {
   // Dopiero po zapisie u nas wysylamy scenariusz do dostawcy. Gdyby wysylka
   // szla pierwsza i sie udala, a zapis padl, klient mialby bota mowiacego
   // rzeczy, ktorych nie widzi w panelu.
-  const wysylka = await wyslijScenariuszDoAgenta(profil.agentId, profil.questions, profil.knowledgeText)
+  const wysylka = await wyslijScenariuszDoAgenta(
+    profil.agentId,
+    profil.questions,
+    profil.knowledgeText,
+    slownikBranzy(profil.industry),
+  )
 
   const czesci: string[] = []
   czesci.push(wysylka.ok ? 'Pytania przekazane do agenta.' : wysylka.blad)
