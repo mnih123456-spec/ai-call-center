@@ -1,7 +1,7 @@
 export const metadata = {
   requireAuth: true,
   requireFeatures: ['directory.tenants.create'],
-  pageTitle: 'Nowa firma',
+  pageTitle: 'Nowy klient',
   pageTitleKey: 'voicebot.newCompany.title',
   pageGroup: 'Voicebot',
   pageGroupKey: 'voicebot.nav.group',
