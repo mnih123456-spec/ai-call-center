@@ -81,7 +81,7 @@ export function zlozPrompt(
   }
   if (lista.length > 0) {
     const punkty = lista.map((p) => `- ${p}`).join('\n')
-    wynik += `\n\n${ZNACZNIK_PYTAN}\n\nPytania, które masz zadać rozmówcy. Zadajesz je po polsku, jedno naraz, i czekasz na odpowiedź:\n\n${punkty}`
+    wynik += `\n\n${ZNACZNIK_PYTAN}\n\nPytania, które masz zadać rozmówcy. Zadajesz je dokładnie w tym brzmieniu, słowo w słowo, bez parafrazowania i bez dopowiadania niczego na podstawie wcześniejszych odpowiedzi. Jedno pytanie naraz, po polsku, i czekasz na odpowiedź:\n\n${punkty}`
   }
   if (czysta) {
     wynik += `\n\n${ZNACZNIK_WIEDZY}\n\nTak o sobie pisze firma, w imieniu której dzwonisz. Korzystaj z tego, gdy rozmówca pyta o firmę lub jej usługi. Jeżeli odpowiedzi tu nie ma, mówisz, że sprawdzi to człowiek, i nie zmyślasz.\n\n${czysta}`

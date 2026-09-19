@@ -13,7 +13,7 @@ describe('zlozPrompt', () => {
   // Pełna równość chroni treść instrukcji i kolejność punktów przekazywanych agentowi.
   it('dodaje pytania jako listę po znaczniku, zachowując stałą treść', () => {
     expect(zlozPrompt(staly, 'Jaki termin?\nJaki budżet?')).toBe(
-      `${staly}\n\n${ZNACZNIK_PYTAN}\n\nPytania, które masz zadać rozmówcy. Zadajesz je po polsku, jedno naraz, i czekasz na odpowiedź:\n\n- Jaki termin?\n- Jaki budżet?`,
+      `${staly}\n\n${ZNACZNIK_PYTAN}\n\nPytania, które masz zadać rozmówcy. Zadajesz je dokładnie w tym brzmieniu, słowo w słowo, bez parafrazowania i bez dopowiadania niczego na podstawie wcześniejszych odpowiedzi. Jedno pytanie naraz, po polsku, i czekasz na odpowiedź:\n\n- Jaki termin?\n- Jaki budżet?`,
     )
   })
 
