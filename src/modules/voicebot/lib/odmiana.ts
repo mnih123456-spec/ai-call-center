@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { createLogger } from '@open-mercato/shared/lib/logger'
+import { dopelniaczRegula } from './odmiana-regula'
 
 const logger = createLogger('voicebot')
 
@@ -22,6 +23,11 @@ export async function nazwaWDopelniaczu(nazwa: string): Promise<string> {
   if (!czysta) return czysta
   const zPamieci = pamiec.get(czysta)
   if (zPamieci) return zPamieci
+
+  // Regula idzie pierwsza: jest przewidywalna i nie wymaga klucza. Model
+  // dostaje tylko nazwy, ktorych regula nie rozpoznala.
+  const zReguly = dopelniaczRegula(czysta)
+  if (zReguly !== czysta) return zReguly
 
   const apiKey = process.env.VOICEBOT_ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY
   if (!apiKey) return czysta
