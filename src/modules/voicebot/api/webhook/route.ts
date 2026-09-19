@@ -4,6 +4,7 @@ import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import { VoiceCall, VoiceCampaign, VoiceCrmConnection } from '../../data/entities'
 import { postCallWebhookSchema } from '../../data/validators'
+import { findOneWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import { toE164 } from '../../lib/phone'
 import { type DanePolaczenia, czyWartoZakladac } from '../../lib/crm'
 import { BitrixCrm } from '../../lib/crm-bitrix'
@@ -162,11 +163,16 @@ async function wyslijDoCrm(
   em: EntityManager,
   call: VoiceCall,
 ): Promise<{ ref: string | null; blad: string | null }> {
-  const polaczenie = await em.findOne(VoiceCrmConnection, {
-    tenantId: call.tenantId,
-    active: true,
-    deletedAt: null,
-  })
+  // Adres jest szyfrowany w spoczynku. Zakres podajemy z samego połączenia,
+  // bo webhook nie ma sesji: tenant został wcześniej ustalony po numerze,
+  // na który zadzwoniono, i to on wybiera klucz odszyfrowania.
+  const polaczenie = await findOneWithDecryption(
+    em,
+    VoiceCrmConnection,
+    { tenantId: call.tenantId, active: true, deletedAt: null },
+    undefined,
+    { tenantId: call.tenantId ?? null, organizationId: call.organizationId ?? null },
+  )
   if (!polaczenie) return { ref: null, blad: null }
 
   const dane = daneDoCrm(call)

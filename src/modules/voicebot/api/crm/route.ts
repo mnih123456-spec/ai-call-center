@@ -2,6 +2,7 @@ import type { EntityManager } from '@mikro-orm/postgresql'
 import { getAuthFromCookies } from '@open-mercato/shared/lib/auth/server'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import { createLogger } from '@open-mercato/shared/lib/logger'
+import { findOneWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import { VoiceCrmConnection } from '../../data/entities'
 import { crmConnectionSchema } from '../../data/validators'
 import { BitrixCrm } from '../../lib/crm-bitrix'
@@ -49,11 +50,16 @@ export async function GET() {
   const { resolve } = await createRequestContainer()
   const em = resolve<EntityManager>('em')
 
-  const polaczenie = await em.findOne(VoiceCrmConnection, {
-    tenantId: auth.tenantId,
-    organizationId: auth.orgId,
-    deletedAt: null,
-  })
+  // Adres jest szyfrowany w spoczynku, więc czytamy go pomocnikiem
+  // odszyfrowującym. Zwykłe findOne oddałoby szyfrogram, a my wysłalibyśmy
+  // go do Bitriksa i dostali błąd nie do wytłumaczenia.
+  const polaczenie = await findOneWithDecryption(
+    em,
+    VoiceCrmConnection,
+    { tenantId: auth.tenantId, organizationId: auth.orgId, deletedAt: null },
+    undefined,
+    { tenantId: auth.tenantId ?? null, organizationId: auth.orgId },
+  )
 
   if (!polaczenie) return json({ configured: false, dostawcy: DOSTAWCY })
 
@@ -109,12 +115,18 @@ export async function POST(request: Request) {
   const em = resolve<EntityManager>('em')
 
   const teraz = new Date()
-  let polaczenie = await em.findOne(VoiceCrmConnection, {
-    tenantId: auth.tenantId,
-    organizationId: auth.orgId,
-    provider: parsed.data.provider,
-    deletedAt: null,
-  })
+  let polaczenie = await findOneWithDecryption(
+    em,
+    VoiceCrmConnection,
+    {
+      tenantId: auth.tenantId,
+      organizationId: auth.orgId,
+      provider: parsed.data.provider,
+      deletedAt: null,
+    },
+    undefined,
+    { tenantId: auth.tenantId ?? null, organizationId: auth.orgId },
+  )
 
   const adres = parsed.data.webhookUrl ?? polaczenie?.webhookUrl
   if (!adres) {
