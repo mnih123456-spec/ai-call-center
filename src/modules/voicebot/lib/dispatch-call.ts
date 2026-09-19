@@ -6,6 +6,14 @@ import { callJobSchema, enqueueCall, type CallJob } from './call-queue'
 import { startOutboundCall, type StartCallInput } from './provider'
 
 const logger = createLogger('voicebot').child({ component: 'dispatch-call' })
+
+/**
+ * Po tylu milisekundach uznajemy rozmowe w stanie dialing za porzucona.
+ *
+ * Piętnascie minut jest z zapasem: najdluzsza rozmowa w naszych testach
+ * trwala niecale trzy minuty, a rozmowa kwalifikacyjna rzadko przekracza pięc.
+ */
+const PRZETERMINOWANIE_DIALING_MS = Number(process.env.VOICEBOT_DIALING_TIMEOUT_MS ?? 15 * 60 * 1000)
 type Claim = { kind: 'skip' } | { kind: 'wait'; delayMs: number } | { kind: 'start'; input: StartCallInput }
 
 export async function dispatchCall(em: EntityManager, raw: CallJob): Promise<void> {
@@ -32,7 +40,29 @@ export async function dispatchCall(em: EntityManager, raw: CallJob): Promise<voi
     const inFlight = await tx.findOne(VoiceCall, {
       ...campaignScope, status: 'dialing', conversationId: null, finishedAt: null,
     })
-    if (inFlight) return { kind: 'wait', delayMs: 30_000 }
+    if (inFlight) {
+      // Czekanie bez konca zamyka kampanie na zawsze. Zdarzenie o zakonczeniu
+      // rozmowy przychodzi webhookiem, a ten potrafi nie dojsc: tunel bywa
+      // niewpiety, adres sie zmienia po restarcie, dostawca ma awarie.
+      // Wtedy pierwsza rozmowa zostaje w stanie dialing i kolejka staje po
+      // jednym telefonie, co wyglada jak zepsuty produkt, a jest brakiem
+      // jednego zadania HTTP.
+      //
+      // Po przekroczeniu czasu zamykamy takie zlecenie jako nieudane
+      // i pozwalamy kampanii isc dalej. Nie dzwonimy pod ten numer ponownie,
+      // bo nie wiemy, czy tamta rozmowa sie nie odbyla.
+      const zaczete = inFlight.startedAt?.getTime() ?? inFlight.updatedAt.getTime()
+      const wiek = Date.now() - zaczete
+      if (wiek < PRZETERMINOWANIE_DIALING_MS) return { kind: 'wait', delayMs: 30_000 }
+
+      const zamkniete = new Date()
+      inFlight.status = 'failed'
+      inFlight.failureReason = 'Brak potwierdzenia zakonczenia rozmowy, zamkniete po przekroczeniu czasu'
+      inFlight.finishedAt = zamkniete
+      inFlight.updatedAt = zamkniete
+      await tx.flush()
+      logger.warn('stale dialing call closed', { callId: inFlight.id, wiekMs: wiek })
+    }
 
     const first = await tx.findOne(VoiceCall, {
       ...campaignScope, status: 'pending', deletedAt: null,

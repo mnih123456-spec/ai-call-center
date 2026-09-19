@@ -254,4 +254,34 @@ describe('kolejka polaczen', () => {
     await dispatchCall(f.em, jobFor(f.calls[1]))
     expect(provider).not.toHaveBeenCalled()
   })
+
+  it('zlecenie bez potwierdzenia nie blokuje kampanii na zawsze', async () => {
+    const f = fixture(2)
+    // Rozmowa wisi w stanie dialing, bo webhook nigdy nie doszedl. Tak wyglada
+    // niewpiety tunel: bez tego kampania stanelaby po pierwszym telefonie.
+    Object.assign(f.calls[0], { status: 'dialing', startedAt: new Date(epoch), conversationId: null })
+    jest.setSystemTime(epoch + 3600_000)
+
+    await dispatchCall(f.em, jobFor(f.calls[1]))
+    expect(f.calls[0].status).toBe('failed')
+    expect(f.calls[0].failureReason).toContain('przekroczeniu czasu')
+    expect(provider).not.toHaveBeenCalled()
+
+    // Zamkniecie przeterminowanego zlecenia przesuwa zegar odstepu, wiec
+    // nastepny telefon idzie po jednym odstepie, a nie natychmiast.
+    jest.setSystemTime(epoch + 3600_000 + 10_000)
+    await dispatchCall(f.em, jobFor(f.calls[1]))
+    expect(provider).toHaveBeenCalledTimes(1)
+    expect(f.calls[1].status).toBe('dialing')
+  })
+
+  it('swieze zlecenie bez potwierdzenia dalej wstrzymuje kampanie', async () => {
+    const f = fixture(2)
+    Object.assign(f.calls[0], { status: 'dialing', startedAt: new Date(epoch), conversationId: null })
+    // Minuta to normalny czas trwania rozmowy, a nie awaria.
+    jest.setSystemTime(epoch + 60_000)
+    await dispatchCall(f.em, jobFor(f.calls[1]))
+    expect(f.calls[0].status).toBe('dialing')
+    expect(provider).not.toHaveBeenCalled()
+  })
 })
