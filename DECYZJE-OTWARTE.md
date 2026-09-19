@@ -120,4 +120,13 @@ przedsiębiorcą telekomunikacyjnym z wpisem do UKE i odpowiedzialnością za ru
 Lepiej, żeby klient podpisał umowę z operatorem sam, a my tylko konfigurujemy
 łącze. Sprzedajemy oprogramowanie, nie minuty.
 
-**Do decyzji przez Michała:** czy tak zostaje.
+**ROZSTRZYGNIETE 19.09:** nie odsprzedajemy numerow. Zamiast tego
+porozumienie o wspolpracy z operatorem, z prowizja od podpisanych umow.
+
+W panelu, w miejscu wyboru numeru, ma byc skrot: **Zamow numer u partnera**,
+prowadzacy wprost do operatora. Klient podpisuje umowe sam albo podlacza
+wlasne lacze SIP. My sprzedajemy oprogramowanie, nie minuty.
+
+**Do zrobienia w kodzie:** odnosnik na ekranie kampanii, widoczny zwlaszcza
+wtedy, gdy lista numerow u dostawcy jest pusta. Ekran kampanii jest teraz
+w rekach Codexa na galezi codex/noc, wiec dokladamy to po scaleniu.
