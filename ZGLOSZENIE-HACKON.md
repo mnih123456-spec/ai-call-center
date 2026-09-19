@@ -1,7 +1,7 @@
 # Zgłoszenie do aplikacji HackOn
 
 Do wklejenia w szkic projektu, gdy pojawi się w sobotę.
-Miejsca oznaczone `[DO UZUPEŁNIENIA]` wymagają liczb, które zna tylko Michał.
+Liczby pochodzą z panelu raportów, okres 1-18 września 2026.
 
 Ścieżki: **03 Solve Your Real Problem** (główna) i **01 Showcase**.
 
@@ -37,13 +37,21 @@ historii kontaktu.
 
 ## Problem, stan obecny
 
-Kto traci czas: `[DO UZUPEŁNIENIA - kto u ciebie dzwoni do leadów]`
+**Dane z panelu raportów, okres 1-18 września 2026, czyli 18 dni:**
+
+- **180 nowych kontaktów**
+- **149 z nich na etapie "kontakt 2"**, czyli nie odebrali za pierwszym razem
+
+To jest **82,8 procent nieodebranych przy pierwszej próbie**.
+
+W przeliczeniu na pełny miesiąc: **300 kontaktów, 248 nieodebranych**,
+czyli co najmniej **548 prób telefonicznych miesięcznie**.
 
 | Krok dzisiaj | Gdzie |
 |---|---|
 | Lead wpada z formularza | strona, reklama |
 | Ktoś musi go przedzwonić | telefon |
-| Nie odbiera za pierwszym razem | `[DO UZUPEŁNIENIA - jaki procent]` |
+| Nie odbiera za pierwszym razem | **82,8% przypadków** |
 | Próba druga i trzecia | telefon |
 | Gdy oddzwoni, trafia na kogokolwiek | telefon |
 | Przepisanie ustaleń do CRM | Bitrix24 |
@@ -55,8 +63,19 @@ Gdzie się sypie:
 - Ustalenia z rozmowy przepisuje człowiek, więc część z nich ginie.
 - Po godzinach i w weekend nie odbiera nikt.
 
-Ile to kosztuje: `[DO UZUPEŁNIENIA - liczba leadów miesięcznie, czas jednej
-próby, koszt godziny pracy]`
+**Ile to kosztuje:**
+
+Jedna próba to **4 minuty pracy**: wejść w kartę klienta, wybrać numer,
+odczekać sygnały, wpisać notatkę, zamknąć. Tyle trwa nawet wtedy, gdy nikt
+nie odbierze.
+
+548 prób razy 4 minuty to **36,5 godziny miesięcznie**, czyli tydzień roboczy.
+
+Koszt osoby: płaca minimalna plus 1000 zł premii, z narzutami pracodawcy
+wychodzi około **40 zł za godzinę**.
+
+**36,5 godziny razy 40 zł daje około 1480 zł miesięcznie** wydane na samo
+wykręcanie numerów, w większości bez odbioru.
 
 ## Stan docelowy
 
@@ -75,7 +94,24 @@ kilkanaście groszy za typową rozmowę kwalifikacyjną.
 
 ## Porównanie przed i po
 
-`[DO UZUPEŁNIENIA - wyliczenie na podstawie trzech liczb powyżej]`
+Na danych z września 2026, przeliczonych na pełny miesiąc:
+
+| | Dziś, człowiek | Z botem |
+|---|---|---|
+| Prób telefonicznych | 548 | 548 |
+| Czas pracy człowieka | **36,5 godziny** | około godziny na przegląd wyników |
+| Koszt miesięczny | **~1480 zł** | **~110 zł** |
+| Kto odbiera, gdy klient oddzwoni wieczorem | nikt | bot, i wie, w jakiej sprawie dzwoniliśmy |
+| Gdzie ląduje ustalenie z rozmowy | notatka pisana ręcznie | pola w CRM, bez przepisywania |
+
+Koszt bota policzony z rzeczywistych rachunków dostawcy: około 35 groszy za
+rozmowę odbytą i 2 grosze za nieodebraną próbę.
+
+**Różnica to około 1370 zł miesięcznie i tydzień roboczy odzyskany.**
+
+Ale ważniejsze jest to, czego w tej tabeli nie widać: dziś lead, który nie
+odbierze trzy razy, po prostu przepada. Bot próbuje dalej i odbiera, gdy ten
+człowiek w końcu oddzwoni.
 
 ---
 
@@ -190,7 +226,7 @@ klientów nie są używane.
 ## Do zrobienia przed demo
 
 - [x] Nazwa robocza: AI call center. Docelowa nadal otwarta.
-- [ ] Uzupełnić trzy liczby i policzyć porównanie przed i po
+- [x] Liczby i porównanie przed i po (dane z 1-18.09.2026)
 - [x] Przygotować zestaw danych demo (scripts/dane-demo.mjs, 13 rozmów)
 - [ ] Nagrać wideo zapasowe
 - [x] Napisać scenariusz wystąpienia (SCENARIUSZ-DEMO.md)

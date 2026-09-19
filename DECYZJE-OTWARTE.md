@@ -20,13 +20,23 @@ Na demo: używamy numeru ACTIO, który już mamy. Ustalone.
 czy my mu numer dajemy. Druga droga może oznaczać działalność
 telekomunikacyjną i wpis do rejestru UKE, co trzeba sprawdzić.
 
-## 3. Trzy liczby do porównania "przed i po"
+## 3. ROZSTRZYGNIETE: liczby do porownania przed i po
 
 Potrzebne do kryterium wartego 30% w ścieżce 03. Tylko Michał je zna:
 
-- Ile leadów miesięcznie trzeba przedzwonić i potwierdzić?
-- Ilu z nich nie odbiera za pierwszym razem?
-- Ile czasu zajmuje człowiekowi jedna próba i ile kosztuje godzina tej osoby?
+Dane z panelu raportow, 1-18 wrzesnia 2026 (18 dni):
+
+- **180 nowych kontaktow**
+- **149 na etapie kontakt 2**, czyli 82,8 procent nie odebralo za pierwszym razem
+- **4 minuty** na jedna probe: wejsc w karte, wybrac numer, odczekac, wpisac
+  notatke, zamknac
+- pracownik: placa minimalna plus 1000 zl premii
+
+Po przeliczeniu na miesiac: 300 kontaktow, 548 prob, 36,5 godziny, okolo
+1480 zl. Bot: okolo 110 zl.
+
+**Do potwierdzenia przez Michala:** wysokosc placy minimalnej w 2026.
+W wyliczeniu podstawione 4666 zl, czyli stawka z 2025.
 
 ## 4. Nazwa produktu
 

@@ -20,8 +20,13 @@ Mówisz od siebie, bez slajdu z definicją.
 > zostawiają zgłoszenie w formularzu, a potem ktoś musi do każdego zadzwonić,
 > potwierdzić, że to ta osoba, uzyskać zgodę i ustalić, o jaki kredyt chodzi.
 >
-> `[LICZBA]` zgłoszeń miesięcznie. `[LICZBA]` procent nie odbiera za pierwszym
-> razem. Jedna próba to `[LICZBA]` minut pracy człowieka.
+> We wrzesniu, od pierwszego do osiemnastego, weszlo **180 nowych zgloszen**.
+> **149 z nich nie odebralo za pierwszym razem.** To jest osiemdziesiat trzy
+> procent. W skali miesiaca to trzysta kontaktow i **ponad piecset prob
+> telefonicznych**.
+>
+> Jedna proba to cztery minuty: wejsc w karte, wybrac numer, odczekac,
+> wpisac notatke, zamknac. Tyle samo, gdy nikt nie odbierze.
 
 **Kluczowe zdanie, powiedz je wolno:**
 
@@ -53,12 +58,21 @@ ten sam człowiek, zero przecieku między firmami.
 
 ## Minuta 3:45-4:45, liczby
 
-> Koszt rozmowy widać w panelu, bo pobieramy go od dostawcy. Typowa rozmowa
-> kwalifikacyjna to kilkanaście do kilkudziesięciu groszy.
->
-> Człowiek robiący to samo: `[LICZBA]` minut razy `[STAWKA]` za godzinę.
+> Koszt rozmowy widac w panelu, bo pobieramy go od dostawcy. Typowa rozmowa
+> kwalifikacyjna to kilkanascie do kilkudziesieciu groszy.
 
-**Porównanie przed i po:** `[DO UZUPEŁNIENIA]`
+**Porownanie przed i po, powiedz powoli:**
+
+> Piecset czterdziesci osiem prob razy cztery minuty to **trzydziesci szesc
+> godzin miesiecznie**. Tydzien roboczy. Przy koszcie czterdziestu zlotych
+> za godzine to **tysiac czterysta osiemdziesiat zlotych**.
+>
+> Te same rozmowy botem kosztuja **sto dziesiec zlotych**.
+
+**Zdanie do zapamietania:**
+
+> Tysiac czterysta osiemdziesiat wobec stu dziesieciu. I tydzien pracy
+> oddany z powrotem czlowiekowi.
 
 ## Minuta 4:45-5:30, wdrożenie
 
