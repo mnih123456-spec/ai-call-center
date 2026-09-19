@@ -137,9 +137,9 @@ export default function VoicebotNowaFirmaPage() {
 
   const napisEtapu = React.useMemo(() => {
     switch (etap) {
-      case 'konto': return t('voicebot.newCompany.stepAccount', 'Zakładam konto firmy...')
-      case 'przelaczenie': return t('voicebot.newCompany.stepSwitch', 'Przełączam na nową firmę...')
-      case 'bot': return t('voicebot.newCompany.stepBot', 'Zakładam bota i jego kampanię...')
+      case 'konto': return t('voicebot.newCompany.stepAccount', 'Zakładam konto...')
+      case 'przelaczenie': return t('voicebot.newCompany.stepSwitch', 'Przygotowuję miejsce na dane...')
+      case 'bot': return t('voicebot.newCompany.stepBot', 'Uczę bota rozmawiać...')
       default: return ''
     }
   }, [etap, t])
@@ -153,7 +153,7 @@ export default function VoicebotNowaFirmaPage() {
             <p className="text-sm text-muted-foreground">
               {t(
                 'voicebot.newCompany.lead',
-                'Jeden przycisk zakłada konto firmy, przełącza panel na nią i tworzy jej bota razem z kampanią.',
+                'Podaj trzy rzeczy, a w minutę dostaniesz gotowego bota dla tej firmy.',
               )}
             </p>
 
@@ -211,24 +211,22 @@ export default function VoicebotNowaFirmaPage() {
           {wynik ? (
             <div className="rounded border p-4 text-sm">
               <div className="font-medium">
-                {t('voicebot.newCompany.doneTitle', 'Gotowe. Panel jest już przełączony na firmę ')}{wynik.nazwa}
+                {t('voicebot.newCompany.doneTitle', 'Gotowe. Bot dla ')}{wynik.nazwa}{t('voicebot.newCompany.doneTitleTail', ' jest przygotowany.')}
               </div>
               <div className="mt-1 text-muted-foreground">
-                {t('voicebot.newCompany.doneBody', 'Bot ma gotowy scenariusz, pytania swojej branży i kampanię ')}
-                <span className="font-medium">{wynik.kampania}</span>
+                {t('voicebot.newCompany.doneBody', 'Ma przygotowane pytania i wie, o czym rozmawiać.')}
                 {wynik.numer
-                  ? t('voicebot.newCompany.doneNumber', ' z numerem ') + wynik.numer
-                  : t('voicebot.newCompany.doneNoNumber', ', ale bez numeru')}
-                {'.'}
+                  ? t('voicebot.newCompany.doneNumber', ' Będzie dzwonił z numeru ') + wynik.numer + '.'
+                  : t('voicebot.newCompany.doneNoNumber', ' Zostało przypisać mu numer telefonu.')}
               </div>
               {wynik.uwaga ? <div className="mt-1 text-muted-foreground">{wynik.uwaga}</div> : null}
 
               <div className="mt-3 flex flex-wrap gap-4">
                 <a className="underline" href="/backend/voicebot">
-                  {t('voicebot.newCompany.ctaCall', 'Zadzwoń testowo')}
+                  {t('voicebot.newCompany.ctaCall', 'Posłuchaj, jak brzmi')}
                 </a>
                 <a className="underline" href="/backend/voicebot-agenci">
-                  {t('voicebot.newCompany.ctaBot', 'Popraw pytania bota')}
+                  {t('voicebot.newCompany.ctaBot', 'Zmień pytania')}
                 </a>
               </div>
             </div>

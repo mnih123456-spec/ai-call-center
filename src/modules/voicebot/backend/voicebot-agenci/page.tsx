@@ -425,12 +425,15 @@ export default function VoicebotAgenciPage() {
               )
             })}
 
-            {/* Zakładanie kolejnej firmy. Na dole, bo to rzadsza czynność niż
-                poprawienie pytań botowi, który już dzwoni. */}
+            {/* Zakładanie bota widzi operator platformy oraz firma, która nie
+                ma jeszcze żadnego. Klientowi z gotowym botem propozycja
+                "załóż kolejną firmę" nie mówi nic: ma jedną firmę i jednego
+                bota, a nie listę do rozbudowy. */}
+            {operator || profile.length === 0 ? (
             <section className="grid gap-3 rounded border border-dashed p-4">
               <div className="text-sm font-medium">
                 {profile.length === 0
-                  ? t('voicebot.agents.new.first', 'Załóż pierwszego bota')
+                  ? t('voicebot.agents.new.first', 'Załóż swojego bota')
                   : t('voicebot.agents.new.title', 'Załóż bota dla kolejnej firmy')}
               </div>
 
@@ -498,6 +501,7 @@ export default function VoicebotAgenciPage() {
                 </div>
               ) : null}
             </section>
+            ) : null}
           </div>
         )}
       </PageBody>
