@@ -55,7 +55,7 @@
       <p class="eyebrow">03 / Jak to działa</p><h2 id="how-title">Zacznij dzwonić.<br>W trzech krokach.</h2>
       <ol class="steps"><li><span class="step-index">1</span><h3>Wybierz klientów</h3><p>Załóż konto swojej firmy. Wklej listę numerów telefonów. Możesz też korzystać ze swojej bazy klientów.</p></li><li><span class="step-index">2</span><h3>Ustal, o co zapytać</h3><p>Wybierz głos bota i pytania do klientów. Podaj adres strony swojej firmy. Na próbę porozmawiaj z botem przez telefon.</p></li><li><span class="step-index">3</span><h3>Sprawdź odpowiedzi</h3><p>Bot dzwoni do wybranych klientów. Ty czytasz ich odpowiedzi. Wiesz, z kim warto porozmawiać dalej.</p></li></ol>
     </div></section>
-    
+    <section class="trust section wrap" aria-labelledby="trust-title"><div><p class="eyebrow">04 / Jasne zasady</p><h2 id="trust-title">Twoje dane.<br>Jasne zasady rozmowy.</h2><p class="lead">Klient po drugiej stronie od razu wie, z kim rozmawia. Ty wiesz, że Twoje dane nie trafią do nikogo innego.</p></div><div class="trust-list"><article><h3>Twoje dane są tylko Twoje</h3><p>Inne firmy nie widzą Twoich danych. Ty nie widzisz ich danych.</p></article><article><h3>Bot przedstawia się jako bot</h3><p>Rozmowa zaczyna się od przedstawienia się bota i pytania o zgodę na rozmowę.</p></article><article><h3>Ukryj dane na ekranie</h3><p>Jednym kliknięciem ukryjesz dane osobowe na ekranie.</p></article></div></section>
   </main>
   <footer id="kontakt"><div class="wrap"><div class="footer-main"><div><p class="eyebrow">Porozmawiajmy</p><h2>Odzyskaj czas<br>na swoją firmę.</h2><p>Porozmawiajmy o telefonach do Twoich klientów.</p></div><div class="contact">
         <a href="mailto:biuro@adsignio.pl">biuro@adsignio.pl</a>
