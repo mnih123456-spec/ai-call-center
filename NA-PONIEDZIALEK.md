@@ -151,3 +151,20 @@ Do zdecydowania: prompt z warunkami (dziala od reki, do kilku rozgalezien)
 czy Workflows u dostawcy (drzewko na sztywno, wiecej galezi, mniej zgadywania
 przez model). Wynik ma trafiac do tych samych kolumn niezaleznie od galezi,
 pola z pytan obu galezi nalezy zglosic dostawcy razem.
+
+### 7. Limity rownoczesnych rozmow
+
+Stan 20.09: konto ElevenLabs na planie Creator, limit rownoczesnych rozmow
+glosowych 10 (Pro 20, Scale/Business 30). Kredyty: 241 tys. znakow miesiecznie,
+przy ok. 1000 znakow na rozmowe to ok. 230 rozmow; to skonczy sie pierwsze.
+
+Trunk ACTIO: liczba kanalow nieznana, zalezy od umowy. Zapytac ACTIO o liczbe
+kanalow na numerze produkcyjnym i cene dodatkowych. Wczorajsze "SIP 480" moglo
+byc zajeciem jedynego kanalu.
+
+Panel: limit "maksimum rownoczesnych rozmow" na firme (ekran Limity firmy,
+domyslnie bez ograniczenia) i odstep miedzy polaczeniami w kampanii
+(domyslnie 180 s). Obowiazuje najnizsze z trzech ograniczen.
+
+Potrzeba: 972 proby miesiecznie w godzinach 8-20 to 2 kanaly; obdzwonienie
+300 leadow w godzine po kampanii reklamowej to 10 kanalow i plan Pro.
