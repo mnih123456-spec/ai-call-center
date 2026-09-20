@@ -187,7 +187,9 @@ export default function VoicebotCallsPage() {
         return ''
       },
     },
-  ], [t, zaslonione, wybrana])
+  // kolumnyZebrane zmieniaja sie po wczytaniu wierszy; bez nich w zaleznosciach
+  // tabela zostawala z kolumnami policzonymi na pustej liscie.
+  ], [t, zaslonione, wybrana, kolumnyZebrane])
 
   const zebrane = rows.filter((r) => r.productCode && r.productCode !== 'NIEUSTALONY').length
   const prosiOKontakt = rows.filter((r) => r.requestsContact).length
