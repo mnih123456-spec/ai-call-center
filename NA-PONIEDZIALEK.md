@@ -128,3 +128,12 @@ Argument za Mercato: wielofirmowosc, logowanie, uprawnienia, tabele gotowe.
 Argument przeciw: ciezar srodowiska i warstwa plikow, ktorej nie uzywamy.
 Decyzja po pierwszym placacym kliencie, nie wczesniej. Logika rozmow
 w `src/modules/voicebot/lib` jest przenosna niezaleznie od decyzji.
+
+### 6. Drzewka rozmowy (Workflows u dostawcy)
+
+ElevenLabs ma wizualny edytor Workflows: wezly z wlasnym promptem i narzedziami,
+krawedzie z warunkami "jesli klient powie X". Da sie ustawiac przez API.
+Dzis rozgalezienia sa w prompcie (np. waluta tylko przy kredycie walutowym).
+Do sprawdzenia pod rozmowy przychodzace: klient mowi, w jakiej sprawie dzwoni,
+i trafia na galaz. Alternatywa: przekazanie do innego bota (transfer_to_agent),
+juz dostepne na kazdym bocie.
