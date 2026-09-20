@@ -3,61 +3,117 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Bot głosowy dzwoni do Twoich klientów, ponawia próby kontaktu i zapisuje odpowiedzi. Zespół przestaje tracić godziny na nieodebrane telefony.">
+  <meta name="description" content="Bot głosowy dzwoni do każdego zgłoszenia w minutę, odbiera oddzwonienia, ponawia próby i oddaje odpowiedzi klienta jako pola w Twoim CRM. Ustawiasz go sam w minutę.">
   <meta name="theme-color" content="#f5f5ef">
-  <title>AI call center | Klienci nie odbierają. Bot dzwoni za Twój zespół.</title>
+  <title>AI call center | Każde zgłoszenie dostaje telefon w minutę</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <a class="skip-link" href="#tresc">Przejdź do treści</a>
   <header class="site-header wrap">
     <a class="brand" href="#" aria-label="AI call center - początek strony"><span class="brand-mark" aria-hidden="true">ai</span> AI call center<span class="brand-dot" aria-hidden="true">.</span></a>
-    <nav aria-label="Nawigacja główna"><a href="#mozliwosci">Możliwości</a><a href="#jak-to-dziala">Jak to działa</a><a class="nav-contact" href="#kontakt">Porozmawiajmy <span aria-hidden="true">↗</span></a></nav>
+    <nav aria-label="Nawigacja główna"><a href="#co-znika">Co znika</a><a href="#jak-to-dziala">Jak to działa</a><a class="nav-contact" href="#proba">Posłuchaj bota <span aria-hidden="true">↗</span></a></nav>
   </header>
   <main id="tresc">
     <section class="hero wrap" aria-labelledby="hero-title">
       <div class="hero-copy">
-        <p class="eyebrow"><span class="little-dot" aria-hidden="true"></span> Koszt nieodebranych telefonów</p>
-        <h1 id="hero-title">Twoi ludzie dzwonią.<br>Klienci nie <span>odbierają.</span></h1>
-        <p class="lead">Sześć na dziesięć pierwszych telefonów do klienta pozostaje bez odpowiedzi. Do 93 procent klientów docierasz dopiero między drugą a szóstą próbą. Bot głosowy wykonuje te próby za zespół.</p>
-        <a class="button" href="#kontakt">Usłysz bota na swoim numerze <span aria-hidden="true">↗</span></a>
-        <p class="hero-note">Krótki test bez zobowiązań i bez rozmowy sprzedażowej.</p>
+        <p class="eyebrow"><span class="little-dot" aria-hidden="true"></span> Bot głosowy dla firm ze zgłoszeniami z reklam i formularzy</p>
+        <h1 id="hero-title">Każde zgłoszenie<br>dostaje telefon <span>w minutę.</span></h1>
+        <p class="lead">Każdy, kto oddzwoni, zostaje odebrany. Twój zespół dostaje gotowe odpowiedzi w CRM, nie listę numerów do wykręcenia.</p>
+        <a class="button" href="#proba">Usłysz bota swojej branży w minutę <span aria-hidden="true">↗</span></a>
+        <p class="hero-note">Bot zadzwoni wyłącznie na numer, który podasz. Bez zobowiązań i bez rozmowy sprzedażowej.</p>
       </div>
-      <div class="voice-art" role="img" aria-label="Wybierasz klientów. Bot do nich dzwoni. Ty dostajesz zapisane odpowiedzi.">
-        <div class="art-top"><span>OD KONTAKTU DO WYNIKU</span><span aria-hidden="true">↗</span></div>
+      <div class="voice-art" role="img" aria-label="Zgłoszenie wpada. Bot dzwoni. Ty dostajesz zapisane odpowiedzi.">
+        <div class="art-top"><span>OD ZGŁOSZENIA DO WYNIKU</span><span aria-hidden="true">↗</span></div>
         <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
         <div class="voice-core"><svg viewBox="0 0 240 110" fill="none" aria-hidden="true"><path d="M15 49v12m15-25v38m15-53v68m15-48v28m15-58v88m15-69v50m15-41v32m15-58v84m15-69v54m15-42v30m15-59v88m15-67v46m15-37v28m15-46v64m15-38v12" stroke="currentColor" stroke-width="7" stroke-linecap="round"/></svg><span>Głos Twojej firmy</span><small>Rozmowa po polsku</small></div>
-        <div class="art-tag input-tag"><span class="tag-icon" aria-hidden="true">↗</span><div>Kontakty<small>Twoja baza klientów</small></div></div>
-        <div class="art-tag output-tag"><span class="tag-icon" aria-hidden="true">✓</span><div>Wynik rozmowy<small>Odpowiedzi w jednym miejscu</small></div></div>
-        <div class="art-bottom"><span>AI call center</span><span>ROZMOWA → ODPOWIEDZI</span></div>
+        <div class="art-tag input-tag"><span class="tag-icon" aria-hidden="true">↗</span><div>Zgłoszenie<small>Formularz, reklama, Twój system</small></div></div>
+        <div class="art-tag output-tag"><span class="tag-icon" aria-hidden="true">✓</span><div>Wynik rozmowy<small>Odpowiedzi jako pola w CRM</small></div></div>
+        <div class="art-bottom"><span>AI call center</span><span>ZGŁOSZENIE → ROZMOWA → CRM</span></div>
       </div>
     </section>
-    <section class="problem section" aria-labelledby="problem-title">
+
+    <section class="problem section" id="co-znika" aria-labelledby="problem-title">
       <div class="wrap">
-        <div class="section-intro"><p class="eyebrow">01 / Problem</p><h2 id="problem-title">Pierwszy telefon<br>to często dopiero początek.</h2><p>Pierwszy telefon odbiera tylko 35 do 40 procent klientów. Reszta wymaga ponownych prób, a do 93 procent tych, którzy w końcu kupią, sprzedawca dociera dopiero między drugą a szóstą rozmową. Szansa na kontakt jest sto razy większa, gdy telefon następuje w pięć minut od zgłoszenia, a nie po pół godzinie.</p></div>
-        <div class="numbers"><div><strong>60%</strong><span>pierwszych telefonów bez odpowiedzi</span></div><div><strong>6</strong><span>prób, żeby dotrzeć do 93% klientów, którzy kupią</span></div><div><strong>100×</strong><span>większa szansa na kontakt w 5 minut niż po 30 minutach</span></div></div>
-        <div class="cost-comparison"><div><p class="eyebrow">Przykład: 300 zgłoszeń miesięcznie</p><p><strong>60 godzin</strong> pracy przy próbach telefonicznych</p></div><div class="cost-values"><span><small>Praca zespołu</small><strong>2400 zł</strong></span><span class="cost-arrow" aria-hidden="true">→</span><span class="bot-cost"><small>Bot</small><strong>120 zł</strong></span></div></div>
-        <p class="source-note">Źródła: badanie Lead Response Management (MIT i InsideSales), analiza Harvard Business Review na 2,24 mln zgłoszeń oraz badanie Velocify na 3,5 mln zgłoszeń. Przykład kosztu to model, nie cennik: 300 zgłoszeń, średnio trzy próby po 4 minuty, czyli 900 prób i 60 godzin; praca zespołu po 40 zł za godzinę daje 2400 zł, a bot przy tej samej liczbie prób kosztuje według stawek dostawcy około 120 zł. W Twojej firmie liczby będą inne.</p>
+        <div class="section-intro"><p class="eyebrow">01 / Co znika</p><h2 id="problem-title">Pięć rzeczy, które znikają,<br>gdy dzwoni bot.</h2><p>Zgłoszenie leży godzinami, klient oddzwania w pustkę, handlowiec dostaje numer zamiast odpowiedzi, trzecia próba się nie odbywa, a lista do obdzwonienia czeka na wolną chwilę. Bot załatwia wszystkie pięć, w obie strony.</p></div>
+        <div class="numbers"><div><strong>100×</strong><span>większa szansa na kontakt, gdy telefon następuje w 5 minut od zgłoszenia, a nie po 30 minutach</span></div><div><strong>60%</strong><span>pierwszych telefonów do klienta zostaje bez odpowiedzi</span></div><div><strong>6</strong><span>prób, żeby dotrzeć do 93% klientów, którzy w końcu kupią</span></div></div>
+        <div class="feature-grid problems-grid">
+<article><span class="feature-number">01</span><h3>Zgłoszenie czeka godzinami</h3><p>Zgłoszenie z reklamy o 21:40 dostaje telefon o 21:41, nie następnego dnia przed południem. Po dobie szansa na kontakt jest 60 razy mniejsza.</p></article>
+<article><span class="feature-number">02</span><h3>Klient oddzwania w pustkę</h3><p>62% telefonów do małych firm zostaje bez odpowiedzi, a 85% dzwoniących nie próbuje drugi raz. Bot odbiera zawsze, poznaje numer i wie, że to oddzwonienie na naszą próbę.</p></article>
+<article><span class="feature-number">03</span><h3>Numer zamiast odpowiedzi</h3><p>Bot zadaje pytania, które ustawiłeś, i oddaje wynik jako pola w CRM. Człowiek dzwoni tylko tam, gdzie warto, i wie, o czym rozmawiać. Nagranie i transkrypcja obok.</p></article>
+<article><span class="feature-number">04</span><h3>Trzecia próba się nie odbywa</h3><p>Bot ponawia próby w ustalonych odstępach i godzinach, każdą zapisuje, a gdy klient oddzwoni, przestaje. Nikt nie musi pamiętać.</p></article>
+<article><span class="feature-number">05</span><h3>Lista czeka na wolną chwilę</h3><p>Potwierdzenia wizyt, przypomnienia o dokumentach, pytanie do starej bazy, czy temat jest aktualny. Wklejasz listę, bot dzwoni.</p></article>
+<article class="cost-card"><span class="feature-number">Koszt</span><h3>300 zgłoszeń miesięcznie</h3><p>Trzy próby po 4 minuty to 900 prób i 60 godzin pracy zespołu, <strong>2400 zł</strong> przy 40 zł za godzinę. Bot przy tej samej liczbie prób: około <strong>120 zł</strong>.</p></article>
+        </div>
+        <p class="source-note">Źródła: badanie Lead Response Management (MIT i InsideSales), analiza Harvard Business Review na 2,24 mln zgłoszeń, badanie Velocify na 3,5 mln zgłoszeń. Przykład kosztu to model, nie cennik: 35 groszy za rozmowę odbytą i 2 grosze za nieodebraną próbę według stawek dostawcy. W Twojej firmie liczby będą inne.</p>
       </div>
     </section>
-    <section class="features section wrap" id="mozliwosci" aria-labelledby="features-title">
-      <div class="section-intro"><p class="eyebrow">02 / Możliwości</p><h2 id="features-title">Bot rozmawia.<br>Ty zajmujesz się firmą.</h2><p>Bot zadaje Twoje pytania i zapisuje odpowiedzi. Po rozmowie wiesz, czego potrzebuje klient.</p></div>
-      <div class="feature-grid">
-<article><span class="feature-number">01</span><h3>Dzwoni i odbiera</h3><p>Bot dzwoni do klientów. Odbiera też ich telefony. Gdy klient oddzwoni, obie próby kontaktu znajdziesz razem.</p></article>
-<article><span class="feature-number">02</span><h3>Wyniki przy Twoich klientach</h3><p>Łączymy się z systemem, w którym trzymasz klientów. Tam zapisujemy wynik rozmowy. Możesz też zacząć od samej listy telefonów.</p></article>
-<article><span class="feature-number">03</span><h3>Koszt każdej rozmowy</h3><p>Widzisz koszt każdej rozmowy. Obok masz zapisane odpowiedzi klienta. Wiesz, za co płacisz.</p></article>
-      </div>
-    </section>
+
     <section class="how section" id="jak-to-dziala" aria-labelledby="how-title"><div class="wrap">
-      <p class="eyebrow">03 / Jak to działa</p><h2 id="how-title">Zacznij dzwonić.<br>W trzech krokach.</h2>
-      <ol class="steps"><li><span class="step-index">1</span><h3>Wybierz klientów</h3><p>Załóż konto swojej firmy. Wklej listę numerów telefonów. Możesz też korzystać ze swojej bazy klientów.</p></li><li><span class="step-index">2</span><h3>Ustal, o co zapytać</h3><p>Wybierz głos bota i pytania, które ma zadać. Zanim ruszysz, zadzwoń botem na swój numer i posłuchaj rozmowy.</p></li><li><span class="step-index">3</span><h3>Sprawdź odpowiedzi</h3><p>Bot dzwoni do wybranych klientów. Ty czytasz ich odpowiedzi. Wiesz, z kim warto porozmawiać dalej.</p></li></ol>
+      <p class="eyebrow">02 / Jak to działa</p><h2 id="how-title">Bot dla Twojej firmy.<br>W czterech krokach, sam.</h2>
+      <ol class="steps"><li><span class="step-index">1</span><h3>Nazwa i branża</h3><p>Podajesz nazwę firmy i wybierasz branżę. Bot przedstawia się Twoją nazwą i zna pojęcia Twojej branży. Minuta.</p></li><li><span class="step-index">2</span><h3>Pytania</h3><p>Dostajesz gotowe pytania i zmieniasz je, jak chcesz. Każde pytanie to jedna kolumna w wynikach rozmów.</p></li><li><span class="step-index">3</span><h3>Zgłoszenia</h3><p>Zgłoszenie wpada z formularza, reklamy albo z Twojego systemu przez API. Bot dzwoni w minutę, ponawia próby, odbiera oddzwonienia.</p></li><li><span class="step-index">4</span><h3>Wynik w CRM</h3><p>Odpowiedzi lądują w Twoim CRM jako pola. Nagranie i transkrypcja obok, gdyby ktoś chciał sprawdzić, skąd wzięła się odpowiedź.</p></li></ol>
     </div></section>
-    
+
+    <section class="proba section" id="proba" aria-labelledby="proba-title"><div class="wrap">
+      <div class="section-intro"><p class="eyebrow">03 / Posłuchaj</p><h2 id="proba-title">Wybierz branżę.<br>Bot zadzwoni do Ciebie.</h2><p>Każda branża ma własny słownik i własne pytania. Kliknij swoją, zobacz, o co bot zapyta, i zostaw numer.</p></div>
+      <div class="branze" role="list">
+<button type="button" class="branza" role="listitem" data-branza="Serwis samochodowy"><h3>Serwis samochodowy</h3><ul><li>Jakim samochodem Pan jeździ?</li><li>Co się dzieje z autem?</li><li>Kiedy mógłby Pan podjechać?</li></ul><span class="branza-cta">Wybierz <span aria-hidden="true">↗</span></span></button>
+<button type="button" class="branza" role="listitem" data-branza="Fotowoltaika i pompy ciepła"><h3>Fotowoltaika i pompy ciepła</h3><ul><li>Jaki jest roczny rachunek za prąd?</li><li>Czym ogrzewa Pan dom?</li><li>Czy budynek jest Pana własnością?</li></ul><span class="branza-cta">Wybierz <span aria-hidden="true">↗</span></span></button>
+<button type="button" class="branza" role="listitem" data-branza="Biuro nieruchomości"><h3>Biuro nieruchomości</h3><ul><li>W jakiej dzielnicy szuka Pan mieszkania?</li><li>Jaki metraż?</li><li>Czy ma Pan załatwiony kredyt?</li></ul><span class="branza-cta">Wybierz <span aria-hidden="true">↗</span></span></button>
+<button type="button" class="branza" role="listitem" data-branza="Gabinet lekarski lub stomatologiczny"><h3>Gabinet lekarski lub stomatologiczny</h3><ul><li>U którego specjalisty?</li><li>Wizyta prywatna czy na NFZ?</li><li>Jaki termin Panu pasuje?</li></ul><span class="branza-cta">Wybierz <span aria-hidden="true">↗</span></span></button>
+<button type="button" class="branza" role="listitem" data-branza="Kancelaria kredytowa"><h3>Kancelaria kredytowa</h3><ul><li>Czy to kredyt hipoteczny, walutowy czy pożyczka gotówkowa?</li><li>Na jaką kwotę?</li><li>Jaki to był bank?</li></ul><span class="branza-cta">Wybierz <span aria-hidden="true">↗</span></span></button>
+<button type="button" class="branza" role="listitem" data-branza="Inna branża"><h3>Inna branża</h3><ul><li>Opisujesz firmę własnymi słowami.</li><li>Bot pyta o to, o co Ty byś zapytał.</li><li>Każde pytanie to kolumna w wynikach.</li></ul><span class="branza-cta">Wybierz <span aria-hidden="true">↗</span></span></button>
+      </div>
+      <form class="proba-form" id="proba-form" novalidate>
+        <div class="proba-row">
+          <label>Branża<select name="branza" id="proba-branza" required><option value="">Wybierz z listy</option><option>Serwis samochodowy</option><option>Fotowoltaika i pompy ciepła</option><option>Biuro nieruchomości</option><option>Gabinet lekarski lub stomatologiczny</option><option>Kancelaria kredytowa</option><option>Inna branża</option></select></label>
+          <label>Numer, na który ma zadzwonić bot<input type="tel" name="numer" id="proba-numer" inputmode="tel" autocomplete="tel" placeholder="503 956 401" required></label>
+        </div>
+        <label class="proba-zgoda"><input type="checkbox" name="zgoda" id="proba-zgoda" required> <span>Zgadzam się na jedno połączenie testowe od bota na podany numer. Numer służy wyłącznie do tej rozmowy. <a href="polityka-prywatnosci.html">Polityka prywatności</a>.</span></label>
+        <button type="submit" class="button">Zadzwoń do mnie <span aria-hidden="true">↗</span></button>
+        <p class="proba-info" id="proba-info" aria-live="polite">Zgłoszenie trafia do nas, a bot Twojej branży dzwoni w ciągu kilku minut w godzinach 9 do 20.</p>
+      </form>
+    </div></section>
   </main>
-  <footer id="kontakt"><div class="wrap"><div class="footer-main"><div><p class="eyebrow">Test na Twoim numerze</p><h2>Najpierw posłuchaj,<br>jak bot rozmawia.</h2><p>Napisz albo zadzwoń, a umówimy test. Bot zadzwoni wyłącznie na numer, który podasz. Usłyszysz dokładnie to, co usłyszą Twoi klienci.</p></div><div class="contact">
+  <footer id="kontakt"><div class="wrap"><div class="footer-main"><div><p class="eyebrow">Porozmawiajmy</p><h2>Wolisz najpierw<br>zapytać człowieka?</h2><p>Napisz albo zadzwoń. Odpowiadamy w dni robocze, a bot i tak może zadzwonić do Ciebie od razu.</p></div><div class="contact">
         <a href="mailto:biuro@adsignio.pl">biuro@adsignio.pl</a>
         <a href="tel:+48570372252">+48 570 372 252</a>
         <p class="contact-pending">Adsignio Sp. z o.o., ul. Frezerów 3, 20-209 Lublin<br>NIP 9462729906, KRS 0001044540, REGON 525693956</p>
-      </div></div><div class="footer-bottom"><a class="brand" href="#">AI call center<span class="brand-dot" aria-hidden="true">.</span></a><span>Mniej telefonów. Więcej czasu dla firmy.</span><nav class="legal-links" aria-label="Dokumenty serwisu"><a href="polityka-prywatnosci.html">Polityka prywatności</a><a href="regulamin.html">Regulamin</a></nav><a href="#">Wróć na górę ↑</a></div></div></footer>
+      </div></div><div class="footer-bottom"><a class="brand" href="#">AI call center<span class="brand-dot" aria-hidden="true">.</span></a><span>Każde zgłoszenie dostaje telefon w minutę.</span><nav class="legal-links" aria-label="Dokumenty serwisu"><a href="polityka-prywatnosci.html">Polityka prywatności</a><a href="regulamin.html">Regulamin</a></nav><a href="#">Wróć na górę ↑</a></div></div></footer>
+  <script>
+  (function () {
+    var form = document.getElementById('proba-form');
+    var wybor = document.getElementById('proba-branza');
+    var numer = document.getElementById('proba-numer');
+    var info = document.getElementById('proba-info');
+    var kafelki = document.querySelectorAll('.branza');
+    function zaznacz(nazwa) {
+      wybor.value = nazwa;
+      for (var i = 0; i < kafelki.length; i++) {
+        kafelki[i].classList.toggle('is-active', kafelki[i].getAttribute('data-branza') === nazwa);
+      }
+    }
+    for (var i = 0; i < kafelki.length; i++) {
+      kafelki[i].addEventListener('click', function () {
+        zaznacz(this.getAttribute('data-branza'));
+        numer.focus();
+      });
+    }
+    wybor.addEventListener('change', function () { zaznacz(wybor.value); });
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var cyfry = numer.value.replace(/[^\d+]/g, '');
+      if (/^\d{9}$/.test(cyfry)) cyfry = '+48' + cyfry;
+      if (/^48\d{9}$/.test(cyfry)) cyfry = '+' + cyfry;
+      if (!wybor.value) { info.textContent = 'Wybierz branżę, żeby bot wiedział, o co pytać.'; wybor.focus(); return; }
+      if (!/^\+[1-9]\d{7,14}$/.test(cyfry)) { info.textContent = 'Wpisz numer w postaci 9 cyfr, np. 503 956 401.'; numer.focus(); return; }
+      if (!document.getElementById('proba-zgoda').checked) { info.textContent = 'Potrzebujemy zgody na jedno połączenie testowe.'; return; }
+      var temat = 'Próbna rozmowa: ' + wybor.value;
+      var tresc = 'Branża: ' + wybor.value + '\nNumer: ' + cyfry + '\nZgoda na jedno połączenie testowe: tak';
+      window.location.href = 'mailto:biuro@adsignio.pl?subject=' + encodeURIComponent(temat) + '&body=' + encodeURIComponent(tresc);
+      info.textContent = 'Dziękujemy. Otworzyliśmy wiadomość z Twoim zgłoszeniem, wystarczy ją wysłać. Bot Twojej branży zadzwoni w ciągu kilku minut w godzinach 9 do 20.';
+    });
+  })();
+  </script>
 </body>
 </html>
