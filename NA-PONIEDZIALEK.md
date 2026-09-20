@@ -208,3 +208,15 @@ kazdym pokazem probna rozmowa 10 minut wczesniej, nagranie zapasowe pod reka,
 a docelowo telefonia od operatora, ktory skaluje sie na zadanie (Twilio,
 Telnyx), zamiast trunku z jednym kanalem. Limit czasu na zlecenie u dostawcy
 w `provider.ts` (20 s) podniesc do 45 s, bo zlecenie i tak dochodzi.
+
+### 11. Odpowiedz na pytanie "a co jest wasze, skoro to ElevenLabs"
+
+Padlo od jury 20.09. Wersja do klientow i inwestorow:
+1. Dostawca daje trzy klocki: rozpoznawanie mowy, glos i spiecie rozmowy
+   z modelem. To samo kupuje Fonio i kazdy inny; nikt nie pisze wlasnego
+   rozpoznawania mowy.
+2. Nasze jest wszystko wokol: bot dla firmy w minute, pytania jako kolumny
+   wynikow, oddzwonienie sklejone z pierwsza proba, wynik w CRM klienta,
+   izolacja firm, policzone koszty, API dla systemu klienta.
+3. Dostawca jest wymienny: zakladanie bota, start rozmowy i odbior wyniku
+   siedza w trzech plikach (`nowy-agent.ts`, `provider.ts`, `webhook/route.ts`).
