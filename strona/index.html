@@ -54,16 +54,8 @@
     </div></section>
 
     <section class="proba section" id="proba" aria-labelledby="proba-title"><div class="wrap">
-      <div class="section-intro"><p class="eyebrow">03 / Posłuchaj</p><h2 id="proba-title">Zostaw numer.<br>Bot zadzwoni do Ciebie.</h2><p>Wybierz branżę i podaj numer. Usłyszysz dokładnie to, co usłyszą Twoi klienci.</p></div>
-      <form class="proba-form" id="proba-form" novalidate>
-        <div class="proba-row">
-          <label>Branża<select name="branza" id="proba-branza" required><option value="">Wybierz z listy</option><option>Serwis samochodowy</option><option>Fotowoltaika i pompy ciepła</option><option>Biuro nieruchomości</option><option>Gabinet lekarski lub stomatologiczny</option><option>Kancelaria kredytowa</option><option>Inna branża</option></select></label>
-          <label>Numer, na który ma zadzwonić bot<input type="tel" name="numer" id="proba-numer" inputmode="tel" autocomplete="tel" placeholder="500 100 200" required></label>
-        </div>
-        <label class="proba-zgoda"><input type="checkbox" name="zgoda" id="proba-zgoda" required> <span>Zgadzam się na jedno połączenie testowe od bota na podany numer. Numer służy wyłącznie do tej rozmowy. <a href="polityka-prywatnosci.html">Polityka prywatności</a>.</span></label>
-        <button type="submit" class="button">Zadzwoń do mnie <span aria-hidden="true">↗</span></button>
-        <p class="proba-info" id="proba-info" aria-live="polite">Zgłoszenie trafia do nas, a bot Twojej branży dzwoni w ciągu kilku minut w godzinach 9 do 20.</p>
-      </form>
+      <div class="section-intro"><p class="eyebrow">03 / Przetestuj</p><h2 id="proba-title">Załóż konto.<br>Bot zadzwoni do Ciebie w minutę.</h2><p>Podajesz nazwę firmy, branżę i swój numer. Bot dzwoni na Twój numer, żebyś usłyszał dokładnie to, co usłyszą Twoi klienci. Bez zobowiązań.</p></div>
+      <a class="button" href="#kontakt">Przetestuj bota <span aria-hidden="true">↗</span></a>
     </div></section>
   </main>
   <footer id="kontakt"><div class="wrap"><div class="footer-main"><div><p class="eyebrow">Porozmawiajmy</p><h2>Wolisz najpierw<br>zapytać człowieka?</h2><p>Napisz albo zadzwoń. Odpowiadamy w dni robocze, a bot i tak może zadzwonić do Ciebie od razu.</p></div><div class="contact">
@@ -71,26 +63,5 @@
         <a href="tel:+48570372252">+48 570 372 252</a>
         <p class="contact-pending">Adsignio Sp. z o.o., ul. Frezerów 3, 20-209 Lublin<br>NIP 9462729906, KRS 0001044540, REGON 525693956</p>
       </div></div><div class="footer-bottom"><a class="brand" href="#">AI call center<span class="brand-dot" aria-hidden="true">.</span></a><span>Każde zgłoszenie dostaje telefon w minutę.</span><nav class="legal-links" aria-label="Dokumenty serwisu"><a href="polityka-prywatnosci.html">Polityka prywatności</a><a href="regulamin.html">Regulamin</a></nav><a href="#">Wróć na górę ↑</a></div></div></footer>
-  <script>
-  (function () {
-    var form = document.getElementById('proba-form');
-    var wybor = document.getElementById('proba-branza');
-    var numer = document.getElementById('proba-numer');
-    var info = document.getElementById('proba-info');
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var cyfry = numer.value.replace(/[^\d+]/g, '');
-      if (/^\d{9}$/.test(cyfry)) cyfry = '+48' + cyfry;
-      if (/^48\d{9}$/.test(cyfry)) cyfry = '+' + cyfry;
-      if (!wybor.value) { info.textContent = 'Wybierz branżę, żeby bot wiedział, o co pytać.'; wybor.focus(); return; }
-      if (!/^\+[1-9]\d{7,14}$/.test(cyfry)) { info.textContent = 'Wpisz numer w postaci 9 cyfr, np. 500 100 200.'; numer.focus(); return; }
-      if (!document.getElementById('proba-zgoda').checked) { info.textContent = 'Potrzebujemy zgody na jedno połączenie testowe.'; return; }
-      var temat = 'Próbna rozmowa: ' + wybor.value;
-      var tresc = 'Branża: ' + wybor.value + '\nNumer: ' + cyfry + '\nZgoda na jedno połączenie testowe: tak';
-      window.location.href = 'mailto:biuro@adsignio.pl?subject=' + encodeURIComponent(temat) + '&body=' + encodeURIComponent(tresc);
-      info.textContent = 'Dziękujemy. Otworzyliśmy wiadomość z Twoim zgłoszeniem, wystarczy ją wysłać. Bot Twojej branży zadzwoni w ciągu kilku minut w godzinach 9 do 20.';
-    });
-  })();
-  </script>
 </body>
 </html>
