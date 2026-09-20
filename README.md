@@ -119,3 +119,21 @@ u pierwszego klienta.
 | `NA-PONIEDZIALEK.md` | dług do spłacenia po hackathonie |
 | `PO-RESTARCIE.md` | jak podnieść środowisko po restarcie laptopa |
 | `src/modules/voicebot/WIEDZA-Z-LINKU.md` | jak działa czytanie strony firmy |
+
+## Jak uruchomić
+
+```
+docker compose up -d          # postgres, redis, meilisearch
+cp .env.example .env          # uzupełnij klucze z sekcji Voicebot
+yarn install
+yarn db:migrate
+yarn dev                      # panel na http://localhost:3000
+```
+
+Logowanie: `superadmin@acme.com` / `secret`. Dane demo (13 rozmów, para nieodebrane
+plus oddzwonienie): `node scripts/dane-demo.mjs`.
+
+Ścieżka klienta do przeklikania: `KROKI-DEMO.md`. Stan projektu, pułapki API
+dostawcy i mapa plików: `STAN.md`. Bez klucza ElevenLabs panel działa, a rozmowy
+są symulowane; prawdziwa rozmowa wymaga też publicznego adresu na webhook
+(np. `cloudflared tunnel --url http://127.0.0.1:3000` i `node scripts/przepnij-tunel.mjs <adres>`).
