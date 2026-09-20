@@ -383,3 +383,13 @@ sam i w srodku dostaje probna rozmowe. Zmiany w panelu:
 - po zalozeniu konta od razu probna rozmowa na ten numer, potem pytania,
 - limity dla kont z rejestracji: liczba prob i dzienny koszt (patrz pkt 14, 20).
 Zasada Michala: zaangazowanie przed dowodem, klient ma wejsc do srodka.
+
+### 23. Codex jako serwer MCP nie wstaje
+
+Codex CLI 0.154 w trybie `codex mcp-server` odpowiada "stdin is not a
+terminal" i konczy proces, wiec sesja Claude widzi "Connection closed".
+Obejscie, ktore dziala: `codex exec` z promptem na stdin
+(`codex exec --skip-git-repo-check --output-last-message plik - < prompt.txt`).
+Sprawdzic, czy nowsza wersja (`codex update`) przywraca tryb serwera, albo
+czy trzeba przypiac starsza. Konfiguracja serwera w tej sesji jest po stronie
+aplikacji Claude, nie w plikach projektu.
