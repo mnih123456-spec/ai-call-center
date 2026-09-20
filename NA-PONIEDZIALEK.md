@@ -297,3 +297,30 @@ Powitanie idzie do `first_message` u dostawcy, pozegnanie do sekcji
 zakonczenia w prompcie. Wymaga dwoch kolumn w `VoiceAgentProfile`
 (migracja), pol na ekranie pytan i przekazania w `wyslijScenariuszDoAgenta`.
 `{FIRMA}` w tekstach klienta podmieniac na nazwe w dopelniaczu.
+
+### 17. Pomysly z telefonu, gdy laptop jest wylaczony (dla Michala)
+
+Najprosciej: ten plik w aplikacji GitHub na telefonie, olowek, dopisac na
+koncu, zapisac. W poniedzialek Claude pobiera zmiany i czyta. Alternatywa:
+jeden czat "Pomysly voicebot" w aplikacji Claude, tresc do wklejenia w sesji.
+Sesja w chmurze mozliwa, ale bez dostepu do laptopa, Dockera i panelu; na
+notatki wystarczy, na prace z panelem nie.
+
+### 18. Wlasne konto ElevenLabs klienta (pomysl Michala, 20.09)
+
+Dla wybranych firm mozliwosc podpiecia ich wlasnego konta u dostawcy, widoczne
+i edytowalne tylko w widoku admina. Co to znaczy w kodzie:
+- klucz API dostawcy na poziomie firmy, w kolumnie szyfrowanej (jak zeton
+  CRM w `encryption.ts`), pusty = konto platformy,
+- `provider.ts`, `nowy-agent.ts`, `ustawienia-agenta.ts`, `rozmowa.ts`:
+  klucz z firmy zamiast z `.env`, gdy ustawiony,
+- webhook: kazde konto dostawcy ma wlasny webhook i sekret, wiec przy
+  podpieciu konta trzeba zalozyc webhook w ich workspace i trzymac sekret
+  per firma; `webhook/route.ts` musi rozpoznac firme po sekrecie (naglowek
+  podpisu), nie tylko po numerze,
+- numery i boty tej firmy zyja na jej koncie: katalog numerow i agentow
+  pobierany jej kluczem,
+- szablon bota: kopiowac przez API nie da sie miedzy kontami, wiec szablon
+  trzeba odtworzyc na ich koncie (prompt i ustawienia mamy w kodzie, `branze.ts`).
+Korzysc: rozliczenie minut i limity rownoleglosci po stronie klienta, my
+sprzedajemy panel. Koszt: dwa tryby do testowania. Zaczac od jednej firmy.
