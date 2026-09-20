@@ -137,3 +137,17 @@ Dzis rozgalezienia sa w prompcie (np. waluta tylko przy kredycie walutowym).
 Do sprawdzenia pod rozmowy przychodzace: klient mowi, w jakiej sprawie dzwoni,
 i trafia na galaz. Alternatywa: przekazanie do innego bota (transfer_to_agent),
 juz dostepne na kazdym bocie.
+
+**Uzupelnienie Michala, 20.09:** rozgalezienia musza byc juz w botach
+dzwoniacych (wychodzacych), nie tylko przychodzacych. Przyklady:
+
+- kredyty: gdy rozmowca powie "walutowy", dodatkowe pytanie o walute;
+  przy zlotowkowym bez pytania, waluta PLN,
+- nieruchomosci: "chce sprzedac" to inna sciezka pytan (jaka nieruchomosc,
+  gdzie, za ile, od kiedy na sprzedaz) niz "chce kupic" (lokalizacja, metraz,
+  budzet, kredyt).
+
+Do zdecydowania: prompt z warunkami (dziala od reki, do kilku rozgalezien)
+czy Workflows u dostawcy (drzewko na sztywno, wiecej galezi, mniej zgadywania
+przez model). Wynik ma trafiac do tych samych kolumn niezaleznie od galezi,
+pola z pytan obu galezi nalezy zglosic dostawcy razem.
