@@ -17,8 +17,8 @@ Wnioski: **najpierw liczby, potem wyjątki.** Efektowne UI tu nie punktuje.
 Mówisz od siebie, bez slajdu z definicją.
 
 > Buduję kancelariom kredytowym automatyzacje: od reklamy i formularza, przez
-> CRM, po analizę umowy i ofertę. Jednego nie dało się zautomatyzować:
-> telefonu do klienta. To przypadek jednej z tych kancelarii. Ludzie
+> CRM, po analizę umowy i ofertę. Jednego w tej układance brakowało:
+> szybkiego telefonu do klienta. To przypadek jednej z tych kancelarii. Ludzie
 > zostawiają zgłoszenie w formularzu, a potem ktoś musi do każdego zadzwonić,
 > potwierdzić, że to ta osoba, uzyskać zgodę i ustalić, o jaki kredyt chodzi.
 >

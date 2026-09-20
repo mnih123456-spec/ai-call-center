@@ -44,8 +44,8 @@ Zmień domyślne "mich's Project". To samo w obu ścieżkach.
 ## PROBLEM
 
     Buduję kancelariom kredytowym automatyzacje: od reklamy i formularza, przez
-    CRM, po analizę umowy i ofertę. Jednego nie dało się zautomatyzować:
-    telefonu do klienta. To przypadek jednej z tych kancelarii. Ludzie
+    CRM, po analizę umowy i ofertę. Jednego w tej układance brakowało:
+    szybkiego telefonu do klienta. To przypadek jednej z tych kancelarii. Ludzie
     zostawiają zgłoszenie w formularzu i czekają na telefon.
 
     Dane z CRM tej kancelarii za wrzesień, przeliczone na miesiąc: 300 nowych
