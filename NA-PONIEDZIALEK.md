@@ -197,3 +197,14 @@ rozmow z wynikami, transkrypcje i nagranie tym samym kluczem (GET). Wynik
 trafia do CRM klienta przez zlacze Bitrix24 albo wbudowany CRM. Brakuje:
 webhooka wychodzacego z wynikiem rozmowy pod adres podany przez klienta
 (z podpisem HMAC, jak u dostawcy) oraz opisu odczytu na ekranie "Integracja API".
+
+### 10. Telefonia zawiodla na scenie (20.09, 13:34)
+
+Dwie przyczyny naraz: internet na sali (zlecenie do dostawcy doszlo minute po
+wyslaniu, panel po 20 s zapisal blad polaczenia) i trunk ACTIO, ktory nie
+odpowiedzial na zestawienie polaczenia (kod 1011 "sip request timed out").
+Wczoraj ten sam trunk odbijal co druga probe (480, 403). Wniosek: przed
+kazdym pokazem probna rozmowa 10 minut wczesniej, nagranie zapasowe pod reka,
+a docelowo telefonia od operatora, ktory skaluje sie na zadanie (Twilio,
+Telnyx), zamiast trunku z jednym kanalem. Limit czasu na zlecenie u dostawcy
+w `provider.ts` (20 s) podniesc do 45 s, bo zlecenie i tak dochodzi.
