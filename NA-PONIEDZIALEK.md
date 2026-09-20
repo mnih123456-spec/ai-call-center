@@ -324,3 +324,15 @@ i edytowalne tylko w widoku admina. Co to znaczy w kodzie:
   trzeba odtworzyc na ich koncie (prompt i ustawienia mamy w kodzie, `branze.ts`).
 Korzysc: rozliczenie minut i limity rownoleglosci po stronie klienta, my
 sprzedajemy panel. Koszt: dwa tryby do testowania. Zaczac od jednej firmy.
+
+### 19. Cesar i orkiestrator w Open Mercato (do zbadania)
+
+Michal, 20.09: "Cesar" to ich agent (Open Mercato), a "orkiestrator" to agent,
+ktory rozdziela zadania miedzy innych agentow. Warte obejrzenia pod nasz
+pipeline: w repo sa juz skille `om-auto-create-pr`, `om-auto-implement-spec`,
+`om-auto-review-pr` i modul `agent_orchestrator` (import w
+`src/modules/agent_examples/ai-agents.ts`, dzis nie dziala, bo brak pakietu
+`@open-mercato/enterprise`). Sprawdzic w repo Open Mercato po weekendzie:
+co robi Cesar, jak dziala orkiestrator, czy da sie go uzyc do naszej pracy
+(np. jeden agent na kod, jeden na testy, jeden na dokumenty) i czy wymaga
+pakietu enterprise.
