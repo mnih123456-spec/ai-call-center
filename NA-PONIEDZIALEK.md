@@ -181,3 +181,11 @@ Dwie rzeczy, ktorych nam brakuje: telefonia bez sufitu kanalow (Telnyx albo
 Twilio, rozliczenie za minute, skaluje sie na zadanie) i drugi dostawca glosu
 na wypadek awarii lub limitu (Azure). Plan: ACTIO zostaje dla malych klientow,
 Twilio lub Telnyx pod kampanie masowe.
+
+### 8. Stare kolumny na liscie rozmow
+
+"Produkt", "Kwota", "Rok umowy", "Bank" w `voicebot-calls/page.tsx` to stale
+kolumny z pol pierwszego szablonu (produkt_kod, kwota, rok_umowy, bank).
+Nowe boty zbieraja pola z pytan, wiec te kolumny sa puste i dubluja
+"Na jaka kwote" i "Jaki to byl bank" z prawej. Ukryc je, gdy zaden wiersz
+nie ma tych pol, albo usunac razem z kolumnami w encji po migracji danych demo.
