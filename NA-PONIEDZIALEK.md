@@ -336,3 +336,19 @@ pipeline: w repo sa juz skille `om-auto-create-pr`, `om-auto-implement-spec`,
 co robi Cesar, jak dziala orkiestrator, czy da sie go uzyc do naszej pracy
 (np. jeden agent na kod, jeden na testy, jeden na dokumenty) i czy wymaga
 pakietu enterprise.
+
+### 20. Numer dla klienta i cennik (Michal, 20.09, glosowo)
+
+- Publiczna probna rozmowa ze strony: formularz (branza, numer, zgoda) ->
+  bot branzy dzwoni w minute. Dzis formularz wysyla mail do biuro@adsignio.pl;
+  jutro endpoint publiczny z limitem prob na numer i na godzine, jeden numer
+  testowy platformy dla wszystkich prob.
+- Szybka sciezka do wlasnego numeru klienta: "zamow numer u partnera" ma
+  prowadzic do podpiecia numeru i wyslania umowy do klienta (na telefon,
+  np. link SMS/e-mail), bez recznego przepisywania. Klient podpisuje umowe
+  z operatorem (ACTIO) na same polaczenia.
+- Cennik platformy, osobno od polaczen: pokrywa hosting, dostawce glosu
+  i marze. Do ustalenia model: abonament miesieczny za panel + cena za
+  rozmowe (u dostawcy ok. 35 gr odbyta, 2 gr nieodebrana) albo pakiety
+  rozmow. Zakotwiczyc na koszcie czlowieka (ok. 2,70 zl za probe), nie na
+  konkurencji (0,50-2 zl za minute u innych).
