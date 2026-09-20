@@ -54,15 +54,7 @@
     </div></section>
 
     <section class="proba section" id="proba" aria-labelledby="proba-title"><div class="wrap">
-      <div class="section-intro"><p class="eyebrow">03 / Posłuchaj</p><h2 id="proba-title">Wybierz branżę.<br>Bot zadzwoni do Ciebie.</h2><p>Każda branża ma własny słownik i własne pytania. Kliknij swoją, zobacz, o co bot zapyta, i zostaw numer.</p></div>
-      <div class="branze" role="list">
-<button type="button" class="branza" role="listitem" data-branza="Serwis samochodowy"><h3>Serwis samochodowy</h3><ul><li>Jakim samochodem Pan jeździ?</li><li>Co się dzieje z autem?</li><li>Kiedy mógłby Pan podjechać?</li></ul><span class="branza-cta">Wybierz <span aria-hidden="true">↗</span></span></button>
-<button type="button" class="branza" role="listitem" data-branza="Fotowoltaika i pompy ciepła"><h3>Fotowoltaika i pompy ciepła</h3><ul><li>Jaki jest roczny rachunek za prąd?</li><li>Czym ogrzewa Pan dom?</li><li>Czy budynek jest Pana własnością?</li></ul><span class="branza-cta">Wybierz <span aria-hidden="true">↗</span></span></button>
-<button type="button" class="branza" role="listitem" data-branza="Biuro nieruchomości"><h3>Biuro nieruchomości</h3><ul><li>W jakiej dzielnicy szuka Pan mieszkania?</li><li>Jaki metraż?</li><li>Czy ma Pan załatwiony kredyt?</li></ul><span class="branza-cta">Wybierz <span aria-hidden="true">↗</span></span></button>
-<button type="button" class="branza" role="listitem" data-branza="Gabinet lekarski lub stomatologiczny"><h3>Gabinet lekarski lub stomatologiczny</h3><ul><li>U którego specjalisty?</li><li>Wizyta prywatna czy na NFZ?</li><li>Jaki termin Panu pasuje?</li></ul><span class="branza-cta">Wybierz <span aria-hidden="true">↗</span></span></button>
-<button type="button" class="branza" role="listitem" data-branza="Kancelaria kredytowa"><h3>Kancelaria kredytowa</h3><ul><li>Czy to kredyt hipoteczny, walutowy czy pożyczka gotówkowa?</li><li>Na jaką kwotę?</li><li>Jaki to był bank?</li></ul><span class="branza-cta">Wybierz <span aria-hidden="true">↗</span></span></button>
-<button type="button" class="branza" role="listitem" data-branza="Inna branża"><h3>Inna branża</h3><ul><li>Opisujesz firmę własnymi słowami.</li><li>Bot pyta o to, o co Ty byś zapytał.</li><li>Każde pytanie to kolumna w wynikach.</li></ul><span class="branza-cta">Wybierz <span aria-hidden="true">↗</span></span></button>
-      </div>
+      <div class="section-intro"><p class="eyebrow">03 / Posłuchaj</p><h2 id="proba-title">Zostaw numer.<br>Bot zadzwoni do Ciebie.</h2><p>Wybierz branżę i podaj numer. Usłyszysz dokładnie to, co usłyszą Twoi klienci.</p></div>
       <form class="proba-form" id="proba-form" novalidate>
         <div class="proba-row">
           <label>Branża<select name="branza" id="proba-branza" required><option value="">Wybierz z listy</option><option>Serwis samochodowy</option><option>Fotowoltaika i pompy ciepła</option><option>Biuro nieruchomości</option><option>Gabinet lekarski lub stomatologiczny</option><option>Kancelaria kredytowa</option><option>Inna branża</option></select></label>
@@ -85,20 +77,6 @@
     var wybor = document.getElementById('proba-branza');
     var numer = document.getElementById('proba-numer');
     var info = document.getElementById('proba-info');
-    var kafelki = document.querySelectorAll('.branza');
-    function zaznacz(nazwa) {
-      wybor.value = nazwa;
-      for (var i = 0; i < kafelki.length; i++) {
-        kafelki[i].classList.toggle('is-active', kafelki[i].getAttribute('data-branza') === nazwa);
-      }
-    }
-    for (var i = 0; i < kafelki.length; i++) {
-      kafelki[i].addEventListener('click', function () {
-        zaznacz(this.getAttribute('data-branza'));
-        numer.focus();
-      });
-    }
-    wybor.addEventListener('change', function () { zaznacz(wybor.value); });
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       var cyfry = numer.value.replace(/[^\d+]/g, '');
