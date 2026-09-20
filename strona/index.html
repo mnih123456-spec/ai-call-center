@@ -67,7 +67,7 @@
       <form class="proba-form" id="proba-form" novalidate>
         <div class="proba-row">
           <label>Branża<select name="branza" id="proba-branza" required><option value="">Wybierz z listy</option><option>Serwis samochodowy</option><option>Fotowoltaika i pompy ciepła</option><option>Biuro nieruchomości</option><option>Gabinet lekarski lub stomatologiczny</option><option>Kancelaria kredytowa</option><option>Inna branża</option></select></label>
-          <label>Numer, na który ma zadzwonić bot<input type="tel" name="numer" id="proba-numer" inputmode="tel" autocomplete="tel" placeholder="503 956 401" required></label>
+          <label>Numer, na który ma zadzwonić bot<input type="tel" name="numer" id="proba-numer" inputmode="tel" autocomplete="tel" placeholder="500 100 200" required></label>
         </div>
         <label class="proba-zgoda"><input type="checkbox" name="zgoda" id="proba-zgoda" required> <span>Zgadzam się na jedno połączenie testowe od bota na podany numer. Numer służy wyłącznie do tej rozmowy. <a href="polityka-prywatnosci.html">Polityka prywatności</a>.</span></label>
         <button type="submit" class="button">Zadzwoń do mnie <span aria-hidden="true">↗</span></button>
@@ -106,7 +106,7 @@
       if (/^\d{9}$/.test(cyfry)) cyfry = '+48' + cyfry;
       if (/^48\d{9}$/.test(cyfry)) cyfry = '+' + cyfry;
       if (!wybor.value) { info.textContent = 'Wybierz branżę, żeby bot wiedział, o co pytać.'; wybor.focus(); return; }
-      if (!/^\+[1-9]\d{7,14}$/.test(cyfry)) { info.textContent = 'Wpisz numer w postaci 9 cyfr, np. 503 956 401.'; numer.focus(); return; }
+      if (!/^\+[1-9]\d{7,14}$/.test(cyfry)) { info.textContent = 'Wpisz numer w postaci 9 cyfr, np. 500 100 200.'; numer.focus(); return; }
       if (!document.getElementById('proba-zgoda').checked) { info.textContent = 'Potrzebujemy zgody na jedno połączenie testowe.'; return; }
       var temat = 'Próbna rozmowa: ' + wybor.value;
       var tresc = 'Branża: ' + wybor.value + '\nNumer: ' + cyfry + '\nZgoda na jedno połączenie testowe: tak';
