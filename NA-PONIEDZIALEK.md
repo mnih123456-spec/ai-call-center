@@ -85,3 +85,46 @@ Przed wgraniem na hosting:
 1. Uzupełnić wszystkie znaczniki `[DO UZUPEŁNIENIA: ...]`.
 2. Przepuścić całość przez skill `strony-php-bezpieczenstwo`.
 3. Dać polityce i regulaminowi oczy prawnika. Masz go pod ręką.
+
+## Dopisane 20.09 rano, przed wystapieniem
+
+### 2. Przeglad botow produkcyjnych AdSignio u dostawcy
+
+Boty spoza panelu ("AdSignio - Polaczenia przychodzace", "Adsignio -
+Potwierdzanie leadow", szablon "DEMO HackOn - Potwierdzanie leadow") zostaly
+w nocy 19/20.09 przelaczone skryptami tak samo jak boty z panelu:
+
+- model rozmowy: `gpt-4.1-mini` (bylo: gemini-2.0-flash-lite),
+- silnik glosu: `eleven_v3_conversational`, stabilnosc 0,5 (bylo: flash, 0,8),
+- webhook: tunel hackathonowy zamiast "Make - wynik rozmowy AdSignio".
+
+Do zrobienia: sprawdzic, ktory z tych trzech ma dzwonic i odbierac naprawde,
+przepiac jego webhook z powrotem na Make (`31d021a6e4ed41bfa6785f3578bbbebd`),
+odsluchac po jednej rozmowie na GPT + v3 i zdecydowac, czy to zostaje.
+Poprawic `scripts/przepnij-tunel.mjs`, zeby omijal boty spoza panelu.
+
+### 3. Co nowego u dostawcy
+
+Przejrzec zmiany w ElevenLabs Conversational AI z ostatnich tygodni: modele
+rozmowy, silniki glosu, rozpoznawanie mowy (czy doszedl wybor silnika STT),
+narzedzia, ceny. W nocy odkrylismy `eleven_v3_conversational` przypadkiem,
+z listy modeli, nie z dokumentacji.
+
+### 4. Badanie rynku: dostawcy i Fonio
+
+- Czy poza ElevenLabs jest lepszy dostawca rozmow glosowych po polsku:
+  Retell, Vapi, Bland, LiveKit Agents, Pipecat z Deepgram.
+- Fonio: co robia inaczej niz "ElevenLabs w ladnym panelu". Wiemy: STT
+  Deepgram, LLM OpenAI, TTS ElevenLabs/Azure, wlasna orkiestracja, 500-900 ms.
+  Jesli tylko skladaja te same klocki, jestesmy na tym samym poziomie; jesli
+  maja cos wlasnego (STT po polsku, obsluga przerwan, oddzwanianie), trzeba
+  to dogonic. Zrobic po jednej rozmowie testowej u nich i u nas na tym samym
+  scenariuszu i porownac transkrypcje.
+
+### 5. Decyzja o frameworku
+
+Zostac na Open Mercato czy przeniesc modul na wlasny, lzejszy szkielet.
+Argument za Mercato: wielofirmowosc, logowanie, uprawnienia, tabele gotowe.
+Argument przeciw: ciezar srodowiska i warstwa plikow, ktorej nie uzywamy.
+Decyzja po pierwszym placacym kliencie, nie wczesniej. Logika rozmow
+w `src/modules/voicebot/lib` jest przenosna niezaleznie od decyzji.
