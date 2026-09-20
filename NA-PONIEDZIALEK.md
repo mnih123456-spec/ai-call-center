@@ -220,3 +220,80 @@ Padlo od jury 20.09. Wersja do klientow i inwestorow:
    izolacja firm, policzone koszty, API dla systemu klienta.
 3. Dostawca jest wymienny: zakladanie bota, start rozmowy i odbior wyniku
    siedza w trzech plikach (`nowy-agent.ts`, `provider.ts`, `webhook/route.ts`).
+
+## Poniedzialek: system w internecie i cztery decyzje (zapis 20.09 po wystapieniu)
+
+### 12. Co trzeba, zeby panel stal w internecie
+
+Wdrozenie jest przygotowane pod Railway: `Dockerfile`, `railway.toml`
+(aplikacja, healthcheck `/api/healthz`), `railway.worker.toml` (worker
+kolejki), `scripts/railway-start.sh` (migracje przy starcie, cache i kolejka
+na Redis). Do zrobienia:
+
+1. Projekt w Railway z trzema uslugami danych: Postgres (obraz z pgvector),
+   Redis, Meilisearch. Dwie uslugi aplikacyjne z tego samego repo: `web`
+   (railway.toml) i `worker` (railway.worker.toml).
+2. Zmienne srodowiska: wszystko z `.env.example` plus sekcja Voicebot,
+   `DATABASE_URL`, `REDIS_URL`, `MEILISEARCH_*`, `APP_URL` = domena,
+   `JWT_SECRET`/`AUTH_SECRET` nowe, `DEMO_MODE=false`, bez zmiennych `OM_DEV_*`.
+3. Domena: wlasna albo `*.up.railway.app`. Webhook u dostawcy zaklada sie
+   raz, na staly adres (`node scripts/przepnij-tunel.mjs https://domena`),
+   tunel przestaje istniec.
+4. Po pierwszym starcie: `node scripts/dane-demo.mjs` tylko jesli ma byc
+   demo; dla klientow nie. Zmienic haslo `superadmin@acme.com`.
+5. Wrocic z limitem rozmow probnych do 5/h (`VOICEBOT_LIMIT_TESTOW_NA_GODZINE`).
+6. Koszt: Railway ok. 20-40 USD/mies. przy tym zestawie. Alternatywa: jeden
+   VPS (Hetzner, 8-15 EUR) z `docker-compose.fullapp.yml`, ale wtedy sami
+   robimy kopie bazy i aktualizacje.
+
+### 13. Ile Mercato naprawde uzywamy (pomiar 20.09)
+
+Nasz kod: 9,3 tys. linii w `src/modules/voicebot`. Framework na dysku:
+218 MB w `node_modules/@open-mercato`. Wlaczone moduly: 16 (auth, directory,
+configs, entities, query_index, notifications, events, search, customers,
+feature_toggles, api_keys, voicebot, record_locks, system_status_overlays,
+sso, security). Z czego voicebot korzysta bezposrednio (liczba plikow):
+logger 23, kontener DI 19, auth z sesji i klucza API 16, i18n 14, przyciski
+i szkielet strony 25, DataTable 3, OpenAPI 5, szyfrowanie kolumn 3, kolejka 3.
+
+Posrednio, bez importow: logowanie, firmy i organizacje (tenant), uprawnienia,
+klucze API, migracje ze snapshotem, wbudowany CRM (customers), menu i widok.
+
+Wniosek: "smieci" to pakiety na dysku i ciezar srodowiska dev, nie kod na
+sciezce rozmowy. Przepisanie od zera znaczy napisanie od nowa: logowania,
+tenantow, uprawnien, kluczy API, kolejki z blokada, szyfrowania, tabel
+i formularzy. To miesiace, nie tygodnie. Decyzja jak wczesniej: po pierwszym
+placacym kliencie. Jesli wtedy zapadnie "przepisac", to logika w `lib/`
+(rozmowa, branze, kolejka, CRM, odmiana, limity) przenosi sie bez zmian,
+a UI i auth trzeba napisac na nowo.
+
+### 14. Liczba prob (ponawianie nieodebranych)
+
+Dzis: jedna proba na numer, bez ponawiania (`dispatch-call.ts`, "nie
+dzwonimy pod ten numer ponownie"). Do zrobienia:
+- na kampanii: maksymalna liczba prob (domyslnie 3), odstep miedzy probami
+  (domyslnie 2 h), okno godzin dzwonienia (domyslnie 8-20, dni robocze),
+- na pojedynczym zleceniu przez API: te same trzy pola jako nadpisanie,
+- worker: po `no_answer`/`busy` planuje kolejna probe zamiast konczyc,
+  `failed` (403, 1011 od operatora) ponawia po 15 min raz,
+- oddzwonienie klienta w miedzyczasie kasuje zaplanowane proby (patrz 15),
+- w tabeli: numer proby i "nastepna proba o".
+
+### 15. Oddzwonienia: co jest, co sprawdzic
+
+Jest: webhook rozmowy przychodzacej zaklada wiersz `inbound`, po numerze
+dzwoniacego szuka wczesniejszej proby w tej samej firmie i wpisuje ja jako
+`relatedCallId` (`webhook/route.ts`, `poprzedniaProba`). Warunek: numer, na
+ktory klient oddzwania, musi byc u dostawcy przypiety do bota przychodzacego
+i przypisany do kampanii tej firmy w panelu. Do sprawdzenia na zywo z numerem
+732 (u dostawcy jest na nim bot "AdSignio - Polaczenia przychodzace", nie bot
+z panelu): oddzwonic po nieodebranej probie i zobaczyc pare wierszy.
+
+### 16. Powitanie i pozegnanie jako osobne pola
+
+Wydzielic z scenariusza dwa pola na karcie bota: "Powitanie" i "Pozegnanie",
+domyslnie z branzy (z odmieniona nazwa firmy), edytowalne przez klienta.
+Powitanie idzie do `first_message` u dostawcy, pozegnanie do sekcji
+zakonczenia w prompcie. Wymaga dwoch kolumn w `VoiceAgentProfile`
+(migracja), pol na ekranie pytan i przekazania w `wyslijScenariuszDoAgenta`.
+`{FIRMA}` w tekstach klienta podmieniac na nazwe w dopelniaczu.
