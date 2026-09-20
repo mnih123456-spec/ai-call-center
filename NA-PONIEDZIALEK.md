@@ -189,3 +189,11 @@ kolumny z pol pierwszego szablonu (produkt_kod, kwota, rok_umowy, bank).
 Nowe boty zbieraja pola z pytan, wiec te kolumny sa puste i dubluja
 "Na jaka kwote" i "Jaki to byl bank" z prawej. Ukryc je, gdy zaden wiersz
 nie ma tych pol, albo usunac razem z kolumnami w encji po migracji danych demo.
+
+### 9. API w druga strone
+
+Dzis: klient zleca rozmowe (POST /api/voicebot/calls) i moze odczytac liste
+rozmow z wynikami, transkrypcje i nagranie tym samym kluczem (GET). Wynik
+trafia do CRM klienta przez zlacze Bitrix24 albo wbudowany CRM. Brakuje:
+webhooka wychodzacego z wynikiem rozmowy pod adres podany przez klienta
+(z podpisem HMAC, jak u dostawcy) oraz opisu odczytu na ekranie "Integracja API".
