@@ -352,3 +352,20 @@ pakietu enterprise.
   rozmowe (u dostawcy ok. 35 gr odbyta, 2 gr nieodebrana) albo pakiety
   rozmow. Zakotwiczyc na koszcie czlowieka (ok. 2,70 zl za probe), nie na
   konkurencji (0,50-2 zl za minute u innych).
+
+### 21. Bot firmowy AI call center do rozmow z klientami (Michal, 20.09)
+
+Wystawic wlasnego bota przychodzacego na numerze platformy: klient
+zainteresowany usluga dzwoni i rozmawia z botem, ktory odpowiada na pytania
+o produkt, ceny, jak to dziala, RODO, branze, czas wdrozenia. Trzeba:
+- wymyslic liste pytan, jakie zadaja zainteresowani, i napisac scenariusz
+  z odpowiedziami (baza wiedzy z tej strony i z NA-PONIEDZIALEK),
+- zbierac numer i firme, zapisywac wynik jak kazda rozmowe,
+- przekazanie do czlowieka tylko gdy klient wyraznie o to prosi
+  (transfer_to_number), w innych przypadkach bot konczy sam,
+- nie pisac o tym na stronie; ma dzialac automatycznie od pierwszego telefonu.
+Zalozenie Michala: nikt nie bedzie recznie rozmawial z kazdym zainteresowanym.
+
+Usuniete ze strony 20.09: kafelki branz z przykladowymi pytaniami
+(niesprawdzone branze nie moga byc na landingu). Zostal formularz: branza
+z listy, numer, zgoda.
