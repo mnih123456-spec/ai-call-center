@@ -369,3 +369,17 @@ Zalozenie Michala: nikt nie bedzie recznie rozmawial z kazdym zainteresowanym.
 Usuniete ze strony 20.09: kafelki branz z przykladowymi pytaniami
 (niesprawdzone branze nie moga byc na landingu). Zostal formularz: branza
 z listy, numer, zgoda.
+
+### 22. Rejestracja zamiast formularza na stronie (Michal, 20.09)
+
+Na stronie zaden formularz z numerem. Jest przycisk "Przetestuj bota", dzis
+prowadzi do stopki, docelowo do rejestracji w panelu. Klient zaklada konto
+sam i w srodku dostaje probna rozmowe. Zmiany w panelu:
+- ekran zakladania firmy ("Nowy klient") ma byc publiczna rejestracja:
+  nazwa firmy, branza, numer telefonu wlasciciela, e-mail, haslo; bez
+  logowania operatora,
+- numer podany przy rejestracji jest domyslnym numerem probnej rozmowy
+  (dzis wpisuje sie go recznie na ekranie Kampanie),
+- po zalozeniu konta od razu probna rozmowa na ten numer, potem pytania,
+- limity dla kont z rejestracji: liczba prob i dzienny koszt (patrz pkt 14, 20).
+Zasada Michala: zaangazowanie przed dowodem, klient ma wejsc do srodka.
