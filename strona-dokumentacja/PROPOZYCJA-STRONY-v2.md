@@ -113,3 +113,10 @@ Ty byś zapytał.
   czy neutralne (serwis samochodowy).
 - Czy "pierwsze 100 rozmów na nasz koszt" jest do udźwignięcia: 100 rozmów
   to około 35 zł u dostawcy plus minuty operatora.
+
+## Decyzje Michała, 20.09 (głosowo, w drodze)
+
+- Na stronie nigdzie o kancelarii i nic z kancelarii. Komunikacja ogólna.
+- Żadnej rozmowy do odsłuchania na wierzchu strony. Zamiast tego rejestracja
+  z numerem i bot dzwoni do zainteresowanego; zaangażowanie przed dowodem.
+- Sześć prób: to statystyka Velocify (3,5 mln zgłoszeń), nie dane Michała.
