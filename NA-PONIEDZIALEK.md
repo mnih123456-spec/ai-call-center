@@ -168,3 +168,16 @@ domyslnie bez ograniczenia) i odstep miedzy polaczeniami w kampanii
 
 Potrzeba: 972 proby miesiecznie w godzinach 8-20 to 2 kanaly; obdzwonienie
 300 leadow w godzine po kampanii reklamowej to 10 kanalow i plan Pro.
+
+**Jak skalowac rownoleglosc (decyzja 20.09):** jedno konto u dostawcy,
+wyzszy plan wraz z klientami (Pro przy pierwszym placacym, Business przy
+trzech, Enterprise dalej). Nie zakladac kilku kont: regulamin dostawcy tego
+zabrania, blokada objelaby wszystkie naraz, a panel musialby zonglowac
+kluczami. Panel juz kolejkuje rozmowy, wiec limit boli dopiero przy setkach
+leadow w godzine.
+
+Tak dziala Fonio: jedno konto platformy, klienci dziela wspolna pule.
+Dwie rzeczy, ktorych nam brakuje: telefonia bez sufitu kanalow (Telnyx albo
+Twilio, rozliczenie za minute, skaluje sie na zadanie) i drugi dostawca glosu
+na wypadek awarii lub limitu (Azure). Plan: ACTIO zostaje dla malych klientow,
+Twilio lub Telnyx pod kampanie masowe.
